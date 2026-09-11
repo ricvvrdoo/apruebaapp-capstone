@@ -1,0 +1,52 @@
+# ── Node ─────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+.npm/
+dist/
+build/
+
+# ── Variables de entorno y secretos ──────────────────
+.env
+.env.*
+!.env.example
+*serviceAccount*.json
+*.pem
+*.key
+
+# ── Datos locales del backend ────────────────────────
+.data/
+*.sqlite
+*.db
+
+# ── Flutter / Dart ───────────────────────────────────
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+*.g.dart
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+android/local.properties
+*.iml
+
+# ── Firebase ─────────────────────────────────────────
+.firebase/
+firebase-debug.log
+google-services.json
+GoogleService-Info.plist
+
+# ── Descartes y temporales ───────────────────────────
+_trash_*/
+*.tmp
+*.bak
+
+# ── Sistema operativo y editores ─────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# ── Office: archivos de bloqueo al tener abierto un doc ──
+~$*
