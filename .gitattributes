@@ -1,0 +1,18 @@
+# Normaliza los fines de línea en el repositorio y respeta los del sistema al
+# trabajar. Evita los avisos "LF will be replaced by CRLF" en Windows.
+* text=auto
+
+# Documentos y binarios: git no debe intentar diferenciarlos ni fusionarlos.
+*.docx  binary
+*.xlsx  binary
+*.pptx  binary
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.ico   binary
+*.ttf   binary
+*.otf   binary
+
+# Scripts de shell siempre con LF, aunque se editen en Windows.
+*.sh    text eol=lf
