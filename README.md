@@ -1,6 +1,6 @@
 # Aprueba — Proyecto APT (Capstone PTY4614)
 
-Repositorio del proyecto de título de **Ricardo Rodríguez Salas** y **Elías Millahuala**,
+Repositorio del proyecto de título de **Ricardo Rodríguez ** y **Elías Millahuala**,
 Ingeniería en Informática, Duoc UC — Sede San Joaquín, semestre 2026-2.
 
 **Proyecto:** *Aprueba*, plataforma móvil y web de preparación para la PAES,
