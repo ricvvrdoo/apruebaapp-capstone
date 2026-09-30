@@ -9,6 +9,7 @@ import { COL, get, set, add, patch, del, query, list } from '../data/repo.js';
 import { TIERS, NEXT, walletProgress, award } from '../lib/medals.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt } from '../lib/quota.js';
 import { verifyPhone } from '../lib/jwt.js';
+import { demoMode } from '../lib/demo.js';
 import { findCountry, findGrade } from '../data/catalog.js';
 
 const r = Router();
@@ -316,7 +317,15 @@ r.get('/me/subscription', wrap(async (req, res) => {
 
 // POST /me/subscription/change
 r.post('/me/subscription/change', wrap(async (req, res) => {
+  // Cambiar de plan deberia cobrar la diferencia; sin pagos integrados, solo en modo demo.
+  if (!demoMode()) return fail(res, 503, 'PAYMENTS_DISABLED', 'Los cambios de plan aun no estan habilitados');
   const { plan, billingCycle } = req.body || {};
+  if (plan !== undefined && (plan === 'free' || !(await get(COL.plans, String(plan))))) {
+    return fail(res, 400, 'INVALID_PLAN', 'El plan indicado no existe', { field: 'plan' });
+  }
+  if (billingCycle !== undefined && !['monthly', 'yearly'].includes(billingCycle)) {
+    return fail(res, 400, 'INVALID_PLAN', 'El ciclo de facturacion indicado no existe', { field: 'billingCycle' });
+  }
   const s = (await query(COL.subscriptions, [['userId', '==', req.user.id], ['status', '==', 'active']]))[0];
   if (!s) return fail(res, 404, 'NO_ACTIVE_SUBSCRIPTION', 'No hay suscripcion activa para modificar');
   if (plan) { s.plan = plan; req.user.plan = plan; await save(req.user); }

@@ -11,6 +11,7 @@ import { todayKey } from '../lib/quota.js';
 import { normalizePhone, detectLocale, maskPhone } from '../lib/phone.js';
 import { verifyPhoneIdToken, PhoneVerificationError } from '../lib/firebasePhone.js';
 import { findCountry } from '../data/catalog.js';
+import { demoMode } from '../lib/demo.js';
 
 const r = Router();
 const publicUser = (u) => ({
@@ -168,7 +169,10 @@ r.post('/auth/login', wrap(async (req, res) => {
 }));
 
 // POST /auth/social  (demo: confia en el email del idToken simulado)
+// El idToken no se verifica contra Google ni Apple, asi que cualquiera puede
+// fabricarlo: solo se acepta en modo demo (ver lib/demo.js).
 r.post('/auth/social', wrap(async (req, res) => {
+  if (!demoMode()) return fail(res, 503, 'SOCIAL_LOGIN_UNAVAILABLE', 'El inicio de sesion con Google o Apple aun no esta habilitado');
   const { provider, idToken, locale, phoneToken } = req.body || {};
   if (!provider || !idToken) return fail(res, 400, 'VALIDATION_ERROR', 'provider e idToken son obligatorios');
   // En demo el idToken trae "provider:email:nombre"
@@ -184,6 +188,11 @@ r.post('/auth/social', wrap(async (req, res) => {
   }
 
   let user = await queryOne(COL.users, [['emailLower', '==', email.toLowerCase()]]);
+  // Incluso en demo, un token fabricado no puede entrar a una cuenta con
+  // contrasena: eso permitia suplantar a cualquier usuario conociendo su correo.
+  if (user && user.authProvider === 'password') {
+    return fail(res, 409, 'ACCOUNT_USES_PASSWORD', 'Esa cuenta usa correo y contrasena; inicia sesion con ellos');
+  }
   let isNewUser = false;
   if (!user) {
     isNewUser = true;

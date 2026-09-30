@@ -5,11 +5,14 @@
 // En desarrollo, si no hay credenciales de Firebase, se acepta un token de prueba
 // con formato  dev:+56912345678  (solo si PHONE_AUTH_ALLOW_DEV_TOKEN=true).
 import { getFirebaseAdmin } from '../config/firebase.js';
+import { demoMode } from './demo.js';
 
 let _auth = null;
 
+// En desarrollo local: PHONE_AUTH_ALLOW_DEV_TOKEN=true. En un despliegue
+// (NODE_ENV=production, como en Vercel) solo con DEMO_MODE=true explicito.
 const devTokensAllowed = () =>
-  process.env.PHONE_AUTH_ALLOW_DEV_TOKEN === 'true' && process.env.NODE_ENV !== 'production';
+  demoMode() || (process.env.PHONE_AUTH_ALLOW_DEV_TOKEN === 'true' && process.env.NODE_ENV !== 'production');
 
 async function firebaseAuth() {
   if (_auth) return _auth;
