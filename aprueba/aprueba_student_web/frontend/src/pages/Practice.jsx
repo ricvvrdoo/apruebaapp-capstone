@@ -19,6 +19,7 @@ export default function Practice() {
   const [elapsed, setElapsed] = useState(0);
   const [quotaCode, setQuotaCode] = useState(null);
   const [rc, setRc] = useState({ open: false, reason: 'wrong_answer', comment: '', sent: false });
+  const [submitting, setSubmitting] = useState(false);
   const startRef = useRef(0);
   const timerRef = useRef(null);
 
@@ -39,8 +40,11 @@ export default function Practice() {
 
   useEffect(() => { loadNext(); return stopTimer; }, [loadNext]);
 
+  // Un solo envio por pregunta: con la latencia de un despliegue, un doble clic
+  // mandaba la respuesta dos veces y el 409 del segundo tapaba el resultado.
   const check = async () => {
-    if (sel == null) return;
+    if (sel == null || submitting) return;
+    setSubmitting(true);
     stopTimer();
     const ms = Date.now() - startRef.current;
     try {
@@ -48,7 +52,10 @@ export default function Practice() {
       setResult({ ...res.data, elapsedMs: ms }); setStep('result'); refreshUser();
     } catch (e) {
       if (e.code === 'QUOTA_DAILY_LIMIT') { setQuotaCode(e.code); setStep('quota'); }
+      else if (e.code === 'ALREADY_ANSWERED') loadNext();
       else setStep('error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -86,7 +93,7 @@ export default function Practice() {
           ))}
         </div>
         <p className="note" style={{ marginTop: 12 }}>{L('speed_note')}</p>
-        <button className="btn full" style={{ marginTop: 12 }} disabled={sel == null} onClick={check}>{L('check')}</button>
+        <button className="btn full" style={{ marginTop: 12 }} disabled={sel == null || submitting} onClick={check}>{L('check')}</button>
       </div>
     );
   }
