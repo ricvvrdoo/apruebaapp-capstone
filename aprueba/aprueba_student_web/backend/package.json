@@ -4,6 +4,9 @@
   "description": "API REST del sitio web del alumno de Aprueba (Express). Driver de datos en memoria/JSON por defecto, Firestore opcional.",
   "type": "module",
   "main": "src/index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
