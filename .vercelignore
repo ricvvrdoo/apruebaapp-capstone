@@ -1,0 +1,20 @@
+# Archivos que `vercel deploy` sube cuando se ejecuta desde la raiz del
+# repositorio (obligatorio: el proyecto tiene Root Directory
+# aprueba/aprueba_student_web). Solo se sube el sitio del alumno.
+/*
+!/aprueba
+/aprueba/*
+!/aprueba/aprueba_student_web
+
+# Vercel instala las dependencias y compila en sus servidores.
+# Con "/" en medio, un patron se ancla a la raiz: por eso **/ delante.
+node_modules
+**/frontend/dist
+# Base local del driver en memoria (datos demo de desarrollo).
+**/backend/.data
+# Credenciales: nunca deben salir del equipo (.env.local lo crea el CLI).
+.env
+.env.*
+!.env.example
+*firebase-adminsdk*.json
+*serviceAccount*.json
