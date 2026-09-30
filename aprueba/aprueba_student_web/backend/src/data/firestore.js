@@ -24,12 +24,21 @@ export const firestoreDriver = {
     await ref.set({ ...partial }, { merge: true }); return this.get(name, id);
   },
   async del(name, id) { await (await ready()).collection(name).doc(id).delete(); },
-  async reset(seedData) {
+  // Escritura masiva en lotes (Firestore admite hasta 500 operaciones por lote).
+  // Cada documento se reemplaza completo, como set().
+  async bulkSet(name, docs) {
     const d = await ready();
+    for (let i = 0; i < docs.length; i += 400) {
+      const batch = d.batch();
+      for (const doc of docs.slice(i, i + 400)) batch.set(d.collection(name).doc(doc.id), { ...doc });
+      await batch.commit();
+    }
+    return docs.length;
+  },
+  // No borra colecciones: sobrescribe los documentos del seed y deja el resto.
+  async reset(seedData) {
     for (const [col, docs] of Object.entries(seedData)) {
-      for (const [id, doc] of Object.entries(docs)) {
-        await d.collection(col).doc(id).set(doc);
-      }
+      await this.bulkSet(col, Object.entries(docs).map(([id, doc]) => ({ ...doc, id })));
     }
   },
 };
