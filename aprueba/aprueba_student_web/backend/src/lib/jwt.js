@@ -1,6 +1,20 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'dev-secret';
+// En produccion el secreto es obligatorio: con el valor por defecto (publico en
+// el repositorio) cualquiera podria firmar tokens validos para cualquier usuario.
+const PLACEHOLDERS = ['dev-secret', 'cambia-esto-en-produccion'];
+function resolveSecret() {
+  const s = process.env.JWT_SECRET;
+  if (process.env.NODE_ENV === 'production') {
+    if (!s || PLACEHOLDERS.includes(s) || s.length < 32) {
+      throw new Error('JWT_SECRET falta, es un valor de ejemplo o tiene menos de 32 caracteres (ver .env.example)');
+    }
+    return s;
+  }
+  if (!s) console.warn('[jwt] JWT_SECRET no definido: se usa un secreto de desarrollo. No usar asi en produccion.');
+  return s || 'dev-secret';
+}
+const SECRET = resolveSecret();
 const ACCESS_TTL = Number(process.env.JWT_ACCESS_TTL || 900);
 const REFRESH_TTL = Number(process.env.JWT_REFRESH_TTL || 2592000);
 // Token corto que acredita "este telefono fue verificado"; se canjea en
