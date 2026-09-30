@@ -8,6 +8,8 @@ import { COL, get, set, add, del, query, list, genId } from '../data/repo.js';
 const r = Router();
 r.use(authRequired);
 
+const INVITATION_TTL_MS = 7 * 24 * 3600e3; // las invitaciones vencen a los 7 dias
+
 async function subjectLabel(testId) {
   const t = await get(COL.tests, testId);
   return t?.label || testId;
@@ -88,7 +90,11 @@ r.post('/groups/:id/invitations', wrap(async (req, res) => {
   const pending = await query(COL.groupInvitations, [['groupId', '==', g.id], ['email', '==', email], ['status', '==', 'pending']]);
   if (pending.length) return fail(res, 409, 'ALREADY_INVITED', 'Ese correo ya tiene una invitacion pendiente');
   const token = genId('inv');
-  const inv = await add(COL.groupInvitations, { groupId: g.id, email, status: 'pending', token, createdAt: new Date().toISOString() }, 'inv');
+  const now = Date.now();
+  const inv = await add(COL.groupInvitations, {
+    groupId: g.id, email, status: 'pending', token,
+    createdAt: new Date(now).toISOString(), expiresAt: new Date(now + INVITATION_TTL_MS).toISOString(),
+  }, 'inv');
   console.log(`[demo] invitacion a ${email} para grupo ${g.name}: token=${token}`);
   return created(res, { id: inv.id, email, status: 'pending', token });
 }));
@@ -97,6 +103,8 @@ r.post('/groups/:id/invitations', wrap(async (req, res) => {
 r.get('/groups/:id/invitations', wrap(async (req, res) => {
   const g = await get(COL.groups, req.params.id);
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
+  // Los correos invitados son datos personales: solo los ven los miembros.
+  if (!(await isMember(g.id, req.user.id))) return fail(res, 403, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
   const items = await query(COL.groupInvitations, [['groupId', '==', g.id], ['status', '==', 'pending']]);
   return ok(res, items.map((i) => ({ id: i.id, email: i.email, status: i.status })));
 }));
@@ -105,6 +113,16 @@ r.get('/groups/:id/invitations', wrap(async (req, res) => {
 r.post('/invitations/:token/accept', wrap(async (req, res) => {
   const inv = (await query(COL.groupInvitations, [['token', '==', req.params.token], ['status', '==', 'pending']]))[0];
   if (!inv) return fail(res, 400, 'INVITATION_INVALID', 'La invitacion es invalida o expiro');
+  // Las invitaciones anteriores a este cambio no traen expiresAt: vencen a los 7 dias de creadas.
+  const expiresAt = Date.parse(inv.expiresAt || '') || (Date.parse(inv.createdAt || '') + INVITATION_TTL_MS);
+  if (!(expiresAt > Date.now())) {
+    inv.status = 'expired'; await set(COL.groupInvitations, inv.id, inv);
+    return fail(res, 400, 'INVITATION_INVALID', 'La invitacion es invalida o expiro');
+  }
+  // El token viaja por correo: solo puede usarlo la cuenta del correo invitado.
+  if (String(inv.email).toLowerCase() !== String(req.user.email || '').toLowerCase()) {
+    return fail(res, 403, 'INVITATION_EMAIL_MISMATCH', 'Esta invitacion es para otro correo');
+  }
   if (await isMember(inv.groupId, req.user.id)) return fail(res, 409, 'ALREADY_MEMBER', 'Ya eres miembro del grupo');
   await add(COL.groupMembers, { groupId: inv.groupId, userId: req.user.id, name: req.user.name, email: req.user.email, role: 'member', score: 0, activeToday: true }, 'gm');
   inv.status = 'accepted'; await set(COL.groupInvitations, inv.id, inv);
