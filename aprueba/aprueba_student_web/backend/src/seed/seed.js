@@ -1,70 +1,37 @@
-// Siembra el almacen (memoria/JSON por defecto, o Firestore si DATA_DRIVER=firestore).
-// Carga las preguntas REALES de las carpetas "PAES Chile *" del repositorio.
-//   Uso:  npm run seed
+// Siembra el almacen completo con datos demo: catalogos, usuarios, grupos,
+// tutores y el banco de preguntas (memoria/JSON por defecto, o Firestore si
+// DATA_DRIVER=firestore). Para cargar SOLO preguntas, usar import-questions.js.
+//   Uso:  PAES_DIR=<carpeta con "PAES Chile *"> npm run seed
+//
+// Contra Firestore SOBRESCRIBE los documentos demo (usuarios, grupos, etc.) y
+// su progreso: exige SEED_CONFIRM con el ID del proyecto destino.
 import 'dotenv/config';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import bcrypt from '../lib/password.js';
-import { reset, genId } from '../data/repo.js';
+import { reset, driverName } from '../data/repo.js';
+import { TESTS, loadQuestionBank, printReport } from './questions.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Raiz del repositorio que contiene las carpetas "PAES Chile *".
-const REPO_ROOT = process.env.PAES_DIR || path.resolve(__dirname, '../../../../');
+if (driverName === 'firestore') {
+  const { getFirebaseAdmin } = await import('../config/firebase.js');
+  const projectId = (await getFirebaseAdmin()).app().options.projectId;
+  if (!process.env.FIRESTORE_EMULATOR_HOST && process.env.SEED_CONFIRM !== projectId) {
+    console.error(`[seed] Esto sobrescribe los datos demo del proyecto Firestore ${projectId}.`);
+    console.error(`[seed] Si es lo que quieres, repite con SEED_CONFIRM=${projectId}`);
+    process.exit(1);
+  }
+}
+
 const hash = (p) => bcrypt.hashSync(p, 8);
-const LETTERS = ['A', 'B', 'C', 'D', 'E'];
-
-// ── Catalogo de pruebas (alineado al doc de API) ──
-const tests = {
-  lectora: { id: 'lectora', label: 'Comp. Lectora', color: '#1A365D', order: 1 },
-  m1: { id: 'm1', label: 'Matematica M1', color: '#10B981', order: 2 },
-  m2: { id: 'm2', label: 'Matematica M2', color: '#6366F1', order: 3 },
-  cien: { id: 'cien', label: 'Ciencias', color: '#F5B041', order: 4 },
-  hist: { id: 'hist', label: 'Historia y C. Soc.', color: '#EF4444', order: 5 },
-};
-
-// Carpeta PAES -> testId
-const SOURCES = [
-  { dir: 'PAES Chile Verbal', testId: 'lectora', axis: 'Comprension lectora' },
-  { dir: 'PAES Chile Matematica', testId: 'm1', axis: 'Numeros y Algebra' },
-  { dir: 'PAES Chile Biologia', testId: 'cien', axis: 'Biologia' },
-];
+const tests = TESTS;
 
 function loadQuestions() {
-  const questions = {};
-  let total = 0, skipped = 0;
-  for (const src of SOURCES) {
-    const dir = path.join(REPO_ROOT, src.dir);
-    if (!fs.existsSync(dir)) { console.warn(`[seed] carpeta no encontrada: ${dir}`); continue; }
-    const files = fs.readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.json'));
-    let i = 0;
-    for (const file of files) {
-      let arr;
-      try { arr = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8')); }
-      catch (e) { skipped++; console.warn(`[seed] omito ${src.dir}/${file}: JSON invalido (${e.message})`); continue; }
-      if (!Array.isArray(arr)) continue;
-      for (const item of arr) {
-        const options = item.alternativas || [];
-        const correctIndex = LETTERS.indexOf(String(item.respuesta_correcta || '').trim().toUpperCase());
-        if (!item.pregunta || options.length < 2 || correctIndex < 0 || correctIndex >= options.length) continue;
-        const id = genId('qst');
-        const difficulty = ['d1', 'd2', 'd2', 'd3', 'd3', 'd4'][i % 6];
-        const shortExp = String(item.explicacion_respuesta || '').split(/(?<=\.)\s/)[0].slice(0, 200);
-        questions[id] = {
-          id, testId: src.testId, testLabel: tests[src.testId].label, axis: src.axis, difficulty,
-          statement: item.pregunta, options, correctIndex, published: true,
-          shortExplanation: shortExp, explanation: item.explicacion_respuesta || '',
-          habilidad: item.habilidad_requerida || '', source: `${src.dir}/${file}`,
-          // Clave de seleccion aleatoria de GET /practice/next (ver pickQuestion).
-          rand: Math.random(),
-          createdAt: new Date().toISOString(),
-        };
-        i++; total++;
-      }
-    }
+  try {
+    const { questions, report } = loadQuestionBank(process.env.PAES_DIR);
+    printReport(report);
+    return questions;
+  } catch (e) {
+    console.error(`[seed] ${e.message}`);
+    process.exit(1);
   }
-  console.log(`[seed] preguntas cargadas: ${total} (archivos omitidos: ${skipped})`);
-  return questions;
 }
 
 // ── Planes y features ──

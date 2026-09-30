@@ -55,6 +55,9 @@ export const set = (col, id, data) => driver.set(col, id, data);
 export const patch = (col, id, partial) => driver.patch(col, id, partial);
 export const del = (col, id) => driver.del(col, id);
 export const reset = (seedData) => driver.reset(seedData);
+// Escritura masiva: cada doc debe traer `id`. En Firestore va en lotes.
+export const bulkSet = (col, docs) => driver.bulkSet(col, docs);
+export const driverName = DRIVER;
 
 // add con id autogenerado opcional
 export async function add(col, data, idPrefix = 'doc') {
