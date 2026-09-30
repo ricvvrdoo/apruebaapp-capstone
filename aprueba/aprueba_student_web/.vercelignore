@@ -1,0 +1,12 @@
+# Archivos que `vercel deploy` NO sube desde la carpeta local.
+# Vercel instala las dependencias y compila en sus servidores.
+node_modules
+frontend/dist
+# Base local del driver en memoria (datos demo de desarrollo).
+backend/.data
+# Credenciales: nunca deben salir del equipo.
+.env
+.env.*
+!.env.example
+*firebase-adminsdk*.json
+*serviceAccount*.json
