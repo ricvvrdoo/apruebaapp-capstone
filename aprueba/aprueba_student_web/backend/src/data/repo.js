@@ -54,6 +54,9 @@ export const get = (col, id) => driver.get(col, id);
 export const set = (col, id, data) => driver.set(col, id, data);
 export const patch = (col, id, partial) => driver.patch(col, id, partial);
 export const del = (col, id) => driver.del(col, id);
+// Crea solo si el id no existe; devuelve null si ya existia. En Firestore es
+// atomico: sirve para evitar duplicados cuando llegan peticiones simultaneas.
+export const create = (col, id, data) => driver.create(col, id, data);
 export const reset = (seedData) => driver.reset(seedData);
 // Escritura masiva: cada doc debe traer `id`. En Firestore va en lotes.
 export const bulkSet = (col, docs) => driver.bulkSet(col, docs);
