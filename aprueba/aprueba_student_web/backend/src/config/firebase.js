@@ -8,6 +8,8 @@
 //      credenciales reales.
 //   3. applicationDefault(): GOOGLE_APPLICATION_CREDENTIALS apuntando al JSON, o
 //      las credenciales del entorno de GCP.
+import fs from 'fs';
+
 let _admin = null;
 let _db = null;
 let _FieldValue = null;
@@ -23,14 +25,25 @@ function readServiceAccount() {
   }
 }
 
+// project_id del archivo apuntado por GOOGLE_APPLICATION_CREDENTIALS, si existe.
+function keyFileProjectId() {
+  const file = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (!file) return undefined;
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8')).project_id;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function getFirebaseAdmin() {
   if (_admin) return _admin;
   const admin = (await import('firebase-admin')).default;
   if (!admin.apps.length) {
     const serviceAccount = readServiceAccount();
-    // Sin GCLOUD_PROJECT, el proyecto sale de la credencial. No se fuerza un
-    // valor por defecto: pisaria el project_id del archivo de clave.
-    const projectId = process.env.GCLOUD_PROJECT || serviceAccount?.project_id;
+    // Sin GCLOUD_PROJECT, el proyecto sale de la credencial (variable o archivo
+    // de clave). No se fuerza un valor por defecto: pisaria el de la clave.
+    const projectId = process.env.GCLOUD_PROJECT || serviceAccount?.project_id || keyFileProjectId();
     const usingEmulator = process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST;
     if (serviceAccount) {
       admin.initializeApp({ credential: admin.credential.cert(serviceAccount), projectId });
