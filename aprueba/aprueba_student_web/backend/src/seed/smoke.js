@@ -329,6 +329,24 @@ results.push('\n[12] Seguridad (rama sec/cierre-hallazgos-acotado)');
   check('helmet: sin X-Powered-By', !h.headers.get('x-powered-by'));
 }
 
+results.push('\n[13] Respuestas: envios simultaneos (doble clic)');
+{
+  const { query: q2, COL: C } = await import('../data/repo.js');
+  let duplicated = 0, bothAccepted = 0;
+  for (let i = 0; i < 5; i++) {
+    const qn = (await call('GET', '/practice/next', { token: premium })).json.data;
+    const [a, b] = await Promise.all([
+      call('POST', `/questions/${qn.id}/answer`, { token: premium, body: { selected: 'A' } }),
+      call('POST', `/questions/${qn.id}/answer`, { token: premium, body: { selected: 'A' } }),
+    ]);
+    const statuses = [a.status, b.status].sort().join('/');
+    if (statuses !== '201/409') bothAccepted++;
+    if ((await q2(C.answers, [['questionId', '==', qn.id]])).length !== 1) duplicated++;
+  }
+  check('5 dobles envios: siempre uno 201 y el otro 409', bothAccepted === 0, `(${bothAccepted} distintos)`);
+  check('5 dobles envios: nunca queda la respuesta duplicada', duplicated === 0, `(${duplicated} duplicadas)`);
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);

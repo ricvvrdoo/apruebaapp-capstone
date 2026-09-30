@@ -81,6 +81,12 @@ export const memoryDriver = {
     delete colObj(name)[id];
     persist();
   },
+  async create(name, id, data) {
+    if (colObj(name)[id]) return null;
+    colObj(name)[id] = { ...clone(data), id };
+    persist();
+    return clone(colObj(name)[id]);
+  },
   async bulkSet(name, docs) {
     for (const doc of docs) colObj(name)[doc.id] = clone(doc);
     persist();

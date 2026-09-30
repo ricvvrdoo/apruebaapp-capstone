@@ -3,7 +3,8 @@ import { Router } from 'express';
 import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, set, add, query, list } from '../data/repo.js';
+import { createHash } from 'crypto';
+import { COL, get, set, add, create, query, list } from '../data/repo.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA } from '../lib/quota.js';
 import { award } from '../lib/medals.js';
 
@@ -76,14 +77,21 @@ r.post('/questions/:id/answer', wrap(async (req, res) => {
   if (!isUnlimited(u) && u.quota.used >= quotaMax(u)) return fail(res, 422, 'QUOTA_DAILY_LIMIT', 'Cuota diaria agotada');
 
   const correct = idx === q.correctIndex;
+  // La respuesta se registra primero y de forma atomica: su id deriva de
+  // (alumno, pregunta, sesion) y create() falla si ya existe. La consulta de
+  // arriba no basta: dos envios simultaneos (doble clic, reintento de red) la
+  // pasaban ambos y quedaban respuestas duplicadas. Solo quien gana la
+  // creacion descuenta cuota y entrega medalla.
+  const answerId = `ans_${createHash('sha1').update(`${u.id}|${q.id}|${sessionId || ''}`).digest('hex').slice(0, 20)}`;
+  const answer = await create(COL.answers, answerId, {
+    userId: u.id, questionId: q.id, testId: q.testId, selected: LETTERS[idx], correct,
+    elapsedMs: elapsedMs || 0, sessionId: sessionId || null, createdAt: new Date().toISOString(),
+  });
+  if (!answer) return fail(res, 409, 'ALREADY_ANSWERED', 'La pregunta ya fue respondida en esta sesion');
   u.quota.used += 1;
   let medalAwarded = null;
   if (correct) { award(u.medals, 'bronze', 1); medalAwarded = { tier: 'bronze', amount: 1 }; }
   await save(u);
-  const answer = await add(COL.answers, {
-    userId: u.id, questionId: q.id, testId: q.testId, selected: LETTERS[idx], correct,
-    elapsedMs: elapsedMs || 0, sessionId: sessionId || null, createdAt: new Date().toISOString(),
-  }, 'ans');
   if (correct) await add(COL.medalLedger, { userId: u.id, tier: 'bronze', amount: 1, reason: 'correct_answer', createdAt: new Date().toISOString() }, 'mdl');
   const cohortPercentile = Math.max(5, Math.min(99, 100 - Math.floor((elapsedMs || 18000) / 600)));
   return created(res, {

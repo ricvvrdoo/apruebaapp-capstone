@@ -24,6 +24,16 @@ export const firestoreDriver = {
     await ref.set({ ...partial }, { merge: true }); return this.get(name, id);
   },
   async del(name, id) { await (await ready()).collection(name).doc(id).delete(); },
+  // Crea el documento solo si no existe (atomico en Firestore). Devuelve null si ya existia.
+  async create(name, id, data) {
+    try {
+      await (await ready()).collection(name).doc(id).create({ ...data, id });
+    } catch (e) {
+      if (e.code === 6) return null; // ALREADY_EXISTS
+      throw e;
+    }
+    return { ...data, id };
+  },
   // Escritura masiva en lotes (Firestore admite hasta 500 operaciones por lote).
   // Cada documento se reemplaza completo, como set().
   async bulkSet(name, docs) {

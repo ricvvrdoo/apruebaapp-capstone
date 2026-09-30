@@ -45,3 +45,14 @@ reales**.
 | Firma del webhook de Stripe | `stripe.webhooks.constructEvent` sobre el cuerpo crudo | Pagos fuera del alcance. | **Empresa**: ¿se implementan pagos? |
 | Teléfono con Firebase Auth real | Números de prueba en Firebase Auth; app Flutter conectada a Firebase | Depende de integrar la app Flutter. | — |
 | Registro desde el frontend web | El frontend web no envía `phoneToken`; el backend lo exige por defecto | Mientras tanto, `PHONE_VERIFICATION_REQUIRED=false` para probar el registro web. | — |
+
+## Otros hallazgos (consistencia de datos)
+
+No son de seguridad, pero afectan la calidad de los datos. Se detectaron al
+corregir las respuestas duplicadas (`fix/doble-envio-respuesta`) y quedan
+pendientes.
+
+| Hallazgo | Qué pasa | Impacto | Corrección posible |
+|---|---|---|---|
+| Repeticiones que no se pueden responder | Si el alumno ya respondió todas las preguntas de la ventana aleatoria, `GET /practice/next` le ofrece una repetida. Como el frontend no envía `sessionId`, `POST /questions/:id/answer` responde `409 ALREADY_ANSWERED` para esa pregunta siempre. | Bajo mientras el banco sea grande (1.365 preguntas). Crece con el uso o con bancos chicos. | Que el cliente envíe un `sessionId` por sesión de práctica, o que `/practice/next` no ofrezca repeticiones que no se pueden responder. |
+| Actualizaciones perdidas en el documento del usuario | La cuota, las medallas y otros contadores se guardan leyendo y reescribiendo el documento `users` completo, sin transacción. Dos peticiones simultáneas del mismo alumno (app y web, o reintentos) pueden pisarse. | Un incremento de cuota o una medalla se pierde en ese caso. | Actualizar los contadores con `FieldValue.increment` o dentro de una transacción de Firestore, como indica `Aprueba_Modelo_Datos_Firestore.docx` (sección 7). |
