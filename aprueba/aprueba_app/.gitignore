@@ -1,0 +1,13 @@
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.g.dart
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+**/google-services.json
+**/GoogleService-Info.plist
+*.iml
+.idea/

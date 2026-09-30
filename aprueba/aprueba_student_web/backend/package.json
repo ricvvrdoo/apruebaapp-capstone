@@ -1,0 +1,21 @@
+{
+  "name": "aprueba-student-backend",
+  "version": "1.0.0",
+  "description": "API REST del sitio web del alumno de Aprueba (Express). Driver de datos en memoria/JSON por defecto, Firestore opcional.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed": "node src/seed/seed.js",
+    "smoke": "node src/seed/smoke.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "comment_firestore": "Para usar DATA_DRIVER=firestore instala el SDK aparte: npm install firebase-admin",
+  "comment_phone_auth": "La verificacion telefonica valida el idToken de Firebase Auth: requiere firebase-admin en produccion. En desarrollo usa PHONE_AUTH_ALLOW_DEV_TOKEN=true y tokens 'dev:+56912345678'"
+}
