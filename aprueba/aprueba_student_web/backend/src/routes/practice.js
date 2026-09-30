@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, set, add, where, list } from '../data/repo.js';
+import { COL, get, set, add, query, list } from '../data/repo.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA } from '../lib/quota.js';
 import { award } from '../lib/medals.js';
 
@@ -16,6 +16,29 @@ const publicQuestion = (q) => ({
   statement: q.statement, options: q.options,
 });
 
+// Seleccion aleatoria sin leer el banco completo. Cada pregunta trae `rand`, un
+// numero aleatorio fijo asignado al importarla: se elige un punto al azar y se
+// leen hasta WINDOW preguntas desde ahi (dando la vuelta si no alcanza), y solo
+// se consultan las respuestas del alumno para esas preguntas. Coste por
+// pregunta servida: ~2*WINDOW lecturas, en vez de todo el banco + todo el
+// historial. Si el alumno ya respondio toda la ventana, se permite repetir.
+const WINDOW = 20;
+async function pickQuestion(userId, testIds) {
+  const base = [['published', '==', true], ['testId', 'in', testIds]];
+  const byRand = { orderBy: ['rand', 'asc'] };
+  const pivot = Math.random();
+  let pool = await query(COL.questions, [...base, ['rand', '>=', pivot]], null, { ...byRand, limit: WINDOW });
+  if (pool.length < WINDOW) {
+    pool = pool.concat(await query(COL.questions, [...base, ['rand', '<', pivot]], null, { ...byRand, limit: WINDOW - pool.length }));
+  }
+  if (!pool.length) return null;
+  const answered = new Set((await query(COL.answers, [['userId', '==', userId], ['questionId', 'in', pool.map((q) => q.id)]]))
+    .map((a) => a.questionId));
+  const candidates = pool.filter((q) => !answered.has(q.id));
+  const from = candidates.length ? candidates : pool;
+  return from[Math.floor(Math.random() * from.length)];
+}
+
 // GET /practice/next
 r.get('/practice/next', wrap(async (req, res) => {
   const u = req.user; ensureQuotaDay(u);
@@ -26,12 +49,8 @@ r.get('/practice/next', wrap(async (req, res) => {
   }
   const prefs = u.selectedTests?.length ? u.selectedTests : (await list(COL.tests)).map((t) => t.id);
   const forced = req.query.testId;
-  const answered = new Set((await where(COL.answers, (a) => a.userId === u.id)).map((a) => a.questionId));
-  let pool = await where(COL.questions, (q) => q.published !== false && (forced ? q.testId === forced : prefs.includes(q.testId)));
-  let candidates = pool.filter((q) => !answered.has(q.id));
-  if (candidates.length === 0) candidates = pool; // permite repetir si ya respondio todo
-  if (candidates.length === 0) return fail(res, 404, 'NO_QUESTIONS_AVAILABLE', 'No quedan preguntas para los filtros actuales');
-  const q = candidates[Math.floor(Math.random() * candidates.length)];
+  const q = await pickQuestion(u.id, forced ? [forced] : prefs);
+  if (!q) return fail(res, 404, 'NO_QUESTIONS_AVAILABLE', 'No quedan preguntas para los filtros actuales');
   const sessionTotal = 10;
   const current = (u.quota.used % sessionTotal) + 1;
   return ok(res, { ...publicQuestion(q), progress: { current, total: sessionTotal } }, 200, { quota: { used: u.quota.used, max } });
@@ -52,7 +71,7 @@ r.post('/questions/:id/answer', wrap(async (req, res) => {
   const idx = LETTERS.indexOf(String(selected || '').toUpperCase());
   if (idx < 0 || idx >= q.options.length) return fail(res, 400, 'INVALID_OPTION', 'La alternativa enviada no existe en la pregunta');
   const u = req.user; ensureQuotaDay(u);
-  const existing = await where(COL.answers, (a) => a.userId === u.id && a.questionId === q.id && a.sessionId === (sessionId || null));
+  const existing = await query(COL.answers, [['userId', '==', u.id], ['questionId', '==', q.id]], (a) => a.sessionId === (sessionId || null));
   if (existing.length) return fail(res, 409, 'ALREADY_ANSWERED', 'La pregunta ya fue respondida en esta sesion');
   if (!isUnlimited(u) && u.quota.used >= quotaMax(u)) return fail(res, 422, 'QUOTA_DAILY_LIMIT', 'Cuota diaria agotada');
 
@@ -92,7 +111,7 @@ r.get('/questions/:id/skill', wrap(async (req, res) => {
   if (!q) return fail(res, 404, 'NOT_FOUND', 'La pregunta no existe');
   const skill = q.skillId ? await get(COL.skills, q.skillId) : null;
   const u = req.user;
-  const answers = await where(COL.answers, (a) => a.userId === u.id && a.testId === q.testId);
+  const answers = await query(COL.answers, [['userId', '==', u.id], ['testId', '==', q.testId]]);
   const total = answers.length; const correct = answers.filter((a) => a.correct).length;
   const percent = total ? Math.round((correct / total) * 100) : 0;
   const base = skill || { id: 'skl_generic', name: q.habilidad || 'Habilidad evaluada', test: q.testId, level: 2, maxLevel: 4, prerequisites: [], resources: [] };

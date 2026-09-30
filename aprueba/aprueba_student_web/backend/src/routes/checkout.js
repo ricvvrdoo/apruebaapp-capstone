@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, set, add, where, genId } from '../data/repo.js';
+import { COL, get, set, add, query, genId } from '../data/repo.js';
 
 const r = Router();
 
@@ -15,7 +15,7 @@ r.post('/checkout/sessions', authRequired, wrap(async (req, res) => {
   }
   const planDoc = await get(COL.plans, plan);
   if (!planDoc) return fail(res, 400, 'INVALID_PLAN', 'El plan no existe');
-  const active = await where(COL.subscriptions, (s) => s.userId === req.user.id && s.status === 'active' && s.plan === plan);
+  const active = await query(COL.subscriptions, [['userId', '==', req.user.id], ['status', '==', 'active'], ['plan', '==', plan]]);
   if (active.length) return fail(res, 409, 'ALREADY_SUBSCRIBED', 'El usuario ya tiene una suscripcion activa a ese plan');
   const amount = billingCycle === 'yearly' ? planDoc.price * 10 : planDoc.price;
   const sessionId = `cs_${genId('').slice(1)}`;
@@ -35,7 +35,7 @@ r.post('/webhooks/stripe', wrap(async (req, res) => {
   if (!evt.type) return fail(res, 400, 'WEBHOOK_MALFORMED', 'Evento sin tipo');
   if (evt.type === 'checkout.session.completed') {
     const csid = evt.data?.object?.id;
-    const sub = (await where(COL.subscriptions, (s) => s.checkoutSessionId === csid))[0];
+    const sub = (await query(COL.subscriptions, [['checkoutSessionId', '==', csid]]))[0];
     if (sub) {
       sub.status = 'active';
       sub.currentPeriodEnd = new Date(Date.now() + (sub.billingCycle === 'yearly' ? 365 : 30) * 864e5).toISOString().slice(0, 10);
@@ -52,7 +52,7 @@ r.post('/webhooks/stripe', wrap(async (req, res) => {
 // Endpoint de conveniencia para la demo web: confirma el pago de una sesion
 // (equivale a recibir checkout.session.completed desde Stripe).
 r.post('/checkout/sessions/:id/confirm', authRequired, wrap(async (req, res) => {
-  const sub = (await where(COL.subscriptions, (s) => s.checkoutSessionId === req.params.id && s.userId === req.user.id))[0];
+  const sub = (await query(COL.subscriptions, [['checkoutSessionId', '==', req.params.id], ['userId', '==', req.user.id]]))[0];
   if (!sub) return fail(res, 404, 'NOT_FOUND', 'Sesion de pago no encontrada');
   sub.status = 'active';
   sub.cancelAtPeriodEnd = false;

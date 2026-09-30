@@ -4,6 +4,8 @@
 // solo valida el idToken resultante y confirma que trae un phone_number verificado.
 // En desarrollo, si no hay credenciales de Firebase, se acepta un token de prueba
 // con formato  dev:+56912345678  (solo si PHONE_AUTH_ALLOW_DEV_TOKEN=true).
+import { getFirebaseAdmin } from '../config/firebase.js';
+
 let _auth = null;
 
 const devTokensAllowed = () =>
@@ -11,14 +13,7 @@ const devTokensAllowed = () =>
 
 async function firebaseAuth() {
   if (_auth) return _auth;
-  const adminMod = await import('firebase-admin');
-  const admin = adminMod.default;
-  if (!admin.apps.length) {
-    const projectId = process.env.GCLOUD_PROJECT || 'aprueba-dev';
-    if (process.env.FIREBASE_AUTH_EMULATOR_HOST) admin.initializeApp({ projectId });
-    else admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId });
-  }
-  _auth = admin.auth();
+  _auth = (await getFirebaseAdmin()).auth();
   return _auth;
 }
 

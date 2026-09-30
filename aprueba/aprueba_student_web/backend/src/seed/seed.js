@@ -55,6 +55,8 @@ function loadQuestions() {
           statement: item.pregunta, options, correctIndex, published: true,
           shortExplanation: shortExp, explanation: item.explicacion_respuesta || '',
           habilidad: item.habilidad_requerida || '', source: `${src.dir}/${file}`,
+          // Clave de seleccion aleatoria de GET /practice/next (ver pickQuestion).
+          rand: Math.random(),
           createdAt: new Date().toISOString(),
         };
         i++; total++;

@@ -1,0 +1,11 @@
+rules_version = '2';
+// Solo el backend accede a Firestore, con el Admin SDK, que no pasa por estas
+// reglas. Se deniega todo acceso directo desde clientes (web o Flutter): la app
+// usa Firebase solo para Auth y mensajeria, nunca lee la base directamente.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

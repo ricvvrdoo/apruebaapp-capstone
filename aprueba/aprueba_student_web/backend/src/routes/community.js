@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { ok, created, fail, noContent } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, set, add, del, where, findOne } from '../data/repo.js';
+import { COL, get, set, add, del, where, query, queryOne } from '../data/repo.js';
 import { paginate } from '../lib/paginate.js';
 
 const r = Router();
@@ -11,10 +11,13 @@ r.use(authRequired);
 
 // GET /feed
 r.get('/feed', wrap(async (req, res) => {
-  const posts = (await where(COL.posts, () => true)).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  // Deuda conocida: lee todas las publicaciones para ordenar y paginar en
+  // memoria (y entregar meta.pagination.total). Aceptable con el volumen del
+  // MVP; con mas uso conviene paginar en Firestore con orderBy + startAfter.
+  const posts =(await where(COL.posts, () => true)).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   const { page, pagination } = paginate(posts, req.query);
-  const myLikes = new Set((await where(COL.likes, (l) => l.userId === req.user.id)).map((l) => l.postId));
-  const myReposts = new Set((await where(COL.reposts, (x) => x.userId === req.user.id)).map((x) => x.postId));
+  const myLikes = new Set((await query(COL.likes, [['userId', '==', req.user.id]])).map((l) => l.postId));
+  const myReposts = new Set((await query(COL.reposts, [['userId', '==', req.user.id]])).map((x) => x.postId));
   const data = page.map((p) => ({
     id: p.id, author: { name: p.authorName }, text: p.text,
     question: p.questionId ? { id: p.questionId, axis: p.questionAxis } : null,
@@ -43,7 +46,7 @@ r.post('/posts', wrap(async (req, res) => {
 r.post('/posts/:id/like', wrap(async (req, res) => {
   const p = await get(COL.posts, req.params.id);
   if (!p) return fail(res, 404, 'NOT_FOUND', 'La publicacion no existe');
-  const existing = await findOne(COL.likes, (l) => l.postId === p.id && l.userId === req.user.id);
+  const existing = await queryOne(COL.likes, [['postId', '==', p.id], ['userId', '==', req.user.id]]);
   let liked;
   if (existing) { await del(COL.likes, existing.id); p.likes = Math.max(0, (p.likes || 0) - 1); liked = false; }
   else { await add(COL.likes, { postId: p.id, userId: req.user.id }, 'lk'); p.likes = (p.likes || 0) + 1; liked = true; }
@@ -55,7 +58,7 @@ r.post('/posts/:id/like', wrap(async (req, res) => {
 r.post('/posts/:id/repost', wrap(async (req, res) => {
   const p = await get(COL.posts, req.params.id);
   if (!p) return fail(res, 404, 'NOT_FOUND', 'La publicacion no existe');
-  const existing = await findOne(COL.reposts, (x) => x.postId === p.id && x.userId === req.user.id);
+  const existing = await queryOne(COL.reposts, [['postId', '==', p.id], ['userId', '==', req.user.id]]);
   let reposted;
   if (existing) { await del(COL.reposts, existing.id); p.reposts = Math.max(0, (p.reposts || 0) - 1); reposted = false; }
   else {
@@ -71,9 +74,9 @@ r.delete('/posts/:id', wrap(async (req, res) => {
   const p = await get(COL.posts, req.params.id);
   if (!p) return fail(res, 404, 'NOT_FOUND', 'La publicacion no existe');
   if (p.authorId !== req.user.id) return fail(res, 403, 'NOT_POST_AUTHOR', 'Solo el autor puede eliminar la publicacion');
-  for (const c of await where(COL.comments, (x) => x.postId === p.id)) await del(COL.comments, c.id);
-  for (const l of await where(COL.likes, (x) => x.postId === p.id)) await del(COL.likes, l.id);
-  for (const x of await where(COL.reposts, (y) => y.postId === p.id)) await del(COL.reposts, x.id);
+  for (const c of await query(COL.comments, [['postId', '==', p.id]])) await del(COL.comments, c.id);
+  for (const l of await query(COL.likes, [['postId', '==', p.id]])) await del(COL.likes, l.id);
+  for (const x of await query(COL.reposts, [['postId', '==', p.id]])) await del(COL.reposts, x.id);
   await del(COL.posts, p.id);
   return noContent(res);
 }));
@@ -97,7 +100,7 @@ r.delete('/posts/:id/comments/:commentId', wrap(async (req, res) => {
 r.get('/posts/:id/comments', wrap(async (req, res) => {
   const p = await get(COL.posts, req.params.id);
   if (!p) return fail(res, 404, 'NOT_FOUND', 'La publicacion no existe');
-  const items = (await where(COL.comments, (c) => c.postId === p.id)).sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+  const items = (await query(COL.comments, [['postId', '==', p.id]])).sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
   return ok(res, items.map((c) => ({ id: c.id, author: { name: c.authorName }, text: c.text, createdAt: c.createdAt })));
 }));
 

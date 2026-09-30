@@ -7,7 +7,7 @@ import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { premiumRequired } from '../middleware/premium.js';
-import { COL, get, set, add, where, list, findOne } from '../data/repo.js';
+import { COL, get, set, add, query, queryOne, list } from '../data/repo.js';
 import { paginate } from '../lib/paginate.js';
 import { buildGapAnalysis, weakAreaNames } from '../lib/gap.js';
 import { findGrade, loc } from '../data/catalog.js';
@@ -27,7 +27,7 @@ async function activeTutors() {
 }
 const byDateDesc = (a, b) => (b.createdAt || '').localeCompare(a.createdAt || '');
 async function reviewsOf(tutorId) {
-  return (await where(COL.tutorReviews, (x) => x.tutorId === tutorId)).sort(byDateDesc);
+  return (await query(COL.tutorReviews, [['tutorId', '==', tutorId]])).sort(byDateDesc);
 }
 // Una sola lectura de resenas agrupada por tutor (evita N+1 en los listados).
 async function reviewsByTutor() {
@@ -46,7 +46,7 @@ async function ratingsOf(tutor) {
 // Perfil del alumno que se comparte al contactar (pantalla tutor-contact).
 async function shareableProfile(user, lang) {
   const [answers, tests, questions, tutors] = await Promise.all([
-    where(COL.answers, (a) => a.userId === user.id),
+    query(COL.answers, [['userId', '==', user.id]]),
     list(COL.tests),
     list(COL.questions),
     activeTutors(),
@@ -124,7 +124,7 @@ r.get('/tutors/:id', wrap(async (req, res) => {
   const reviews = await reviewsOf(tutor.id);
   const ratings = aggregateRatings(tutor, reviews);
   const mine = reviews.find((x) => x.userId === req.user.id) || null;
-  const conversation = await findOne(COL.conversations, (c) => c.tutorId === tutor.id && c.userId === req.user.id);
+  const conversation = await queryOne(COL.conversations, [['tutorId', '==', tutor.id], ['userId', '==', req.user.id]]);
   return ok(res, tutorProfile(tutor, ratings, lang, {
     highlightedReview: reviews[0] ? publicReview(reviews[0], lang) : (tutor.highlightedReview || null),
     myReview: mine ? publicReview(mine, lang) : null,
@@ -162,9 +162,9 @@ r.post('/tutors/:id/reviews', wrap(async (req, res) => {
   const invalid = validateReviewRatings(ratings);
   if (invalid) return fail(res, 400, 'VALIDATION_ERROR', invalid, { field: 'ratings' });
 
-  const conversation = await findOne(COL.conversations, (c) => c.tutorId === tutor.id && c.userId === req.user.id);
+  const conversation = await queryOne(COL.conversations, [['tutorId', '==', tutor.id], ['userId', '==', req.user.id]]);
   if (!conversation) return fail(res, 403, 'REVIEW_NOT_ALLOWED', 'Solo puedes resenar tutores con los que has tenido contacto');
-  const previous = await findOne(COL.tutorReviews, (x) => x.tutorId === tutor.id && x.userId === req.user.id);
+  const previous = await queryOne(COL.tutorReviews, [['tutorId', '==', tutor.id], ['userId', '==', req.user.id]]);
   if (previous) return fail(res, 409, 'REVIEW_ALREADY_EXISTS', 'Ya publicaste una resena para este tutor');
 
   const clean = { teaching: ratings.teaching, punctuality: ratings.punctuality, mastery: ratings.mastery };
@@ -193,7 +193,7 @@ r.post('/tutors/:id/contact-requests', premiumRequired, wrap(async (req, res) =>
   if (!message) return fail(res, 400, 'VALIDATION_ERROR', 'message es obligatorio', { field: 'message' });
   const shareProfile = req.body?.shareProfile !== false;
 
-  const existing = await findOne(COL.conversations, (c) => c.tutorId === tutor.id && c.userId === req.user.id);
+  const existing = await queryOne(COL.conversations, [['tutorId', '==', tutor.id], ['userId', '==', req.user.id]]);
   const now = new Date().toISOString();
 
   if (existing) {
@@ -238,7 +238,7 @@ r.post('/tutors/:id/contact-requests', premiumRequired, wrap(async (req, res) =>
 r.get('/me/gap-analysis', premiumRequired, wrap(async (req, res) => {
   const lang = langOf(req);
   const [answers, tests, questions, tutors] = await Promise.all([
-    where(COL.answers, (a) => a.userId === req.user.id),
+    query(COL.answers, [['userId', '==', req.user.id]]),
     list(COL.tests),
     list(COL.questions),
     activeTutors(),

@@ -5,7 +5,7 @@ import { ok, created, fail, noContent } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { signAccess, signRefresh, signPhone, verifyPhone, verify, accessTtl, phoneTtl } from '../lib/jwt.js';
-import { COL, get, set, add, del, findOne, genId } from '../data/repo.js';
+import { COL, get, set, add, del, queryOne, genId } from '../data/repo.js';
 import { emptyWallet, award } from '../lib/medals.js';
 import { todayKey } from '../lib/quota.js';
 import { normalizePhone, detectLocale, maskPhone } from '../lib/phone.js';
@@ -58,7 +58,7 @@ r.post('/auth/phone/send-code', wrap(async (req, res) => {
   if (!locale.supported) {
     return fail(res, 422, 'COUNTRY_NOT_SUPPORTED', 'Por ahora solo operamos en Chile (+56) y Reino Unido (+44)', { field: 'phone' });
   }
-  const existing = await findOne(COL.users, (u) => u.phone === phone);
+  const existing = await queryOne(COL.users, [['phone', '==', phone]]);
   return ok(res, {
     phone,
     masked: maskPhone(phone),
@@ -95,7 +95,7 @@ r.post('/auth/phone/verify-code', wrap(async (req, res) => {
   if (!locale.supported) {
     return fail(res, 422, 'COUNTRY_NOT_SUPPORTED', 'Por ahora solo operamos en Chile (+56) y Reino Unido (+44)');
   }
-  const existing = await findOne(COL.users, (u) => u.phone === phone);
+  const existing = await queryOne(COL.users, [['phone', '==', phone]]);
   return ok(res, {
     phoneToken: signPhone({
       phone, country: locale.country, language: locale.language,
@@ -115,7 +115,7 @@ r.post('/auth/register', wrap(async (req, res) => {
   if (!name || !email || !password) return fail(res, 400, 'VALIDATION_ERROR', 'Nombre, correo y contrasena son obligatorios');
   if (String(password).length < 8) return fail(res, 400, 'WEAK_PASSWORD', 'La contrasena debe tener al menos 8 caracteres');
   if (!consent) return fail(res, 400, 'CONSENT_REQUIRED', 'Debe aceptarse el tratamiento de datos');
-  const exists = await findOne(COL.users, (u) => u.email?.toLowerCase() === String(email).toLowerCase());
+  const exists = await queryOne(COL.users, [['emailLower', '==', String(email).toLowerCase()]]);
   if (exists) return fail(res, 409, 'EMAIL_ALREADY_EXISTS', 'Ya existe una cuenta con ese correo');
 
   // Telefono verificado (pantalla sms-verification). Obligatorio salvo que se
@@ -125,7 +125,7 @@ r.post('/auth/register', wrap(async (req, res) => {
   if (phoneToken && !verifiedPhone) return fail(res, 401, 'PHONE_TOKEN_INVALID', 'El phoneToken es invalido o expiro', { field: 'phoneToken' });
   if (phoneRequired && !verifiedPhone) return fail(res, 400, 'PHONE_VERIFICATION_REQUIRED', 'Debes verificar tu telefono antes de crear la cuenta', { field: 'phoneToken' });
   if (verifiedPhone) {
-    const phoneTaken = await findOne(COL.users, (u) => u.phone === verifiedPhone.phone);
+    const phoneTaken = await queryOne(COL.users, [['phone', '==', verifiedPhone.phone]]);
     if (phoneTaken) return fail(res, 409, 'PHONE_ALREADY_IN_USE', 'Ya existe una cuenta con ese telefono', { field: 'phoneToken' });
   }
   if (country && !findCountry(country)) return fail(res, 400, 'VALIDATION_ERROR', 'country invalido', { field: 'country' });
@@ -155,7 +155,7 @@ r.post('/auth/register', wrap(async (req, res) => {
 r.post('/auth/login', wrap(async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) return fail(res, 400, 'VALIDATION_ERROR', 'email y password son obligatorios');
-  const user = await findOne(COL.users, (u) => u.email?.toLowerCase() === String(email).toLowerCase());
+  const user = await queryOne(COL.users, [['emailLower', '==', String(email).toLowerCase()]]);
   if (!user || !bcrypt.compareSync(password, user.passwordHash || '')) {
     return fail(res, 401, 'AUTH_INVALID_CREDENTIALS', 'El correo o la contrasena son incorrectos');
   }
@@ -179,11 +179,11 @@ r.post('/auth/social', wrap(async (req, res) => {
   const verifiedPhone = phoneToken ? consumePhoneToken(phoneToken) : null;
   if (phoneToken && !verifiedPhone) return fail(res, 401, 'PHONE_TOKEN_INVALID', 'El phoneToken es invalido o expiro', { field: 'phoneToken' });
   if (verifiedPhone) {
-    const phoneTaken = await findOne(COL.users, (u) => u.phone === verifiedPhone.phone && u.emailLower !== email.toLowerCase());
+    const phoneTaken = await queryOne(COL.users, [['phone', '==', verifiedPhone.phone]], (u) => u.emailLower !== email.toLowerCase());
     if (phoneTaken) return fail(res, 409, 'PHONE_ALREADY_IN_USE', 'Ya existe una cuenta con ese telefono', { field: 'phoneToken' });
   }
 
-  let user = await findOne(COL.users, (u) => u.email?.toLowerCase() === email.toLowerCase());
+  let user = await queryOne(COL.users, [['emailLower', '==', email.toLowerCase()]]);
   let isNewUser = false;
   if (!user) {
     isNewUser = true;
@@ -236,7 +236,7 @@ r.post('/auth/logout', authRequired, wrap(async (_req, res) => noContent(res)));
 r.post('/auth/password/forgot', wrap(async (req, res) => {
   const { email } = req.body || {};
   if (!email) return fail(res, 400, 'VALIDATION_ERROR', 'email es obligatorio');
-  const user = await findOne(COL.users, (u) => u.email?.toLowerCase() === String(email).toLowerCase());
+  const user = await queryOne(COL.users, [['emailLower', '==', String(email).toLowerCase()]]);
   if (user) {
     const token = genId('rst');
     await set(COL.users, user.id, { ...user, resetToken: token });
@@ -250,7 +250,7 @@ r.post('/auth/password/reset', wrap(async (req, res) => {
   const { token, password } = req.body || {};
   if (!token || !password) return fail(res, 400, 'VALIDATION_ERROR', 'token y password son obligatorios');
   if (String(password).length < 8) return fail(res, 400, 'WEAK_PASSWORD', 'La contrasena debe tener al menos 8 caracteres');
-  const user = await findOne(COL.users, (u) => u.resetToken === token);
+  const user = await queryOne(COL.users, [['resetToken', '==', token]]);
   if (!user) return fail(res, 400, 'RESET_TOKEN_INVALID', 'El token de recuperacion es invalido o expiro');
   await set(COL.users, user.id, { ...user, passwordHash: bcrypt.hashSync(password, 8), resetToken: null });
   return ok(res, { reset: true });
