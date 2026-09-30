@@ -7,7 +7,7 @@ import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { premiumRequired } from '../middleware/premium.js';
-import { COL, get, add, where, patch } from '../data/repo.js';
+import { COL, get, add, query, patch } from '../data/repo.js';
 import { paginate } from '../lib/paginate.js';
 
 const r = Router();
@@ -43,7 +43,7 @@ const publicMessage = (m, userId) => ({
 
 // GET /me/conversations
 r.get('/me/conversations', wrap(async (req, res) => {
-  const items = (await where(COL.conversations, (c) => c.userId === req.user.id))
+  const items = (await query(COL.conversations, [['userId', '==', req.user.id]]))
     .sort((a, b) => (b.lastMessageAt || '').localeCompare(a.lastMessageAt || ''));
   // El listado tambien informa `online` para que el cliente pinte el punto verde.
   const online = new Map();
@@ -89,7 +89,7 @@ r.get('/conversations/:id', wrap(async (req, res) => {
 r.get('/conversations/:id/messages', wrap(async (req, res) => {
   const c = await myConversation(req.params.id, req.user.id);
   if (!c) return fail(res, 404, 'NOT_FOUND', 'La conversacion no existe');
-  const all = (await where(COL.messages, (m) => m.conversationId === c.id))
+  const all = (await query(COL.messages, [['conversationId', '==', c.id]]))
     .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   const { page, pagination } = paginate(all, req.query, 30, 100);
 
@@ -128,7 +128,7 @@ r.post('/conversations/:id/messages', premiumRequired, wrap(async (req, res) => 
 r.post('/conversations/:id/read', wrap(async (req, res) => {
   const c = await myConversation(req.params.id, req.user.id);
   if (!c) return fail(res, 404, 'NOT_FOUND', 'La conversacion no existe');
-  const pending = await where(COL.messages, (m) => m.conversationId === c.id && m.senderType === 'tutor' && !m.readByUser);
+  const pending = await query(COL.messages, [['conversationId', '==', c.id], ['senderType', '==', 'tutor']], (m) => !m.readByUser);
   for (const m of pending) await patch(COL.messages, m.id, { readByUser: true });
   await patch(COL.conversations, c.id, { unreadForUser: 0 });
   return ok(res, { marked: pending.length, unreadCount: 0 });

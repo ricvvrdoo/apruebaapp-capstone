@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, add, where } from '../data/repo.js';
+import { COL, get, add, query } from '../data/repo.js';
 
 const r = Router();
 r.use(authRequired);
@@ -15,7 +15,7 @@ r.post('/corrections', wrap(async (req, res) => {
   if (!questionId || !REASONS.includes(reason)) return fail(res, 400, 'VALIDATION_ERROR', 'questionId y reason validos son obligatorios');
   const q = await get(COL.questions, questionId);
   if (!q) return fail(res, 404, 'NOT_FOUND', 'La pregunta no existe');
-  const open = await where(COL.corrections, (c) => c.userId === req.user.id && c.questionId === questionId && c.status === 'pending');
+  const open = await query(COL.corrections, [['userId', '==', req.user.id], ['questionId', '==', questionId], ['status', '==', 'pending']]);
   if (open.length) return fail(res, 409, 'CORRECTION_ALREADY_OPEN', 'Ya existe una solicitud abierta tuya para esta pregunta');
   const expectedReviewBy = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
   const c = await add(COL.corrections, {
@@ -27,7 +27,7 @@ r.post('/corrections', wrap(async (req, res) => {
 
 // GET /corrections
 r.get('/corrections', wrap(async (req, res) => {
-  const items = (await where(COL.corrections, (c) => c.userId === req.user.id)).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const items = (await query(COL.corrections, [['userId', '==', req.user.id]])).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   return ok(res, items.map((c) => ({
     id: c.id, questionId: c.questionId, reason: c.reason, status: c.status,
     rewardGranted: c.status === 'confirmed' ? { tier: 'bronze', amount: 250 } : null,

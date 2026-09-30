@@ -4,7 +4,7 @@ import { Router } from 'express';
 import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, list, get, add, set, where } from '../data/repo.js';
+import { COL, list, get, add, set, query } from '../data/repo.js';
 import { genId } from '../data/repo.js';
 import {
   COUNTRIES, GRADE_GROUPS, SUBJECT_SETS, TEST_LABELS_EN,
@@ -95,7 +95,7 @@ r.get('/benefits/:id', authRequired, wrap(async (req, res) => {
   const benefit = await get(COL.benefits, req.params.id);
   if (!benefit) return fail(res, 404, 'NOT_FOUND', 'El beneficio no existe');
   const platinum = req.user.medals?.platinum || 0;
-  const redemptions = await where(COL.benefitRedemptions, (x) => x.userId === req.user.id && x.benefitId === benefit.id);
+  const redemptions = await query(COL.benefitRedemptions, [['userId', '==', req.user.id], ['benefitId', '==', benefit.id]]);
   return ok(res, {
     ...publicBenefit(benefit, platinum >= REQUIRED_PLATINUM),
     platinum,

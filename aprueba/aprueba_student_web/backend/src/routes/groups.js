@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { ok, created, fail, noContent } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, set, add, del, where, list, genId } from '../data/repo.js';
+import { COL, get, set, add, del, query, list, genId } from '../data/repo.js';
 
 const r = Router();
 r.use(authRequired);
@@ -13,18 +13,18 @@ async function subjectLabel(testId) {
   return t?.label || testId;
 }
 async function isMember(groupId, userId) {
-  const m = await where(COL.groupMembers, (x) => x.groupId === groupId && x.userId === userId);
+  const m = await query(COL.groupMembers, [['groupId', '==', groupId], ['userId', '==', userId]]);
   return m[0] || null;
 }
 
 // GET /groups
 r.get('/groups', wrap(async (req, res) => {
-  const myMemberships = await where(COL.groupMembers, (m) => m.userId === req.user.id);
+  const myMemberships = await query(COL.groupMembers, [['userId', '==', req.user.id]]);
   const out = [];
   for (const mem of myMemberships) {
     const g = await get(COL.groups, mem.groupId);
     if (!g) continue;
-    const members = await where(COL.groupMembers, (m) => m.groupId === g.id);
+    const members = await query(COL.groupMembers, [['groupId', '==', g.id]]);
     const avg = members.length ? Math.round(members.reduce((s, m) => s + (m.score || 0), 0) / members.length) : 0;
     out.push({ id: g.id, name: g.name, subject: g.subject, memberCount: members.length, avgScore: avg, yourScore: mem.score || 0 });
   }
@@ -47,7 +47,7 @@ r.get('/groups/:id', wrap(async (req, res) => {
   const g = await get(COL.groups, req.params.id);
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
   if (!(await isMember(g.id, req.user.id))) return fail(res, 403, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
-  const members = await where(COL.groupMembers, (m) => m.groupId === g.id);
+  const members = await query(COL.groupMembers, [['groupId', '==', g.id]]);
   return ok(res, {
     id: g.id, name: g.name, subject: g.subject, ownerId: g.ownerId,
     members: members.map((m) => ({ userId: m.userId, name: m.name, score: m.score || 0, activeToday: !!m.activeToday, role: m.role })),
@@ -71,7 +71,7 @@ r.delete('/groups/:id', wrap(async (req, res) => {
   const g = await get(COL.groups, req.params.id);
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
   if (g.ownerId !== req.user.id) return fail(res, 403, 'AUTH_FORBIDDEN', 'Solo el owner puede eliminar');
-  for (const m of await where(COL.groupMembers, (x) => x.groupId === g.id)) await del(COL.groupMembers, m.id);
+  for (const m of await query(COL.groupMembers, [['groupId', '==', g.id]])) await del(COL.groupMembers, m.id);
   await del(COL.groups, g.id);
   return noContent(res);
 }));
@@ -83,10 +83,9 @@ r.post('/groups/:id/invitations', wrap(async (req, res) => {
   if (!(await isMember(g.id, req.user.id))) return fail(res, 403, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
   const { email } = req.body || {};
   if (!email) return fail(res, 400, 'VALIDATION_ERROR', 'email es obligatorio');
-  const target = await where(COL.users, () => false); // placeholder
-  const existingMember = (await where(COL.groupMembers, (m) => m.groupId === g.id)).find((m) => m.email === email);
+  const existingMember = (await query(COL.groupMembers, [['groupId', '==', g.id]])).find((m) => m.email === email);
   if (existingMember) return fail(res, 409, 'ALREADY_MEMBER', 'Ese usuario ya es miembro del grupo');
-  const pending = await where(COL.groupInvitations, (i) => i.groupId === g.id && i.email === email && i.status === 'pending');
+  const pending = await query(COL.groupInvitations, [['groupId', '==', g.id], ['email', '==', email], ['status', '==', 'pending']]);
   if (pending.length) return fail(res, 409, 'ALREADY_INVITED', 'Ese correo ya tiene una invitacion pendiente');
   const token = genId('inv');
   const inv = await add(COL.groupInvitations, { groupId: g.id, email, status: 'pending', token, createdAt: new Date().toISOString() }, 'inv');
@@ -98,13 +97,13 @@ r.post('/groups/:id/invitations', wrap(async (req, res) => {
 r.get('/groups/:id/invitations', wrap(async (req, res) => {
   const g = await get(COL.groups, req.params.id);
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
-  const items = await where(COL.groupInvitations, (i) => i.groupId === g.id && i.status === 'pending');
+  const items = await query(COL.groupInvitations, [['groupId', '==', g.id], ['status', '==', 'pending']]);
   return ok(res, items.map((i) => ({ id: i.id, email: i.email, status: i.status })));
 }));
 
 // POST /invitations/:token/accept
 r.post('/invitations/:token/accept', wrap(async (req, res) => {
-  const inv = (await where(COL.groupInvitations, (i) => i.token === req.params.token && i.status === 'pending'))[0];
+  const inv = (await query(COL.groupInvitations, [['token', '==', req.params.token], ['status', '==', 'pending']]))[0];
   if (!inv) return fail(res, 400, 'INVITATION_INVALID', 'La invitacion es invalida o expiro');
   if (await isMember(inv.groupId, req.user.id)) return fail(res, 409, 'ALREADY_MEMBER', 'Ya eres miembro del grupo');
   await add(COL.groupMembers, { groupId: inv.groupId, userId: req.user.id, name: req.user.name, email: req.user.email, role: 'member', score: 0, activeToday: true }, 'gm');
@@ -121,10 +120,10 @@ r.delete('/groups/:id/members/me', wrap(async (req, res) => {
   const m = await isMember(g.id, req.user.id);
   if (!m) return fail(res, 404, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
   await del(COL.groupMembers, m.id);
-  const remaining = await where(COL.groupMembers, (x) => x.groupId === g.id);
+  const remaining = await query(COL.groupMembers, [['groupId', '==', g.id]]);
   if (!remaining.length) {
-    for (const s of await where(COL.groupShared, (x) => x.groupId === g.id)) await del(COL.groupShared, s.id);
-    for (const i of await where(COL.groupInvitations, (x) => x.groupId === g.id)) await del(COL.groupInvitations, i.id);
+    for (const s of await query(COL.groupShared, [['groupId', '==', g.id]])) await del(COL.groupShared, s.id);
+    for (const i of await query(COL.groupInvitations, [['groupId', '==', g.id]])) await del(COL.groupInvitations, i.id);
     await del(COL.groups, g.id);
     return noContent(res);
   }
@@ -154,7 +153,7 @@ r.get('/groups/:id/stats', wrap(async (req, res) => {
   const g = await get(COL.groups, req.params.id);
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
   if (!(await isMember(g.id, req.user.id))) return fail(res, 403, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
-  const members = await where(COL.groupMembers, (m) => m.groupId === g.id);
+  const members = await query(COL.groupMembers, [['groupId', '==', g.id]]);
   const avg = members.length ? Math.round(members.reduce((s, m) => s + (m.score || 0), 0) / members.length) : 0;
   return ok(res, {
     avgScore: avg, memberCount: members.length,
@@ -168,7 +167,7 @@ r.get('/groups/:id/shared', wrap(async (req, res) => {
   const g = await get(COL.groups, req.params.id);
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
   if (!(await isMember(g.id, req.user.id))) return fail(res, 403, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
-  const items = (await where(COL.groupShared, (s) => s.groupId === g.id)).sort((a, b) => (b.sharedAt || '').localeCompare(a.sharedAt || ''));
+  const items = (await query(COL.groupShared, [['groupId', '==', g.id]])).sort((a, b) => (b.sharedAt || '').localeCompare(a.sharedAt || ''));
   return ok(res, items.map((s) => ({ id: s.id, questionId: s.questionId, sharedBy: s.sharedBy, result: s.result, elapsed: s.elapsed, comment: s.comment, sharedAt: s.sharedAt })));
 }));
 

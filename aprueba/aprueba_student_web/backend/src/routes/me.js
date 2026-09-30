@@ -5,7 +5,7 @@ import bcrypt from '../lib/password.js';
 import { ok, created, fail, noContent } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
-import { COL, get, set, add, patch, del, where, list } from '../data/repo.js';
+import { COL, get, set, add, patch, del, query, list } from '../data/repo.js';
 import { TIERS, NEXT, walletProgress, award } from '../lib/medals.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt } from '../lib/quota.js';
 import { verifyPhone } from '../lib/jwt.js';
@@ -36,7 +36,7 @@ r.patch('/me/phone', wrap(async (req, res) => {
   if (!phoneToken) return fail(res, 400, 'VALIDATION_ERROR', 'phoneToken es obligatorio', { field: 'phoneToken' });
   const payload = verifyPhone(phoneToken);
   if (!payload) return fail(res, 401, 'PHONE_TOKEN_INVALID', 'El phoneToken es invalido o expiro', { field: 'phoneToken' });
-  const taken = await where(COL.users, (x) => x.phone === payload.sub && x.id !== req.user.id);
+  const taken = await query(COL.users, [['phone', '==', payload.sub]], (x) => x.id !== req.user.id);
   if (taken.length) return fail(res, 409, 'PHONE_ALREADY_IN_USE', 'Ya existe una cuenta con ese telefono');
   const u = req.user;
   u.phone = payload.sub;
@@ -167,7 +167,7 @@ r.post('/me/quota/unlock', wrap(async (req, res) => {
 // GET /me/progress
 r.get('/me/progress', wrap(async (req, res) => {
   const u = req.user;
-  const answers = await where(COL.answers, (a) => a.userId === u.id);
+  const answers = await query(COL.answers, [['userId', '==', u.id]]);
   const tests = await list(COL.tests);
   const byTest = {};
   for (const a of answers) {
@@ -210,11 +210,11 @@ r.get('/me/gifts', wrap(async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   const used = u.giftDay === today ? (u.giftUsed || 0) : 0;
   // amigos: miembros de grupos compartidos
-  const myGroups = (await where(COL.groupMembers, (m) => m.userId === u.id)).map((m) => m.groupId);
+  const myGroups = (await query(COL.groupMembers, [['userId', '==', u.id]])).map((m) => m.groupId);
   const friends = [];
   const seen = new Set();
   for (const gid of myGroups) {
-    const members = await where(COL.groupMembers, (m) => m.groupId === gid && m.userId !== u.id);
+    const members = await query(COL.groupMembers, [['groupId', '==', gid]], (m) => m.userId !== u.id);
     for (const m of members) {
       if (seen.has(m.userId)) continue; seen.add(m.userId);
       friends.push({ userId: m.userId, name: m.name, giftedToday: 0 });
@@ -234,9 +234,9 @@ r.post('/me/gifts', wrap(async (req, res) => {
   if (u.giftUsed + total > 10) return fail(res, 422, 'DAILY_GIFT_LIMIT', 'Se supero el limite de 10 regalos diarios');
   if ((u.medals.bronze || 0) < total) return fail(res, 422, 'INSUFFICIENT_MEDALS', 'No tienes suficientes bronces');
   // validar grupo compartido
-  const myGroups = new Set((await where(COL.groupMembers, (m) => m.userId === u.id)).map((m) => m.groupId));
+  const myGroups = new Set((await query(COL.groupMembers, [['userId', '==', u.id]])).map((m) => m.groupId));
   for (const rcp of recipients) {
-    const shares = await where(COL.groupMembers, (m) => m.userId === rcp.userId && myGroups.has(m.groupId));
+    const shares = await query(COL.groupMembers, [['userId', '==', rcp.userId]], (m) => myGroups.has(m.groupId));
     if (shares.length === 0) return fail(res, 403, 'NOT_IN_SHARED_GROUP', 'El destinatario no comparte ningun grupo contigo');
   }
   for (const rcp of recipients) {
@@ -252,7 +252,7 @@ r.post('/me/gifts', wrap(async (req, res) => {
 // GET /me/notifications
 r.get('/me/notifications', wrap(async (req, res) => {
   const onlyUnread = req.query.unread === 'true';
-  let items = await where(COL.notifications, (n) => n.userId === req.user.id);
+  let items = await query(COL.notifications, [['userId', '==', req.user.id]]);
   items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   const unreadCount = items.filter((n) => !n.read).length;
   if (onlyUnread) items = items.filter((n) => !n.read);
@@ -269,7 +269,7 @@ r.patch('/me/notifications/:id/read', wrap(async (req, res) => {
 
 // POST /me/notifications/read-all
 r.post('/me/notifications/read-all', wrap(async (req, res) => {
-  const items = await where(COL.notifications, (n) => n.userId === req.user.id && !n.read);
+  const items = await query(COL.notifications, [['userId', '==', req.user.id]], (n) => !n.read);
   for (const n of items) await patch(COL.notifications, n.id, { read: true });
   return ok(res, { marked: items.length, unreadCount: 0 });
 }));
@@ -304,7 +304,7 @@ r.delete('/devices/:id', wrap(async (req, res) => {
 
 // GET /me/subscription
 r.get('/me/subscription', wrap(async (req, res) => {
-  const sub = await where(COL.subscriptions, (s) => s.userId === req.user.id && s.status !== 'canceled');
+  const sub = await query(COL.subscriptions, [['userId', '==', req.user.id]], (s) => s.status !== 'canceled');
   const s = sub.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
   if (!s) return ok(res, null);
   return ok(res, {
@@ -317,7 +317,7 @@ r.get('/me/subscription', wrap(async (req, res) => {
 // POST /me/subscription/change
 r.post('/me/subscription/change', wrap(async (req, res) => {
   const { plan, billingCycle } = req.body || {};
-  const s = (await where(COL.subscriptions, (x) => x.userId === req.user.id && x.status === 'active'))[0];
+  const s = (await query(COL.subscriptions, [['userId', '==', req.user.id], ['status', '==', 'active']]))[0];
   if (!s) return fail(res, 404, 'NO_ACTIVE_SUBSCRIPTION', 'No hay suscripcion activa para modificar');
   if (plan) { s.plan = plan; req.user.plan = plan; await save(req.user); }
   if (billingCycle) s.billingCycle = billingCycle;
@@ -328,7 +328,7 @@ r.post('/me/subscription/change', wrap(async (req, res) => {
 // POST /me/subscription/cancel
 r.post('/me/subscription/cancel', wrap(async (req, res) => {
   const { immediate } = req.body || {};
-  const s = (await where(COL.subscriptions, (x) => x.userId === req.user.id && x.status === 'active'))[0];
+  const s = (await query(COL.subscriptions, [['userId', '==', req.user.id], ['status', '==', 'active']]))[0];
   if (!s) return fail(res, 404, 'NO_ACTIVE_SUBSCRIPTION', 'No hay suscripcion activa');
   if (immediate) { s.status = 'canceled'; req.user.plan = 'free'; await save(req.user); await set(COL.subscriptions, s.id, s); return ok(res, { id: s.id, status: 'canceled' }); }
   s.cancelAtPeriodEnd = true; await set(COL.subscriptions, s.id, s);
@@ -337,7 +337,7 @@ r.post('/me/subscription/cancel', wrap(async (req, res) => {
 
 // GET /me/invoices
 r.get('/me/invoices', wrap(async (req, res) => {
-  const items = (await where(COL.invoices, (i) => i.userId === req.user.id)).sort((a, b) => (b.paidAt || '').localeCompare(a.paidAt || ''));
+  const items = (await query(COL.invoices, [['userId', '==', req.user.id]])).sort((a, b) => (b.paidAt || '').localeCompare(a.paidAt || ''));
   return ok(res, items.map((i) => ({ id: i.id, amount: i.amount, currency: i.currency, status: i.status, paidAt: i.paidAt, pdfUrl: i.pdfUrl })));
 }));
 
