@@ -10,6 +10,9 @@ build/
 .env.*
 !.env.example
 *serviceAccount*.json
+# Nombre por defecto de la clave que descarga Firebase:
+# <proyecto>-firebase-adminsdk-<id>.json
+*firebase-adminsdk*.json
 *.pem
 *.key
 
@@ -33,8 +36,13 @@ android/local.properties
 # ── Firebase ─────────────────────────────────────────
 .firebase/
 firebase-debug.log
+firestore-debug.log
+ui-debug.log
 google-services.json
 GoogleService-Info.plist
+
+# ── Vercel ───────────────────────────────────────────
+.vercel/
 
 # ── Descartes y temporales ───────────────────────────
 _trash_*/
