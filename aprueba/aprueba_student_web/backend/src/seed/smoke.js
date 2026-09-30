@@ -8,6 +8,9 @@
 // resenas), asi que hay que resembrar antes de cada corrida.
 process.env.PHONE_AUTH_ALLOW_DEV_TOKEN = 'true';
 process.env.PHONE_VERIFICATION_REQUIRED = 'true';
+// Los flujos demo (login social, activar planes) se prueban con DEMO_MODE; la
+// seccion [12] lo apaga temporalmente para probar el comportamiento sin el.
+process.env.DEMO_MODE = 'true';
 process.env.PORT = process.env.SMOKE_PORT || '4199';
 await import('../index.js');
 const BASE = `http://127.0.0.1:${process.env.PORT}/api/v1`;
@@ -258,6 +261,73 @@ await expect('plans publico', 'GET', '/plans', {}, 200, (d) => d.length >= 2);
 await expect('me/medals', 'GET', '/me/medals', { token: free }, 200, (d) => d.wallet);
 await expect('me/progress', 'GET', '/me/progress', { token: free }, 200, (d) => Array.isArray(d));
 await expect('sin token', 'GET', '/tutors', {}, 401);
+
+results.push('\n[12] Seguridad (rama sec/cierre-hallazgos-acotado)');
+{
+  const juan = await login('juan@correo.cl');
+  const { patch: patchDoc, COL: C } = await import('../data/repo.js');
+
+  // Invitaciones: solo miembros ven los correos; solo el invitado acepta; vencen.
+  const grp = (await call('POST', '/groups', { token: premium, body: { name: 'Grupo seguridad', subjectTestId: 'm1' } })).json.data;
+  await expect('no miembro NO ve correos invitados', 'GET', `/groups/${grp.id}/invitations`, { token: free }, 403);
+  await expect('miembro ve invitaciones', 'GET', `/groups/${grp.id}/invitations`, { token: premium }, 200, (d) => Array.isArray(d));
+  const inv = (await call('POST', `/groups/${grp.id}/invitations`, { token: premium, body: { email: 'Juan@Correo.cl' } })).json.data;
+  check('invitacion creada con vencimiento', !!inv?.token);
+  await expect('otro correo NO acepta la invitacion', 'POST', `/invitations/${inv.token}/accept`, { token: free }, 403);
+  await expect('el invitado acepta (sin importar mayusculas)', 'POST', `/invitations/${inv.token}/accept`, { token: juan }, 200,
+    (d) => d.joined === true);
+  const grp2 = (await call('POST', '/groups', { token: premium, body: { name: 'Grupo vencido', subjectTestId: 'm1' } })).json.data;
+  const inv2 = (await call('POST', `/groups/${grp2.id}/invitations`, { token: premium, body: { email: 'juan@correo.cl' } })).json.data;
+  await patchDoc(C.groupInvitations, inv2.id, { expiresAt: new Date(Date.now() - 1000).toISOString() });
+  await expect('invitacion vencida se rechaza', 'POST', `/invitations/${inv2.token}/accept`, { token: juan }, 400);
+
+  // Cambio de plan: valida plan y ciclo.
+  await expect('plan inexistente', 'POST', '/me/subscription/change', { token: premium, body: { plan: 'vip' } }, 400);
+  await expect('plan free no se asigna asi', 'POST', '/me/subscription/change', { token: premium, body: { plan: 'free' } }, 400);
+  await expect('ciclo inexistente', 'POST', '/me/subscription/change', { token: premium, body: { billingCycle: 'weekly' } }, 400);
+  await expect('cambio valido en demo', 'POST', '/me/subscription/change', { token: premium, body: { billingCycle: 'yearly' } }, 200);
+
+  // Login social demo: no puede entrar a una cuenta con contrasena.
+  await expect('token social NO suplanta cuenta con contrasena', 'POST', '/auth/social',
+    { body: { provider: 'google', idToken: 'google:camila@correo.cl:Falsa' } }, 409);
+
+  // Webhook de Stripe: deshabilitado siempre (no verifica firma).
+  await expect('webhook de Stripe deshabilitado', 'POST', '/webhooks/stripe',
+    { body: { type: 'checkout.session.completed', data: { object: { id: 'cs_x' } } } }, 503);
+
+  // Sin DEMO_MODE: los atajos quedan cerrados.
+  process.env.DEMO_MODE = 'false';
+  await expect('sin demo: login social cerrado', 'POST', '/auth/social',
+    { body: { provider: 'google', idToken: `google:nuevo${Date.now()}@x.cl:X` } }, 503);
+  await expect('sin demo: checkout cerrado', 'POST', '/checkout/sessions',
+    { token: free, body: { plan: 'all', billingCycle: 'monthly' } }, 503);
+  await expect('sin demo: confirmar pago cerrado', 'POST', '/checkout/sessions/cs_x/confirm', { token: free }, 503);
+  await expect('sin demo: cambio de plan cerrado', 'POST', '/me/subscription/change',
+    { token: premium, body: { plan: 'uni' } }, 503);
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  const devPhoneProd = await call('POST', '/auth/phone/verify-code', { body: { firebaseIdToken: 'dev:+56911112222' } });
+  check('produccion sin demo: token dev: de telefono rechazado', devPhoneProd.status !== 200, `(recibido ${devPhoneProd.status})`);
+  process.env.DEMO_MODE = 'true';
+  const devPhoneDemo = await call('POST', '/auth/phone/verify-code', { body: { firebaseIdToken: 'dev:+56911112222' } });
+  check('produccion con demo: token dev: aceptado', devPhoneDemo.status === 200, `(recibido ${devPhoneDemo.status})`);
+  if (prevEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = prevEnv;
+
+  // JWT_SECRET obligatorio en produccion: el proceso no debe arrancar.
+  const { spawnSync } = await import('child_process');
+  const jwtStarts = (secret) => spawnSync(process.execPath, ['-e', "import('./src/lib/jwt.js')"], {
+    env: { ...process.env, NODE_ENV: 'production', JWT_SECRET: secret }, encoding: 'utf8',
+  }).status === 0;
+  check('produccion sin JWT_SECRET: no arranca', !jwtStarts(''));
+  check('produccion con JWT_SECRET de ejemplo: no arranca', !jwtStarts('cambia-esto-en-produccion'));
+  check('produccion con JWT_SECRET corto: no arranca', !jwtStarts('corto'));
+  check('produccion con JWT_SECRET valido: arranca', jwtStarts('x'.repeat(48)));
+
+  // Cabeceras de seguridad (helmet).
+  const h = await fetch(BASE.replace('/api/v1', '') + '/health');
+  check('helmet: X-Content-Type-Options nosniff', h.headers.get('x-content-type-options') === 'nosniff');
+  check('helmet: sin X-Powered-By', !h.headers.get('x-powered-by'));
+}
 
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);

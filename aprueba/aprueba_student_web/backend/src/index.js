@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import { demoMode } from './lib/demo.js';
 
 import { notFound, errorHandler } from './middleware/error.js';
 import authRoutes from './routes/auth.js';
@@ -15,8 +17,21 @@ import tutorsRoutes from './routes/tutors.js';
 import conversationsRoutes from './routes/conversations.js';
 
 const app = express();
-app.use(cors());
+app.use(helmet());
+
+// CORS: solo los origenes de CORS_ORIGINS (separados por coma). Sin la variable,
+// en desarrollo se acepta cualquiera y en produccion ninguno: el frontend web se
+// sirve desde el mismo dominio y la app movil no envia Origin, asi que ninguno
+// de los dos necesita CORS.
+const corsOrigins = (process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
+app.use(cors(corsOrigins.length ? { origin: corsOrigins }
+  : process.env.NODE_ENV === 'production' ? { origin: false } : {}));
 app.use(express.json({ limit: '5mb' }));
+
+if (demoMode()) {
+  console.warn('[demo] DEMO_MODE activo: se permiten activar planes sin pago, login social sin verificar '
+    + 'y tokens de telefono dev:. Desactivar antes de tener usuarios reales.');
+}
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'aprueba-student-api', driver: process.env.DATA_DRIVER || 'memory' }));
 
