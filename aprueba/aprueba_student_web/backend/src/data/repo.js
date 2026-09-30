@@ -62,7 +62,35 @@ export async function add(col, data, idPrefix = 'doc') {
   return set(col, id, { ...data, id });
 }
 
-// where: lista filtrada por predicado en memoria (suficiente para este dominio)
+// query: consulta con filtros nativos del driver, [campo, operador, valor] con
+// operador '==' | 'in' | '>=' | '<'. En Firestore solo se leen (y cobran) los
+// documentos que cumplen. `refine` aplica en memoria condiciones que Firestore no
+// expresa bien (!==, campos ausentes) sobre el resultado ya acotado.
+// Un filtro con valor undefined o un 'in' vacio no puede coincidir con nada:
+// devuelve [] sin consultar (Firestore lanzaria error con undefined).
+export async function query(col, filters, refine = null, opts = {}) {
+  for (const [field, op, value] of filters) {
+    if (value === undefined) return [];
+    if (op === 'in') {
+      if (!Array.isArray(value)) throw new Error(`query(${col}): 'in' en ${field} requiere un arreglo`);
+      if (value.length === 0) return [];
+      if (value.length > 30) throw new Error(`query(${col}): 'in' en ${field} admite hasta 30 valores`);
+    }
+  }
+  const rows = await driver.query(col, filters, opts);
+  return refine ? rows.filter(refine) : rows;
+}
+
+export async function queryOne(col, filters, refine = null) {
+  // Con refine no se puede limitar a 1 en el driver: el primero podria no cumplirlo.
+  const rows = await query(col, filters, refine, refine ? {} : { limit: 1 });
+  return rows[0] || null;
+}
+
+// where/findOne: filtro por predicado en memoria sobre la coleccion COMPLETA.
+// En Firestore lee (y cobra) todos los documentos: usar solo en catalogos
+// pequenos y acotados (tests, plans, benefits, tutors). Para colecciones que
+// crecen con el uso, usar query/queryOne.
 export async function where(col, predicate) {
   const all = await list(col);
   return all.filter(predicate);
