@@ -11,6 +11,7 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "seed": "node src/seed/seed.js",
+    "import:preguntas": "node src/seed/import-questions.js",
     "smoke": "node src/seed/smoke.js"
   },
   "dependencies": {
