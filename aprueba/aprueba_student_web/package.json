@@ -1,0 +1,10 @@
+{
+  "name": "aprueba-student-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Despliegue en Vercel del sitio web del alumno: frontend Vite estatico + backend Express como funcion (api/index.js).",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  }
+}

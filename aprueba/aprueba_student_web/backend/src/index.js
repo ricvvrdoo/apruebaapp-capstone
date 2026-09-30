@@ -55,7 +55,11 @@ app.use('/api/v1', v1);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4100;
-app.listen(PORT, () => console.log(`[aprueba-student-api] escuchando en http://localhost:${PORT}/api/v1 (driver: ${process.env.DATA_DRIVER || 'memory'})`));
+// En Vercel (VERCEL=1) la app se exporta como funcion serverless desde
+// ../api/index.js y la plataforma atiende las peticiones: no se abre un puerto.
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 4100;
+  app.listen(PORT, () => console.log(`[aprueba-student-api] escuchando en http://localhost:${PORT}/api/v1 (driver: ${process.env.DATA_DRIVER || 'memory'})`));
+}
 
 export default app;
