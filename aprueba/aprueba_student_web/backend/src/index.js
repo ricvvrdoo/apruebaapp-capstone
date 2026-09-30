@@ -2,7 +2,9 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 import { demoMode } from './lib/demo.js';
+import openapi from './docs/openapi.json' with { type: 'json' };
 
 import { notFound, errorHandler } from './middleware/error.js';
 import authRoutes from './routes/auth.js';
@@ -34,6 +36,16 @@ if (demoMode()) {
 }
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'aprueba-student-api', driver: process.env.DATA_DRIVER || 'memory' }));
+
+// Documentacion de la API: contrato OpenAPI 3.1 generado desde el codigo
+// (npm run openapi:generar) y su vista navegable. Publicas, y antes de los
+// routers de /api/v1, que exigen sesion a nivel de router.
+app.get('/api/v1/openapi.json', (_req, res) => res.json(openapi));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi, {
+  customSiteTitle: 'Aprueba · API del alumno',
+  customfavIcon: '/favicon-32x32.png',
+  swaggerOptions: { docExpansion: 'none', operationsSorter: 'alpha', displayRequestDuration: true },
+}));
 
 const v1 = express.Router();
 // OJO con el orden: varios routers aplican authRequired a nivel de router
