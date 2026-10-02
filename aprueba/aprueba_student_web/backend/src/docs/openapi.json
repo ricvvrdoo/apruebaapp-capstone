@@ -11,7 +11,7 @@
       "description": "Este servidor"
     },
     {
-      "url": "https://aprueba-student-web.vercel.app",
+      "url": "https://aprueba-api.vercel.app",
       "description": "Producción (Vercel)"
     },
     {
@@ -266,8 +266,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_7a41a55c-f95",
-                    "timestamp": "2026-09-30T16:52:00.796Z"
+                    "requestId": "req_6820e3e3-794",
+                    "timestamp": "2026-10-02T21:18:53.305Z"
                   }
                 }
               }
@@ -577,8 +577,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_80c98f40-d01",
-                    "timestamp": "2026-09-30T16:52:02.908Z"
+                    "requestId": "req_e82322a7-dce",
+                    "timestamp": "2026-10-02T21:18:55.363Z"
                   }
                 }
               }
@@ -727,8 +727,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_cd80c50c-3d7",
-                    "timestamp": "2026-09-30T16:52:02.978Z"
+                    "requestId": "req_71c27a31-645",
+                    "timestamp": "2026-10-02T21:18:55.431Z"
                   }
                 }
               }
@@ -903,8 +903,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_fc6989f7-3d6",
-                    "timestamp": "2026-09-30T16:52:00.903Z"
+                    "requestId": "req_41f0222c-e36",
+                    "timestamp": "2026-10-02T21:18:53.400Z"
                   }
                 }
               }
@@ -1074,8 +1074,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_34d34f4a-666",
-                    "timestamp": "2026-09-30T16:52:00.913Z"
+                    "requestId": "req_5b30562e-5a6",
+                    "timestamp": "2026-10-02T21:18:53.410Z"
                   }
                 }
               }
@@ -1270,8 +1270,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_2dc1012b-fc7",
-                    "timestamp": "2026-09-30T16:52:02.897Z"
+                    "requestId": "req_97080ffe-f36",
+                    "timestamp": "2026-10-02T21:18:55.352Z"
                   }
                 }
               }
@@ -1413,7 +1413,7 @@
               },
               "example": {
                 "name": "Nueva Alumna",
-                "email": "nueva1790787121079@x.cl",
+                "email": "nueva1790975933570@x.cl",
                 "password": "********",
                 "consent": true,
                 "phoneToken": "<phoneToken>",
@@ -1543,9 +1543,9 @@
                 "example": {
                   "data": {
                     "user": {
-                      "id": "usr_3ce0629719",
+                      "id": "usr_7a7686d307",
                       "name": "Nueva Alumna",
-                      "email": "nueva1790787121079@x.cl",
+                      "email": "nueva1790975933570@x.cl",
                       "plan": "free",
                       "streak": 0,
                       "quota": {
@@ -1573,8 +1573,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_1ad0387f-313",
-                    "timestamp": "2026-09-30T16:52:01.150Z"
+                    "requestId": "req_d4eb902a-ceb",
+                    "timestamp": "2026-10-02T21:18:53.638Z"
                   }
                 }
               }
@@ -1901,9 +1901,9 @@
                 "example": {
                   "data": {
                     "user": {
-                      "id": "usr_2a93ab9d36",
+                      "id": "usr_732ed3bf4e",
                       "name": "Social User",
-                      "email": "social1790787121155@x.cl",
+                      "email": "social1790975933643@x.cl",
                       "plan": "free",
                       "streak": 1,
                       "quota": {
@@ -1932,8 +1932,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_bfc49715-77c",
-                    "timestamp": "2026-09-30T16:52:01.189Z"
+                    "requestId": "req_8100b9ca-86a",
+                    "timestamp": "2026-10-02T21:18:53.674Z"
                   }
                 }
               }
@@ -2221,8 +2221,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_0ff6baab-156",
-                    "timestamp": "2026-09-30T16:52:02.980Z",
+                    "requestId": "req_4e79fce5-267",
+                    "timestamp": "2026-10-02T21:18:55.433Z",
                     "platinum": 1,
                     "requiredPlatinum": 5
                   }
@@ -2416,8 +2416,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_2b55d9f5-7fe",
-                    "timestamp": "2026-09-30T16:52:01.790Z"
+                    "requestId": "req_5a1b52b1-2eb",
+                    "timestamp": "2026-10-02T21:18:54.258Z"
                   }
                 }
               }
@@ -2602,15 +2602,15 @@
                 },
                 "example": {
                   "data": {
-                    "redemptionId": "rdm_c4b545eb47",
+                    "redemptionId": "rdm_185875e8f0",
                     "benefit": "Platzi",
-                    "couponCode": "APRUEBA-2790",
+                    "couponCode": "APRUEBA-AC68",
                     "platinumSpent": 5
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_7214a845-f7b",
-                    "timestamp": "2026-09-30T16:52:03.023Z"
+                    "requestId": "req_4c17025b-294",
+                    "timestamp": "2026-10-02T21:18:55.471Z"
                   }
                 }
               }
@@ -2879,7 +2879,7 @@
                 },
                 "example": {
                   "data": {
-                    "checkoutSessionId": "cs_6d96ac435d",
+                    "checkoutSessionId": "cs_6b5c389e1d",
                     "clientSecret": "<clientSecret>",
                     "amount": 1,
                     "currency": "USD",
@@ -2888,8 +2888,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_8ec0a7e4-35d",
-                    "timestamp": "2026-09-30T16:52:03.332Z"
+                    "requestId": "req_843870e7-264",
+                    "timestamp": "2026-10-02T21:18:55.762Z"
                   }
                 }
               }
@@ -3177,16 +3177,16 @@
                 },
                 "example": {
                   "data": {
-                    "id": "sub_d41a295bf9",
+                    "id": "sub_3b02e2f800",
                     "plan": "uni",
                     "billingCycle": "monthly",
                     "status": "active",
-                    "currentPeriodEnd": "2026-10-30"
+                    "currentPeriodEnd": "2026-11-01"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_33295a0f-e96",
-                    "timestamp": "2026-09-30T16:52:03.363Z"
+                    "requestId": "req_0ab0ca94-9f8",
+                    "timestamp": "2026-10-02T21:18:55.792Z"
                   }
                 }
               }
@@ -3469,7 +3469,7 @@
                 },
                 "example": {
                   "data": {
-                    "id": "cnv_f82d6f886e",
+                    "id": "cnv_b862bb6d13",
                     "tutor": {
                       "id": "tut_rodrigo",
                       "name": "Rodrigo Cea",
@@ -3499,12 +3499,12 @@
                       ],
                       "weakAreas": []
                     },
-                    "createdAt": "2026-09-30T16:52:01.348Z"
+                    "createdAt": "2026-10-02T21:18:53.833Z"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_7f71b853-7f5",
-                    "timestamp": "2026-09-30T16:52:01.436Z"
+                    "requestId": "req_b6e49b37-7a8",
+                    "timestamp": "2026-10-02T21:18:53.917Z"
                   }
                 }
               }
@@ -3732,8 +3732,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_c79b2d03-645",
-                    "timestamp": "2026-09-30T16:52:01.518Z"
+                    "requestId": "req_a517cef9-373",
+                    "timestamp": "2026-10-02T21:18:53.995Z"
                   }
                 }
               }
@@ -4038,24 +4038,24 @@
                 "example": {
                   "data": [
                     {
-                      "id": "msg_79ac3ae6eb",
+                      "id": "msg_1e55807df6",
                       "text": "Insisto :)",
                       "mine": true,
                       "senderType": "user",
-                      "createdAt": "2026-09-30T16:52:01.405Z"
+                      "createdAt": "2026-10-02T21:18:53.887Z"
                     },
                     {
-                      "id": "msg_fc7c6b7270",
+                      "id": "msg_dc5465a2f8",
                       "text": "Hola Rodrigo, necesito reforzar inferencias.",
                       "mine": true,
                       "senderType": "user",
-                      "createdAt": "2026-09-30T16:52:01.348Z"
+                      "createdAt": "2026-10-02T21:18:53.833Z"
                     }
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_0a017bd1-eb0",
-                    "timestamp": "2026-09-30T16:52:01.442Z",
+                    "requestId": "req_01d2b80d-092",
+                    "timestamp": "2026-10-02T21:18:53.922Z",
                     "pagination": {
                       "nextCursor": null,
                       "limit": 30,
@@ -4269,16 +4269,16 @@
                 },
                 "example": {
                   "data": {
-                    "id": "msg_74cfad56d5",
+                    "id": "msg_347249d9b5",
                     "text": "Puedo los jueves",
                     "mine": true,
                     "senderType": "user",
-                    "createdAt": "2026-09-30T16:52:01.447Z"
+                    "createdAt": "2026-10-02T21:18:53.928Z"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_3396f4d1-157",
-                    "timestamp": "2026-09-30T16:52:01.469Z"
+                    "requestId": "req_f81fa334-254",
+                    "timestamp": "2026-10-02T21:18:53.949Z"
                   }
                 }
               }
@@ -4505,8 +4505,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_1e27b9f9-c76",
-                    "timestamp": "2026-09-30T16:52:01.496Z"
+                    "requestId": "req_982a63d0-f1e",
+                    "timestamp": "2026-10-02T21:18:53.974Z"
                   }
                 }
               }
@@ -4657,7 +4657,7 @@
                 ]
               },
               "example": {
-                "questionId": "qst_90d78e020f",
+                "questionId": "qst_a9fd7946d1",
                 "reason": "ambiguous",
                 "comment": "Enunciado ambiguo"
               }
@@ -4722,9 +4722,9 @@
                 },
                 "example": {
                   "data": {
-                    "id": "cor_714b7cddca",
+                    "id": "cor_ec6513d0f8",
                     "status": "pending",
-                    "expectedReviewBy": "2026-10-02T16:52:01.624Z",
+                    "expectedReviewBy": "2026-10-04T21:18:54.096Z",
                     "potentialReward": {
                       "tier": "bronze",
                       "amount": 250
@@ -4732,8 +4732,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_e0490aa3-bb2",
-                    "timestamp": "2026-09-30T16:52:01.633Z"
+                    "requestId": "req_e5a7c20c-ae9",
+                    "timestamp": "2026-10-02T21:18:54.105Z"
                   }
                 }
               }
@@ -4968,8 +4968,8 @@
                 "example": {
                   "data": [
                     {
-                      "id": "cor_714b7cddca",
-                      "questionId": "qst_90d78e020f",
+                      "id": "cor_ec6513d0f8",
+                      "questionId": "qst_a9fd7946d1",
                       "reason": "ambiguous",
                       "status": "pending",
                       "rewardGranted": null
@@ -4977,8 +4977,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_e0dcbab0-7c9",
-                    "timestamp": "2026-09-30T16:52:03.218Z"
+                    "requestId": "req_e14fdaba-eb7",
+                    "timestamp": "2026-10-02T21:18:55.656Z"
                   }
                 }
               }
@@ -5194,15 +5194,15 @@
                 },
                 "example": {
                   "data": {
-                    "id": "cor_714b7cddca",
-                    "questionId": "qst_90d78e020f",
+                    "id": "cor_ec6513d0f8",
+                    "questionId": "qst_a9fd7946d1",
                     "question": {
-                      "id": "qst_90d78e020f",
-                      "testId": "lectora",
-                      "testLabel": "Comp. Lectora",
-                      "axis": "Comprension lectora",
+                      "id": "qst_a9fd7946d1",
+                      "testId": "m1",
+                      "testLabel": "Matematica M1",
+                      "axis": "Numeros y Algebra",
                       "difficulty": "d2",
-                      "statement": "¿Cuál es el significado de 'perspicaz' en la frase 'Es un observador perspicaz'?",
+                      "statement": "Un automóvil viaja a 80 km/h. ¿Cuántos minutos tarda en recorrer 40 km?",
                       "officialAnswer": "A"
                     },
                     "reason": "ambiguous",
@@ -5210,19 +5210,19 @@
                     "status": "pending",
                     "resolution": null,
                     "reviewerNote": null,
-                    "expectedReviewBy": "2026-10-02T16:52:01.624Z",
+                    "expectedReviewBy": "2026-10-04T21:18:54.096Z",
                     "resolvedAt": null,
                     "potentialReward": {
                       "tier": "bronze",
                       "amount": 250
                     },
                     "rewardGranted": null,
-                    "createdAt": "2026-09-30T16:52:01.624Z"
+                    "createdAt": "2026-10-02T21:18:54.096Z"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_349b5bec-e7a",
-                    "timestamp": "2026-09-30T16:52:01.637Z"
+                    "requestId": "req_47dd8bfb-bf3",
+                    "timestamp": "2026-10-02T21:18:54.108Z"
                   }
                 }
               }
@@ -5444,8 +5444,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_c3a2bb82-6d4",
-                    "timestamp": "2026-09-30T16:52:01.208Z"
+                    "requestId": "req_8d333136-e1c",
+                    "timestamp": "2026-10-02T21:18:53.692Z"
                   }
                 }
               }
@@ -5608,8 +5608,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_f4741fbd-f17",
-                    "timestamp": "2026-09-30T16:52:01.209Z",
+                    "requestId": "req_151dff49-232",
+                    "timestamp": "2026-10-02T21:18:53.693Z",
                     "country": "CL"
                   }
                 }
@@ -5748,8 +5748,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_94266d34-73d",
-                    "timestamp": "2026-09-30T16:52:03.187Z"
+                    "requestId": "req_3df38af2-907",
+                    "timestamp": "2026-10-02T21:18:55.627Z"
                   }
                 }
               }
@@ -6137,7 +6137,7 @@
                       "liked": false,
                       "reposted": false,
                       "mine": false,
-                      "createdAt": "2026-09-30T14:51:59.893Z"
+                      "createdAt": "2026-10-02T19:18:52.399Z"
                     },
                     {
                       "id": "pst_2",
@@ -6152,13 +6152,13 @@
                       "liked": false,
                       "reposted": false,
                       "mine": false,
-                      "createdAt": "2026-09-30T11:51:59.893Z"
+                      "createdAt": "2026-10-02T16:18:52.399Z"
                     }
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_b1e04cb2-f54",
-                    "timestamp": "2026-09-30T16:52:01.644Z",
+                    "requestId": "req_8847236b-e65",
+                    "timestamp": "2026-10-02T21:18:54.115Z",
                     "pagination": {
                       "nextCursor": null,
                       "limit": 20,
@@ -6337,8 +6337,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_fbc3bf86-068",
-                    "timestamp": "2026-09-30T16:52:01.795Z"
+                    "requestId": "req_d36c0fd9-f6a",
+                    "timestamp": "2026-10-02T21:18:54.266Z"
                   }
                 }
               }
@@ -6510,15 +6510,15 @@
                 },
                 "example": {
                   "data": {
-                    "id": "grp_b2a683ba7f",
+                    "id": "grp_a84a4c9c9b",
                     "name": "Grupo seguridad",
                     "subject": "Matematica M1",
                     "memberCount": 1
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_c275a043-9c2",
-                    "timestamp": "2026-09-30T16:52:01.951Z"
+                    "requestId": "req_26baca79-28b",
+                    "timestamp": "2026-10-02T21:18:54.421Z"
                   }
                 }
               }
@@ -6742,7 +6742,7 @@
                 },
                 "example": {
                   "data": {
-                    "id": "grp_59005a5f12",
+                    "id": "grp_194e8f020f",
                     "name": "Ensayo M1",
                     "subject": "Matematica M1",
                     "ownerId": "usr_camila",
@@ -6758,8 +6758,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_8cce3f78-49b",
-                    "timestamp": "2026-09-30T16:52:03.249Z"
+                    "requestId": "req_fe484c22-4c8",
+                    "timestamp": "2026-10-02T21:18:55.684Z"
                   }
                 }
               }
@@ -6978,14 +6978,14 @@
                 },
                 "example": {
                   "data": {
-                    "id": "grp_59005a5f12",
+                    "id": "grp_194e8f020f",
                     "name": "Ensayo M1 · sábados",
                     "subject": "Matematica M1"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_d679d76b-b54",
-                    "timestamp": "2026-09-30T16:52:03.263Z"
+                    "requestId": "req_2b67cf65-c75",
+                    "timestamp": "2026-10-02T21:18:55.697Z"
                   }
                 }
               }
@@ -7356,15 +7356,15 @@
                 },
                 "example": {
                   "data": {
-                    "id": "inv_ec4432f974",
+                    "id": "inv_0f2eaad970",
                     "email": "Juan@Correo.cl",
                     "status": "pending",
                     "token": "<token>"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_9c0b6000-894",
-                    "timestamp": "2026-09-30T16:52:01.975Z"
+                    "requestId": "req_f29ba907-4f3",
+                    "timestamp": "2026-10-02T21:18:54.443Z"
                   }
                 }
               }
@@ -7624,8 +7624,8 @@
                   "data": [],
                   "error": null,
                   "meta": {
-                    "requestId": "req_610c1d60-182",
-                    "timestamp": "2026-09-30T16:52:01.958Z"
+                    "requestId": "req_f650210e-733",
+                    "timestamp": "2026-10-02T21:18:54.428Z"
                   }
                 }
               }
@@ -8148,19 +8148,19 @@
                 "example": {
                   "data": [
                     {
-                      "id": "shr_8477673987",
-                      "questionId": "qst_8eb1bcbfdb",
+                      "id": "shr_78f174ab25",
+                      "questionId": "qst_4dbcbc2d70",
                       "sharedBy": "Camila Rojas",
                       "result": "correct",
                       "elapsed": "0:18",
                       "comment": "¿Cómo la resolvieron?",
-                      "sharedAt": "2026-09-30T16:52:03.271Z"
+                      "sharedAt": "2026-10-02T21:18:55.705Z"
                     }
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_6134251b-202",
-                    "timestamp": "2026-09-30T16:52:03.284Z"
+                    "requestId": "req_65e69fee-a45",
+                    "timestamp": "2026-10-02T21:18:55.718Z"
                   }
                 }
               }
@@ -8335,7 +8335,7 @@
                 ]
               },
               "example": {
-                "questionId": "qst_8eb1bcbfdb",
+                "questionId": "qst_4dbcbc2d70",
                 "comment": "¿Cómo la resolvieron?"
               }
             }
@@ -8387,14 +8387,14 @@
                 },
                 "example": {
                   "data": {
-                    "id": "shr_8477673987",
-                    "questionId": "qst_8eb1bcbfdb",
-                    "groupId": "grp_59005a5f12"
+                    "id": "shr_78f174ab25",
+                    "questionId": "qst_4dbcbc2d70",
+                    "groupId": "grp_194e8f020f"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_27497ea2-bba",
-                    "timestamp": "2026-09-30T16:52:03.281Z"
+                    "requestId": "req_58a7e3b8-170",
+                    "timestamp": "2026-10-02T21:18:55.714Z"
                   }
                 }
               }
@@ -8670,8 +8670,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_2719d549-7dd",
-                    "timestamp": "2026-09-30T16:52:03.267Z"
+                    "requestId": "req_cd5960c2-647",
+                    "timestamp": "2026-10-02T21:18:55.701Z"
                   }
                 }
               }
@@ -8866,13 +8866,13 @@
                 },
                 "example": {
                   "data": {
-                    "groupId": "grp_b2a683ba7f",
+                    "groupId": "grp_a84a4c9c9b",
                     "joined": true
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_cabbd814-e5b",
-                    "timestamp": "2026-09-30T16:52:02.001Z"
+                    "requestId": "req_277df337-0e3",
+                    "timestamp": "2026-10-02T21:18:54.468Z"
                   }
                 }
               }
@@ -9183,8 +9183,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_94939088-f9a",
-                    "timestamp": "2026-09-30T16:52:01.249Z"
+                    "requestId": "req_0419a8ff-d64",
+                    "timestamp": "2026-10-02T21:18:53.733Z"
                   }
                 }
               }
@@ -9369,8 +9369,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_e5869b5d-b0d",
-                    "timestamp": "2026-09-30T16:52:03.059Z"
+                    "requestId": "req_72b0af97-a8f",
+                    "timestamp": "2026-10-02T21:18:55.506Z"
                   }
                 }
               }
@@ -9703,7 +9703,7 @@
                 "example": {
                   "data": [
                     {
-                      "id": "cnv_f82d6f886e",
+                      "id": "cnv_b862bb6d13",
                       "tutor": {
                         "id": "tut_rodrigo",
                         "name": "Rodrigo Cea",
@@ -9712,7 +9712,7 @@
                         "online": false
                       },
                       "lastMessagePreview": "Insisto :)",
-                      "lastMessageAt": "2026-09-30T16:52:01.405Z",
+                      "lastMessageAt": "2026-10-02T21:18:53.887Z",
                       "unreadCount": 0,
                       "lessonsTaken": 0,
                       "contactShared": false
@@ -9720,8 +9720,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_d34205b8-179",
-                    "timestamp": "2026-09-30T16:52:01.430Z",
+                    "requestId": "req_fb855cf7-1e5",
+                    "timestamp": "2026-10-02T21:18:53.912Z",
                     "unreadTotal": 0
                   }
                 }
@@ -9862,13 +9862,13 @@
                 },
                 "example": {
                   "data": {
-                    "exportId": "exp_uuyf",
+                    "exportId": "exp_tbnf",
                     "status": "processing"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_b90276ec-d50",
-                    "timestamp": "2026-09-30T16:52:03.192Z"
+                    "requestId": "req_23a84c12-643",
+                    "timestamp": "2026-10-02T21:18:55.632Z"
                   }
                 }
               }
@@ -10097,7 +10097,7 @@
                 "example": {
                   "data": {
                     "basedOnExercises": 0,
-                    "generatedAt": "2026-09-30T16:52:01.337Z",
+                    "generatedAt": "2026-10-02T21:18:53.823Z",
                     "weakThreshold": 60,
                     "subjects": [
                       {
@@ -10149,8 +10149,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_b34932e9-d71",
-                    "timestamp": "2026-09-30T16:52:01.337Z"
+                    "requestId": "req_f819785b-bc8",
+                    "timestamp": "2026-10-02T21:18:53.823Z"
                   }
                 }
               }
@@ -10335,7 +10335,7 @@
                       "used": 0,
                       "max": 10
                     },
-                    "bronzeAvailable": 41,
+                    "bronzeAvailable": 40,
                     "friends": [
                       {
                         "userId": "usr_demo",
@@ -10356,8 +10356,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_49e48ad5-873",
-                    "timestamp": "2026-09-30T16:52:03.123Z"
+                    "requestId": "req_32fd670d-2d3",
+                    "timestamp": "2026-10-02T21:18:55.565Z"
                   }
                 }
               }
@@ -10549,12 +10549,12 @@
                       "used": 1,
                       "max": 10
                     },
-                    "bronzeAvailable": 40
+                    "bronzeAvailable": 39
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_380639db-79d",
-                    "timestamp": "2026-09-30T16:52:03.146Z"
+                    "requestId": "req_5cfe4a23-100",
+                    "timestamp": "2026-10-02T21:18:55.587Z"
                   }
                 }
               }
@@ -10808,8 +10808,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_ce96d6e7-c6d",
-                    "timestamp": "2026-09-30T16:52:03.190Z"
+                    "requestId": "req_4b186b33-7d4",
+                    "timestamp": "2026-10-02T21:18:55.630Z"
                   }
                 }
               }
@@ -10999,8 +10999,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_e4102ca1-ffc",
-                    "timestamp": "2026-09-30T16:52:01.846Z"
+                    "requestId": "req_58f25cf7-d7c",
+                    "timestamp": "2026-10-02T21:18:54.318Z"
                   }
                 }
               }
@@ -11196,7 +11196,7 @@
                 "example": {
                   "data": {
                     "wallet": {
-                      "bronze": 41,
+                      "bronze": 40,
                       "silver": 7,
                       "gold": 2,
                       "diamond": 0,
@@ -11210,8 +11210,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_6a089606-607",
-                    "timestamp": "2026-09-30T16:52:03.047Z"
+                    "requestId": "req_6f15680a-98e",
+                    "timestamp": "2026-10-02T21:18:55.495Z"
                   }
                 }
               }
@@ -11459,7 +11459,7 @@
                       "title": "Sigue tu racha",
                       "body": "Llevas 4 dias seguidos. No la pierdas!",
                       "read": true,
-                      "createdAt": "2026-09-30T15:51:59.893Z"
+                      "createdAt": "2026-10-02T20:18:52.399Z"
                     },
                     {
                       "id": "ntf_2",
@@ -11467,13 +11467,13 @@
                       "title": "Nueva medalla",
                       "body": "Ganaste 1 medalla de bronce por tu respuesta correcta.",
                       "read": true,
-                      "createdAt": "2026-09-29T16:51:59.893Z"
+                      "createdAt": "2026-10-01T21:18:52.399Z"
                     }
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_f6460c16-b15",
-                    "timestamp": "2026-09-30T16:52:03.148Z",
+                    "requestId": "req_f8ece1a5-d8e",
+                    "timestamp": "2026-10-02T21:18:55.589Z",
                     "unreadCount": 0
                   }
                 }
@@ -11630,8 +11630,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_eb9c42d3-e03",
-                    "timestamp": "2026-09-30T16:52:03.162Z"
+                    "requestId": "req_9f818ec5-34f",
+                    "timestamp": "2026-10-02T21:18:55.603Z"
                   }
                 }
               }
@@ -11835,8 +11835,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_4669f9ea-fd9",
-                    "timestamp": "2026-09-30T16:52:03.175Z"
+                    "requestId": "req_c43280f9-5bf",
+                    "timestamp": "2026-10-02T21:18:55.615Z"
                   }
                 }
               }
@@ -12009,8 +12009,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_4c1042e0-fd4",
-                    "timestamp": "2026-09-30T16:52:01.788Z"
+                    "requestId": "req_defa69c8-015",
+                    "timestamp": "2026-10-02T21:18:54.256Z"
                   }
                 }
               }
@@ -12185,8 +12185,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_50691a6f-609",
-                    "timestamp": "2026-09-30T16:52:01.204Z"
+                    "requestId": "req_cc666c05-88d",
+                    "timestamp": "2026-10-02T21:18:53.688Z"
                   }
                 }
               }
@@ -12429,8 +12429,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_a6500a31-d3b",
-                    "timestamp": "2026-09-30T16:52:01.238Z"
+                    "requestId": "req_628ef3e3-3ad",
+                    "timestamp": "2026-10-02T21:18:53.722Z"
                   }
                 }
               }
@@ -12659,8 +12659,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_cd0b172d-b0e",
-                    "timestamp": "2026-09-30T16:52:01.232Z"
+                    "requestId": "req_32f7edf4-60f",
+                    "timestamp": "2026-10-02T21:18:53.715Z"
                   }
                 }
               }
@@ -12923,8 +12923,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_4dfd3b24-cae",
-                    "timestamp": "2026-09-30T16:52:01.847Z"
+                    "requestId": "req_05c6540b-607",
+                    "timestamp": "2026-10-02T21:18:54.319Z"
                   }
                 }
               }
@@ -13093,12 +13093,12 @@
                       "address": false
                     },
                     "unlimited": false,
-                    "resetsAt": "2026-10-01T00:00:00.000Z"
+                    "resetsAt": "2026-10-03T00:00:00.000Z"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_e0793de1-ca0",
-                    "timestamp": "2026-09-30T16:52:03.086Z"
+                    "requestId": "req_659cf9aa-b4b",
+                    "timestamp": "2026-10-02T21:18:55.531Z"
                   }
                 }
               }
@@ -13293,8 +13293,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_6e586b1c-157",
-                    "timestamp": "2026-09-30T16:52:03.121Z"
+                    "requestId": "req_bf0a9980-7f4",
+                    "timestamp": "2026-10-02T21:18:55.563Z"
                   }
                 }
               }
@@ -13546,8 +13546,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_103e0ee3-460",
-                    "timestamp": "2026-09-30T16:52:03.061Z"
+                    "requestId": "req_9640aa7d-dc4",
+                    "timestamp": "2026-10-02T21:18:55.508Z"
                   }
                 }
               }
@@ -13722,8 +13722,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_12eba0d6-c00",
-                    "timestamp": "2026-09-30T16:52:03.074Z"
+                    "requestId": "req_8a489fec-7cb",
+                    "timestamp": "2026-10-02T21:18:55.519Z"
                   }
                 }
               }
@@ -13927,8 +13927,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_544d4c7c-451",
-                    "timestamp": "2026-09-30T16:52:03.189Z"
+                    "requestId": "req_c8591a97-282",
+                    "timestamp": "2026-10-02T21:18:55.629Z"
                   }
                 }
               }
@@ -14100,8 +14100,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_cec4ee49-7ca",
-                    "timestamp": "2026-09-30T16:52:03.204Z"
+                    "requestId": "req_d71d4295-087",
+                    "timestamp": "2026-10-02T21:18:55.643Z"
                   }
                 }
               }
@@ -14306,8 +14306,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_5aa28203-379",
-                    "timestamp": "2026-09-30T16:52:02.085Z"
+                    "requestId": "req_e29e577d-d4e",
+                    "timestamp": "2026-10-02T21:18:54.545Z"
                   }
                 }
               }
@@ -14620,8 +14620,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_fd1d5348-400",
-                    "timestamp": "2026-09-30T16:52:01.844Z"
+                    "requestId": "req_6b537d3e-af9",
+                    "timestamp": "2026-10-02T21:18:54.316Z"
                   }
                 }
               }
@@ -14724,7 +14724,7 @@
                 },
                 "example": {
                   "data": {
-                    "id": "pst_d736a4ae70",
+                    "id": "pst_0b6467a4a8",
                     "text": "Post de prueba",
                     "likes": 0,
                     "comments": 0,
@@ -14732,8 +14732,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_965ef637-999",
-                    "timestamp": "2026-09-30T16:52:01.712Z"
+                    "requestId": "req_e1f025ac-845",
+                    "timestamp": "2026-10-02T21:18:54.183Z"
                   }
                 }
               }
@@ -15110,13 +15110,13 @@
                         "name": "Juan L."
                       },
                       "text": "Es B por el despeje, revisa el paso 2.",
-                      "createdAt": "2026-09-30T15:11:59.893Z"
+                      "createdAt": "2026-10-02T19:38:52.399Z"
                     }
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_7543c16f-ecc",
-                    "timestamp": "2026-09-30T16:52:03.318Z"
+                    "requestId": "req_b4b46588-087",
+                    "timestamp": "2026-10-02T21:18:55.748Z"
                   }
                 }
               }
@@ -15315,13 +15315,13 @@
                 },
                 "example": {
                   "data": {
-                    "id": "cmt_61897d0116",
+                    "id": "cmt_aa9b6e686d",
                     "text": "Comentario"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_ce744dea-131",
-                    "timestamp": "2026-09-30T16:52:01.738Z"
+                    "requestId": "req_841f0752-138",
+                    "timestamp": "2026-10-02T21:18:54.209Z"
                   }
                 }
               }
@@ -15690,8 +15690,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_d91ac990-3f8",
-                    "timestamp": "2026-09-30T16:52:03.312Z"
+                    "requestId": "req_0238c892-4e8",
+                    "timestamp": "2026-10-02T21:18:55.744Z"
                   }
                 }
               }
@@ -15874,8 +15874,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_6d713b2f-194",
-                    "timestamp": "2026-09-30T16:52:01.669Z"
+                    "requestId": "req_7db831bb-8e0",
+                    "timestamp": "2026-10-02T21:18:54.140Z"
                   }
                 }
               }
@@ -16100,15 +16100,15 @@
                 },
                 "example": {
                   "data": {
-                    "id": "qst_90d78e020f",
-                    "testId": "lectora",
-                    "axis": "Comprension lectora",
+                    "id": "qst_a9fd7946d1",
+                    "testId": "m1",
+                    "axis": "Numeros y Algebra",
                     "difficulty": "d2",
-                    "statement": "¿Cuál es el significado de 'perspicaz' en la frase 'Es un observador perspicaz'?",
+                    "statement": "Un automóvil viaja a 80 km/h. ¿Cuántos minutos tarda en recorrer 40 km?",
                     "options": [
-                      "Agudo",
-                      "Lento",
-                      "Distraído"
+                      "30 min",
+                      "20 min",
+                      "40 min"
                     ],
                     "progress": {
                       "current": 1,
@@ -16117,8 +16117,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_958d1e74-eda",
-                    "timestamp": "2026-09-30T16:52:01.620Z",
+                    "requestId": "req_cf3504fc-e2c",
+                    "timestamp": "2026-10-02T21:18:54.092Z",
                     "quota": {
                       "used": 0,
                       "max": 999999
@@ -16360,21 +16360,21 @@
                 },
                 "example": {
                   "data": {
-                    "id": "qst_8eb1bcbfdb",
+                    "id": "qst_4dbcbc2d70",
                     "testId": "m1",
                     "axis": "Numeros y Algebra",
-                    "difficulty": "d4",
-                    "statement": "Resuelve la ecuación: 4^{x} = 2^{x+3}.",
+                    "difficulty": "d3",
+                    "statement": "¿Cuál es el dominio de f(x) = 1/(x - 4)?",
                     "options": [
-                      "3",
-                      "2",
-                      "4"
+                      "ℝ - {4}",
+                      "x > 4",
+                      "x < 4"
                     ]
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_720841f2-9aa",
-                    "timestamp": "2026-09-30T16:52:03.210Z"
+                    "requestId": "req_8dd059c1-879",
+                    "timestamp": "2026-10-02T21:18:55.649Z"
                   }
                 }
               }
@@ -16570,7 +16570,10 @@
                           "type": "integer"
                         },
                         "medalAwarded": {
-                          "type": "object",
+                          "type": [
+                            "null",
+                            "object"
+                          ],
                           "properties": {
                             "tier": {
                               "type": "string"
@@ -16615,24 +16618,21 @@
                 },
                 "example": {
                   "data": {
-                    "correct": true,
-                    "correctAnswer": "A",
-                    "shortExplanation": "Paso 1: f'(x)= (2x)/(x²+1).",
+                    "correct": false,
+                    "correctAnswer": "C",
+                    "shortExplanation": "El aceite y el agua no se mezclan (son inmiscibles).",
                     "cohortPercentile": 70,
-                    "medalAwarded": {
-                      "tier": "bronze",
-                      "amount": 1
-                    },
+                    "medalAwarded": null,
                     "quota": {
                       "used": 1,
                       "max": 999999
                     },
-                    "answerId": "ans_2a70d811337c2b74f3d7"
+                    "answerId": "ans_138382c1bf11f98d52d9"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_c4dcd887-7e1",
-                    "timestamp": "2026-09-30T16:52:02.558Z"
+                    "requestId": "req_cacbfda2-e41",
+                    "timestamp": "2026-10-02T21:18:55.000Z"
                   }
                 }
               }
@@ -16920,20 +16920,20 @@
                     "steps": [
                       {
                         "label": "Planteamiento",
-                        "body": "Resuelve la ecuación: 4^{x} = 2^{x+3}."
+                        "body": "¿Cuál es el dominio de f(x) = 1/(x - 4)?"
                       },
                       {
                         "label": "Resolucion",
-                        "body": "Paso 1: 4=2², entonces 2^{2x} = 2^{x+3} → 2x = x+3 → x=3."
+                        "body": "La función racional no está definida cuando el denominador es 0: x-4≠0 → x≠4."
                       }
                     ],
                     "verification": "",
-                    "keyConcept": "Clase: Ecuaciones exponenciales con misma base. Ejemplo: 9^{x}=3^{x+2} → 3^{2x}=3^{x+2} → 2x=x+2 → x=2."
+                    "keyConcept": "Determinar dominio de funciones racionales."
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_0d99b081-2f6",
-                    "timestamp": "2026-09-30T16:52:03.212Z"
+                    "requestId": "req_e9d839ce-b15",
+                    "timestamp": "2026-10-02T21:18:55.651Z"
                   }
                 }
               }
@@ -17182,15 +17182,15 @@
                   "data": {
                     "skill": {
                       "id": "skl_generic",
-                      "name": "Clase: Ecuaciones exponenciales con misma base. Ejemplo: 9^{x}=3^{x+2} → 3^{2x}=3^{x+2} → 2x=x+2 → x=2.",
+                      "name": "Determinar dominio de funciones racionales.",
                       "test": "m1",
                       "level": 2,
                       "maxLevel": 4
                     },
                     "mastery": {
                       "percent": 100,
-                      "correct": 4,
-                      "total": 4,
+                      "correct": 2,
+                      "total": 2,
                       "status": "mastered"
                     },
                     "prerequisites": [
@@ -17199,7 +17199,7 @@
                         "status": "done"
                       },
                       {
-                        "name": "Clase: Ecuaciones exponenciales con misma base. Ejemplo: 9^{x}=3^{x+2} → 3^{2x}=3^{x+2} → 2x=x+2 → x=2.",
+                        "name": "Determinar dominio de funciones racionales.",
                         "status": "active"
                       },
                       {
@@ -17224,8 +17224,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_302aeb2f-fd2",
-                    "timestamp": "2026-09-30T16:52:03.214Z"
+                    "requestId": "req_2b6d3c09-256",
+                    "timestamp": "2026-10-02T21:18:55.653Z"
                   }
                 }
               }
@@ -17447,8 +17447,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_d2cbbd24-acc",
-                    "timestamp": "2026-09-30T16:52:01.214Z",
+                    "requestId": "req_d9886f18-b84",
+                    "timestamp": "2026-10-02T21:18:53.698Z",
                     "gradeId": "cl-media-2",
                     "country": "CL"
                   }
@@ -17870,8 +17870,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_662f7b7f-f92",
-                    "timestamp": "2026-09-30T16:52:01.267Z",
+                    "requestId": "req_2dc1f561-e39",
+                    "timestamp": "2026-10-02T21:18:53.751Z",
                     "pagination": {
                       "nextCursor": null,
                       "limit": 20,
@@ -18362,7 +18362,7 @@
                           "value": 5
                         }
                       ],
-                      "createdAt": "2026-09-16T16:51:59.893Z"
+                      "createdAt": "2026-09-18T21:18:52.399Z"
                     },
                     "myReview": {
                       "id": "rev_1",
@@ -18395,7 +18395,7 @@
                           "value": 5
                         }
                       ],
-                      "createdAt": "2026-09-16T16:51:59.893Z"
+                      "createdAt": "2026-09-18T21:18:52.399Z"
                     },
                     "conversationId": null,
                     "contacted": false,
@@ -18403,8 +18403,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_4ad145b5-bc3",
-                    "timestamp": "2026-09-30T16:52:01.303Z"
+                    "requestId": "req_45558d75-d5f",
+                    "timestamp": "2026-10-02T21:18:53.788Z"
                   }
                 }
               }
@@ -18624,14 +18624,14 @@
                 "example": {
                   "data": {
                     "created": false,
-                    "conversationId": "cnv_f82d6f886e",
-                    "requestId": "trq_520ca1b357",
+                    "conversationId": "cnv_b862bb6d13",
+                    "requestId": "trq_5a241f4d0f",
                     "status": "sent"
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_4f4e442c-790",
-                    "timestamp": "2026-09-30T16:52:01.425Z"
+                    "requestId": "req_58711e5d-29f",
+                    "timestamp": "2026-10-02T21:18:53.906Z"
                   }
                 }
               }
@@ -18719,8 +18719,8 @@
                 "example": {
                   "data": {
                     "created": true,
-                    "requestId": "trq_520ca1b357",
-                    "conversationId": "cnv_f82d6f886e",
+                    "requestId": "trq_5a241f4d0f",
+                    "conversationId": "cnv_b862bb6d13",
                     "status": "sent",
                     "sharedProfile": {
                       "name": "Camila Rojas",
@@ -18739,8 +18739,8 @@
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_27408326-bc6",
-                    "timestamp": "2026-09-30T16:52:01.400Z"
+                    "requestId": "req_1fa54f50-f83",
+                    "timestamp": "2026-10-02T21:18:53.882Z"
                   }
                 }
               }
@@ -19116,7 +19116,7 @@
                           "value": 5
                         }
                       ],
-                      "createdAt": "2026-09-16T16:51:59.893Z"
+                      "createdAt": "2026-09-18T21:18:52.399Z"
                     },
                     {
                       "id": "rev_2",
@@ -19149,13 +19149,13 @@
                           "value": 5
                         }
                       ],
-                      "createdAt": "2026-08-31T16:51:59.893Z"
+                      "createdAt": "2026-09-02T21:18:52.399Z"
                     }
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_b99e0334-60c",
-                    "timestamp": "2026-09-30T16:52:01.313Z",
+                    "requestId": "req_8854e8fb-c30",
+                    "timestamp": "2026-10-02T21:18:53.798Z",
                     "pagination": {
                       "nextCursor": null,
                       "limit": 20,
@@ -19471,7 +19471,7 @@
                 "example": {
                   "data": {
                     "review": {
-                      "id": "rev_90af20e053",
+                      "id": "rev_b05b09c259",
                       "author": {
                         "name": "Camila Rojas",
                         "initials": "CA",
@@ -19501,15 +19501,15 @@
                           "value": 5
                         }
                       ],
-                      "createdAt": "2026-09-30T16:52:01.586Z"
+                      "createdAt": "2026-10-02T21:18:54.060Z"
                     },
                     "tutorRating": 4.7,
                     "reviewCount": 87
                   },
                   "error": null,
                   "meta": {
-                    "requestId": "req_518f63ee-783",
-                    "timestamp": "2026-09-30T16:52:01.605Z"
+                    "requestId": "req_775a554d-303",
+                    "timestamp": "2026-10-02T21:18:54.078Z"
                   }
                 }
               }
@@ -19881,8 +19881,8 @@
                   ],
                   "error": null,
                   "meta": {
-                    "requestId": "req_e76f8436-831",
-                    "timestamp": "2026-09-30T16:52:01.273Z"
+                    "requestId": "req_5c446e9c-a1d",
+                    "timestamp": "2026-10-02T21:18:53.757Z"
                   }
                 }
               }

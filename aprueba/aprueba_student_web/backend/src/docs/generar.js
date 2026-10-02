@@ -353,7 +353,7 @@ const doc = {
   servers: [
     // Relativo: "Try it out" usa el mismo dominio que sirve la documentacion (sin CORS).
     { url: '/', description: 'Este servidor' },
-    { url: 'https://aprueba-student-web.vercel.app', description: 'Producción (Vercel)' },
+    { url: 'https://aprueba-api.vercel.app', description: 'Producción (Vercel)' },
     { url: 'http://localhost:4100', description: 'Local' },
   ],
   tags: TAGS.map(({ name, description }) => ({ name, description })),

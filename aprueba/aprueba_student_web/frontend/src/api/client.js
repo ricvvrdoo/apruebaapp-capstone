@@ -1,6 +1,8 @@
 // Cliente HTTP del API del alumno. Maneja el envelope {data,error,meta},
 // el token Bearer y el refresh automatico. Persiste tokens en localStorage.
-const BASE = '/api/v1';
+// La API vive en su propio dominio: VITE_API_URL (p. ej. https://aprueba-api.vercel.app)
+// se fija al compilar. Sin ella, ruta relativa: en desarrollo la atiende el proxy de Vite.
+const BASE = `${(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')}/api/v1`;
 const LS = 'aprueba_tokens';
 
 let accessToken = null;

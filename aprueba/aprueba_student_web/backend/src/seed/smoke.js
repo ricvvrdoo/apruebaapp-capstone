@@ -389,6 +389,33 @@ results.push('\n[14] Acceso a la documentacion de la API (API_DOCS)');
   }
 }
 
+results.push('\n[15] CORS (API y frontend en dominios distintos)');
+{
+  const saved = { list: process.env.CORS_ORIGINS, re: process.env.CORS_ORIGIN_REGEX, env: process.env.NODE_ENV };
+  const FRONT = 'https://aprueba-student-web.vercel.app';
+  const PREVIEW = 'https://aprueba-student-3ab9xk2-aprueba.vercel.app';
+  const acao = async (origin, method = 'GET') => {
+    const r = await fetch(`${BASE}/plans`, { method, headers: { Origin: origin, ...(method === 'OPTIONS' && { 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'authorization,content-type' }) } });
+    return { status: r.status, origin: r.headers.get('access-control-allow-origin'), methods: r.headers.get('access-control-allow-methods'), headers: r.headers.get('access-control-allow-headers'), creds: r.headers.get('access-control-allow-credentials') };
+  };
+  process.env.NODE_ENV = 'production';
+  process.env.CORS_ORIGINS = FRONT;
+  process.env.CORS_ORIGIN_REGEX = 'https://aprueba-student-(web-git-[a-z0-9-]+|[a-z0-9]+)-aprueba\\.vercel\\.app';
+  check('origen del frontend permitido', (await acao(FRONT)).origin === FRONT);
+  check('preview del frontend permitido por patron', (await acao(PREVIEW)).origin === PREVIEW);
+  check('origen ajeno rechazado', !(await acao('https://sitio-ajeno.com')).origin);
+  check('patron anclado: dominio que lo contiene rechazado', !(await acao(`${PREVIEW}.evil.com`)).origin);
+  check('patron anclado: prefijo malicioso rechazado', !(await acao(`https://evil.com/${PREVIEW}`)).origin);
+  const pre = await acao(FRONT, 'OPTIONS');
+  check('preflight: 204 con metodos y cabeceras permitidas', pre.status === 204 && /PATCH/.test(pre.methods || '') && /Authorization/i.test(pre.headers || ''), `(${pre.status} ${pre.methods} ${pre.headers})`);
+  check('sin credenciales de navegador (Allow-Credentials ausente)', !pre.creds);
+  delete process.env.CORS_ORIGINS; delete process.env.CORS_ORIGIN_REGEX;
+  check('produccion sin configuracion: ningun origen permitido', !(await acao(FRONT)).origin);
+  for (const [k, v] of Object.entries({ CORS_ORIGINS: saved.list, CORS_ORIGIN_REGEX: saved.re, NODE_ENV: saved.env })) {
+    if (v === undefined) delete process.env[k]; else process.env[k] = v;
+  }
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);
