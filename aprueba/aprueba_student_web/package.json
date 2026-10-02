@@ -2,8 +2,7 @@
   "name": "aprueba-student-web",
   "version": "1.0.0",
   "private": true,
-  "description": "Despliegue en Vercel del sitio web del alumno: frontend Vite estatico + backend Express como funcion (api/index.js).",
-  "type": "module",
+  "description": "Despliegue en Vercel del frontend web del alumno (proyecto aprueba-student-web). La API se despliega aparte desde backend/ (proyecto aprueba-api).",
   "engines": {
     "node": "22.x"
   }
