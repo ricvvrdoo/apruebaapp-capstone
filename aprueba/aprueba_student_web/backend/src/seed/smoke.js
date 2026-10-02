@@ -347,6 +347,48 @@ results.push('\n[13] Respuestas: envios simultaneos (doble clic)');
   check('5 dobles envios: nunca queda la respuesta duplicada', duplicated === 0, `(${duplicated} duplicadas)`);
 }
 
+results.push('\n[14] Acceso a la documentacion de la API (API_DOCS)');
+{
+  const ROOT = BASE.replace('/api/v1', '');
+  const docs = async (auth) => Promise.all(['/api/v1/openapi.json', '/api/docs/'].map(async (p) => {
+    const r = await fetch(ROOT + p, auth ? { headers: { Authorization: `Basic ${Buffer.from(auth).toString('base64')}` } } : {});
+    return { status: r.status, auth: r.headers.get('www-authenticate'), robots: r.headers.get('x-robots-tag') };
+  }));
+  const both = (rs, status) => rs.every((r) => r.status === status);
+  const saved = { mode: process.env.API_DOCS, user: process.env.API_DOCS_USER, pass: process.env.API_DOCS_PASSWORD, env: process.env.NODE_ENV };
+
+  process.env.API_DOCS = 'public';
+  let rs = await docs();
+  check('public: especificacion y Swagger UI responden 200', both(rs, 200), `(${rs.map((r) => r.status)})`);
+  check('public: no se indexa (X-Robots-Tag)', rs.every((r) => /noindex/.test(r.robots || '')));
+
+  process.env.API_DOCS = 'off';
+  rs = await docs();
+  check('off: responde 404, como si no existiera', both(rs, 404), `(${rs.map((r) => r.status)})`);
+
+  delete process.env.API_DOCS; process.env.NODE_ENV = 'production';
+  rs = await docs();
+  check('produccion sin API_DOCS: cerrada por defecto (404)', both(rs, 404), `(${rs.map((r) => r.status)})`);
+
+  process.env.API_DOCS = 'protected'; delete process.env.API_DOCS_USER; delete process.env.API_DOCS_PASSWORD;
+  rs = await docs('a:b');
+  check('protected sin credenciales configuradas: falla cerrado (404)', both(rs, 404), `(${rs.map((r) => r.status)})`);
+
+  process.env.API_DOCS_USER = 'empresa'; process.env.API_DOCS_PASSWORD = 'clave-larga-de-prueba-1234';
+  rs = await docs();
+  check('protected sin credenciales: 401 y pide Basic', both(rs, 401) && rs.every((r) => /^Basic /.test(r.auth || '')), `(${rs.map((r) => r.status)})`);
+  rs = await docs('empresa:otra-clave');
+  check('protected con clave incorrecta: 401', both(rs, 401), `(${rs.map((r) => r.status)})`);
+  rs = await docs('otro:clave-larga-de-prueba-1234');
+  check('protected con usuario incorrecto: 401', both(rs, 401), `(${rs.map((r) => r.status)})`);
+  rs = await docs('empresa:clave-larga-de-prueba-1234');
+  check('protected con credenciales correctas: 200', both(rs, 200), `(${rs.map((r) => r.status)})`);
+
+  for (const [k, v] of Object.entries({ API_DOCS: saved.mode, API_DOCS_USER: saved.user, API_DOCS_PASSWORD: saved.pass, NODE_ENV: saved.env })) {
+    if (v === undefined) delete process.env[k]; else process.env[k] = v;
+  }
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);

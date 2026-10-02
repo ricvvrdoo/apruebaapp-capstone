@@ -14,6 +14,24 @@ En la documentación navegable, **Authorize** recibe el `accessToken` de
 `POST /api/v1/auth/login` y permite probar los endpoints con "Try it out". El
 servidor "Este servidor" apunta al mismo dominio que sirve la documentación.
 
+## Acceso
+
+La API es **privada**: la consumen la web, la app Flutter y la consola admin.
+Por eso su documentación no queda abierta en producción. El acceso lo controla
+la variable `API_DOCS` (`backend/src/middleware/docsAccess.js`):
+
+| `API_DOCS` | Comportamiento |
+|---|---|
+| `off` | `404`, como si no existiera. **Valor por defecto en producción.** |
+| `protected` | Usuario y contraseña (HTTP Basic) con `API_DOCS_USER` y `API_DOCS_PASSWORD`. Si falta alguna credencial, se cierra (`404`). |
+| `public` | Abierta. Valor por defecto en desarrollo. |
+
+En todos los casos se marca `noindex` para que no aparezca en buscadores.
+
+La documentación **no da acceso a la API**: cada endpoint exige su propio token
+y, si corresponde, plan de pago. Lo que se protege es el mapa de la API, por
+defensa en profundidad.
+
 ## Cómo se genera
 
 `openapi.json` **no se edita a mano**. Lo produce `backend/src/docs/generar.js`
