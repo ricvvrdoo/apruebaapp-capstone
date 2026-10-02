@@ -22,13 +22,29 @@ import conversationsRoutes from './routes/conversations.js';
 const app = express();
 app.use(helmet());
 
-// CORS: solo los origenes de CORS_ORIGINS (separados por coma). Sin la variable,
-// en desarrollo se acepta cualquiera y en produccion ninguno: el frontend web se
-// sirve desde el mismo dominio y la app movil no envia Origin, asi que ninguno
-// de los dos necesita CORS.
-const corsOrigins = (process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
-app.use(cors(corsOrigins.length ? { origin: corsOrigins }
-  : process.env.NODE_ENV === 'production' ? { origin: false } : {}));
+// CORS: la API y el frontend web viven en dominios distintos. Solo se aceptan
+// los origenes de CORS_ORIGINS (lista exacta, separada por coma) y, si se
+// define, los que calzan con CORS_ORIGIN_REGEX (los previews del frontend, cuya
+// URL cambia en cada despliegue). Sin ninguna de las dos: cualquier origen en
+// desarrollo y ninguno en produccion. Sin credenciales de navegador: la sesion
+// viaja como token Bearer en la cabecera Authorization. Las peticiones sin
+// Origin (app movil, curl) no pasan por CORS, que es un control del navegador.
+// Se lee en cada peticion, para poder probarla sin reiniciar.
+function corsOriginAllowed(origin) {
+  const list = (process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const pattern = process.env.CORS_ORIGIN_REGEX;
+  if (!list.length && !pattern) return process.env.NODE_ENV !== 'production';
+  // Anclado siempre: un patron suelto como "aprueba-student" tambien calzaria
+  // con "https://aprueba-student.evil.com".
+  return list.includes(origin) || (!!pattern && new RegExp(`^(?:${pattern})$`).test(origin));
+}
+app.use(cors({
+  origin: (origin, done) => done(null, !origin || corsOriginAllowed(origin)),
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  credentials: false,
+  maxAge: 600,
+}));
 app.use(express.json({ limit: '5mb' }));
 
 if (demoMode()) {
