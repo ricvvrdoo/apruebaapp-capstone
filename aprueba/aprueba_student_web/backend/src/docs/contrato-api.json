@@ -1,0 +1,2712 @@
+{
+ "fuente": "Aprueba_API_Backend.docx, version 1.0 (junio 2026), entregado por la empresa. Fichas de los endpoints del alumno extraidas del documento; no editar a mano.",
+ "endpoints": [
+  {
+   "method": "POST",
+   "path": "/auth/register",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Pública",
+   "descripcion": "Crea una cuenta de alumno con nombre, correo y contraseña. Al registrarse, el alumno desbloquea 10 preguntas diarias gratuitas y recibe 1 medalla de bronce de bienvenida. Requiere aceptar términos y tratamiento de datos.",
+   "entradas": [
+    {
+     "name": "name",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Nombre completo del alumno."
+    },
+    {
+     "name": "email",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Correo electrónico único."
+    },
+    {
+     "name": "password",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Mínimo 8 caracteres."
+    },
+    {
+     "name": "consent",
+     "in": "body",
+     "type": "boolean",
+     "required": "Sí",
+     "desc": "Aceptación de términos y tratamiento de datos."
+    },
+    {
+     "name": "locale",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "es (por defecto) o en."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "user",
+     "type": "object",
+     "desc": "Datos del usuario creado (entidad User)."
+    },
+    {
+     "name": "accessToken",
+     "type": "string",
+     "desc": "JWT de acceso (15 min)."
+    },
+    {
+     "name": "refreshToken",
+     "type": "string",
+     "desc": "JWT de renovación (30 días)."
+    },
+    {
+     "name": "expiresIn",
+     "type": "integer",
+     "desc": "Segundos de validez del access token."
+    }
+   ],
+   "errores": [
+    {
+     "status": 409,
+     "code": "EMAIL_ALREADY_EXISTS",
+     "desc": "Ya existe una cuenta con ese correo."
+    },
+    {
+     "status": 400,
+     "code": "WEAK_PASSWORD",
+     "desc": "La contraseña no cumple los requisitos mínimos."
+    },
+    {
+     "status": 400,
+     "code": "CONSENT_REQUIRED",
+     "desc": "Debe aceptarse el tratamiento de datos."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{  \"name\": \"Camila Rojas\",  \"email\": \"camila@correo.cl\",  \"password\": \"********\",  \"consent\": true,  \"locale\": \"es\"}"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{  \"data\": {    \"user\": { \"id\": \"usr_8f2a\", \"name\": \"Camila Rojas\", \"email\": \"camila@correo.cl\", \"plan\": \"free\", \"quotaMax\": 10 },    \"accessToken\": \"eyJhbGciOi...\",    \"refreshToken\": \"eyJhbGciOi...\",    \"expiresIn\": 900  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/auth/login",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Pública",
+   "descripcion": "Inicia sesión con correo y contraseña. Devuelve los tokens y, como efecto secundario, registra el inicio de sesión diario que otorga 1 medalla de bronce (una vez al día).",
+   "entradas": [
+    {
+     "name": "email",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Correo de la cuenta."
+    },
+    {
+     "name": "password",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Contraseña."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "user",
+     "type": "object",
+     "desc": "Datos del usuario."
+    },
+    {
+     "name": "accessToken",
+     "type": "string",
+     "desc": "JWT de acceso."
+    },
+    {
+     "name": "refreshToken",
+     "type": "string",
+     "desc": "JWT de renovación."
+    },
+    {
+     "name": "dailyLoginReward",
+     "type": "object",
+     "desc": "Medalla otorgada por login diario, o null si ya se otorgó hoy."
+    }
+   ],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_INVALID_CREDENTIALS",
+     "desc": "El correo o la contraseña son incorrectos."
+    },
+    {
+     "status": 403,
+     "code": "ACCOUNT_SUSPENDED",
+     "desc": "La cuenta está suspendida."
+    },
+    {
+     "status": 429,
+     "code": "TOO_MANY_ATTEMPTS",
+     "desc": "Demasiados intentos fallidos; reintente más tarde."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"email\": \"camila@correo.cl\", \"password\": \"********\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"user\": { \"id\": \"usr_8f2a\", \"name\": \"Camila Rojas\", \"plan\": \"all\" },    \"accessToken\": \"eyJ...\", \"refreshToken\": \"eyJ...\",    \"dailyLoginReward\": { \"tier\": \"bronze\", \"amount\": 1 }  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/auth/social",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Pública",
+   "descripcion": "Inicia sesión o registra al alumno mediante un proveedor social (Google o Apple). El cliente obtiene un idToken del SDK del proveedor y lo envía aquí; el backend lo verifica y crea la cuenta si no existe.",
+   "entradas": [
+    {
+     "name": "provider",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "google | apple."
+    },
+    {
+     "name": "idToken",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Token de identidad emitido por el proveedor."
+    },
+    {
+     "name": "locale",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "Idioma preferido."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "user",
+     "type": "object",
+     "desc": "Usuario autenticado o recién creado."
+    },
+    {
+     "name": "isNewUser",
+     "type": "boolean",
+     "desc": "true si la cuenta se creó en esta llamada."
+    },
+    {
+     "name": "accessToken",
+     "type": "string",
+     "desc": "JWT de acceso."
+    },
+    {
+     "name": "refreshToken",
+     "type": "string",
+     "desc": "JWT de renovación."
+    }
+   ],
+   "errores": [
+    {
+     "status": 401,
+     "code": "SOCIAL_TOKEN_INVALID",
+     "desc": "El idToken del proveedor no es válido o expiró."
+    },
+    {
+     "status": 409,
+     "code": "EMAIL_LINKED_OTHER_PROVIDER",
+     "desc": "El correo ya está asociado a otro método de acceso."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"provider\": \"google\", \"idToken\": \"ya29.a0Af...\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"user\": { \"id\": \"usr_91bd\", \"name\": \"Juan López\", \"authProvider\": \"google\" },    \"isNewUser\": true,    \"accessToken\": \"eyJ...\", \"refreshToken\": \"eyJ...\"  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/auth/refresh",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Refresh token",
+   "descripcion": "Emite un nuevo par de tokens a partir de un refresh token válido. Implementa rotación: el refresh token anterior queda invalidado.",
+   "entradas": [
+    {
+     "name": "refreshToken",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Refresh token vigente (o cookie httpOnly en web)."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "accessToken",
+     "type": "string",
+     "desc": "Nuevo access token."
+    },
+    {
+     "name": "refreshToken",
+     "type": "string",
+     "desc": "Nuevo refresh token (rotado)."
+    },
+    {
+     "name": "expiresIn",
+     "type": "integer",
+     "desc": "Validez del access token en segundos."
+    }
+   ],
+   "errores": [
+    {
+     "status": 401,
+     "code": "REFRESH_TOKEN_INVALID",
+     "desc": "El refresh token es inválido o ya fue usado."
+    },
+    {
+     "status": 401,
+     "code": "REFRESH_TOKEN_EXPIRED",
+     "desc": "El refresh token expiró; debe iniciar sesión nuevamente."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"refreshToken\": \"eyJhbGciOi...\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"accessToken\": \"eyJ...\", \"refreshToken\": \"eyJ...\", \"expiresIn\": 900 }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/auth/logout",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Cierra la sesión actual invalidando el refresh token asociado al dispositivo.",
+   "entradas": [
+    {
+     "name": "refreshToken",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Token a invalidar; si se omite se usa el del dispositivo actual."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": []
+  },
+  {
+   "method": "POST",
+   "path": "/auth/password/forgot",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Pública",
+   "descripcion": "Solicita el envío de un correo con un enlace para restablecer la contraseña. Por seguridad responde 200 aunque el correo no exista.",
+   "entradas": [
+    {
+     "name": "email",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Correo de la cuenta."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 429,
+     "code": "RATE_LIMITED",
+     "desc": "Demasiadas solicitudes de recuperación."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"email\": \"camila@correo.cl\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"sent\": true }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/auth/password/reset",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Pública (token de correo)",
+   "descripcion": "Establece una nueva contraseña usando el token recibido por correo.",
+   "entradas": [
+    {
+     "name": "token",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Token del enlace de recuperación."
+    },
+    {
+     "name": "password",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Nueva contraseña (mínimo 8)."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "RESET_TOKEN_INVALID",
+     "desc": "El token de recuperación es inválido o expiró."
+    },
+    {
+     "status": 400,
+     "code": "WEAK_PASSWORD",
+     "desc": "La nueva contraseña no cumple los requisitos."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"token\": \"rst_7a1c...\", \"password\": \"********\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"reset\": true }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Devuelve el perfil completo del alumno autenticado, incluyendo plan, racha, cuota y resumen de medallas. Es la llamada que el cliente hace al arrancar.",
+   "entradas": [],
+   "salidas": [
+    {
+     "name": "id",
+     "type": "id",
+     "desc": "Identificador del usuario."
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "desc": "Nombre."
+    },
+    {
+     "name": "email",
+     "type": "string",
+     "desc": "Correo."
+    },
+    {
+     "name": "plan",
+     "type": "enum",
+     "desc": "free | uni | all."
+    },
+    {
+     "name": "streak",
+     "type": "integer",
+     "desc": "Racha de días."
+    },
+    {
+     "name": "quota",
+     "type": "object",
+     "desc": "{ used, max } cuota del día."
+    },
+    {
+     "name": "medals",
+     "type": "object",
+     "desc": "Saldo por nivel."
+    }
+   ],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"id\": \"usr_8f2a\", \"name\": \"Camila Rojas\", \"email\": \"camila@correo.cl\",    \"plan\": \"all\", \"streak\": 4,    \"quota\": { \"used\": 5, \"max\": 10 },    \"medals\": { \"bronze\": 14, \"silver\": 3, \"gold\": 1, \"diamond\": 0, \"platinum\": 0 }  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "PATCH",
+   "path": "/me",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Actualiza datos del perfil: nombre, colegio, edad y región. Declarar colegio y región puede ampliar la cuota diaria (ver /me/quota/unlock).",
+   "entradas": [
+    {
+     "name": "name",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Nuevo nombre."
+    },
+    {
+     "name": "school",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Colegio o liceo."
+    },
+    {
+     "name": "age",
+     "in": "body",
+     "type": "integer",
+     "required": "No",
+     "desc": "Edad."
+    },
+    {
+     "name": "region",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Región."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"school\": \"Liceo Bicentenario\", \"age\": 17, \"region\": \"Metropolitana\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"id\": \"usr_8f2a\", \"school\": \"Liceo Bicentenario\", \"age\": 17, \"region\": \"Metropolitana\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "DELETE",
+   "path": "/me",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Elimina la cuenta del alumno y todos sus datos y medallas, de forma permanente (botón \"Eliminar cuenta\" en Ajustes). Operación irreversible; requiere confirmación de contraseña.",
+   "entradas": [
+    {
+     "name": "password",
+     "in": "body",
+     "type": "string",
+     "required": "Condicional",
+     "desc": "Contraseña actual; obligatoria si authProvider = password."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_INVALID_CREDENTIALS",
+     "desc": "La contraseña de confirmación es incorrecta."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"password\": \"********\" }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/settings",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Devuelve la configuración del alumno: idioma, tema, recordatorio diario y pruebas seleccionadas.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"locale\": \"es\", \"theme\": \"light\", \"dailyReminder\": true,    \"selectedTests\": [\"lectora\", \"m1\"], \"format\": \"random\", \"difficulty\": \"d2\"  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "PATCH",
+   "path": "/me/settings",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Actualiza preferencias de la cuenta (idioma, tema, recordatorio diario).",
+   "entradas": [
+    {
+     "name": "locale",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "es | en."
+    },
+    {
+     "name": "theme",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "light | dark."
+    },
+    {
+     "name": "dailyReminder",
+     "in": "body",
+     "type": "boolean",
+     "required": "No",
+     "desc": "Activa el recordatorio diario."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"theme\": \"dark\", \"dailyReminder\": true }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"locale\": \"es\", \"theme\": \"dark\", \"dailyReminder\": true }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/data-export",
+   "seccion": "1.1 Autenticación y cuenta",
+   "auth": "Bearer",
+   "descripcion": "Inicia la exportación de los datos personales del alumno (opción \"Mis datos y privacidad\"). Genera un archivo descargable de forma asíncrona y notifica cuando está listo.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    },
+    {
+     "status": 429,
+     "code": "EXPORT_RATE_LIMITED",
+     "desc": "Ya hay una exportación reciente en curso."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 202 Accepted)",
+     "json": "{ \"data\": { \"exportId\": \"exp_3f\", \"status\": \"processing\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/tests",
+   "seccion": "1.2 Onboarding y configuración de práctica",
+   "auth": "Bearer",
+   "descripcion": "Lista las pruebas PAES disponibles para practicar, con su etiqueta y color. Alimenta la pantalla \"¿Qué pruebas quieres practicar?\".",
+   "entradas": [],
+   "salidas": [
+    {
+     "name": "data",
+     "type": "array<Test>",
+     "desc": "Lista de pruebas."
+    }
+   ],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"lectora\", \"label\": \"Comp. Lectora\", \"color\": \"#1A365D\" },    { \"id\": \"m1\", \"label\": \"Matemática M1\", \"color\": \"#10B981\" },    { \"id\": \"m2\", \"label\": \"Matemática M2\", \"color\": \"#6366F1\" },    { \"id\": \"cien\", \"label\": \"Ciencias\", \"color\": \"#F5B041\" },    { \"id\": \"hist\", \"label\": \"Historia y C. Soc.\", \"color\": \"#EF4444\" }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/preferences",
+   "seccion": "1.2 Onboarding y configuración de práctica",
+   "auth": "Bearer",
+   "descripcion": "Devuelve la configuración de práctica actual del alumno.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"selectedTests\": [\"lectora\",\"m1\"], \"format\": \"random\", \"difficulty\": \"d2\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "PUT",
+   "path": "/me/preferences",
+   "seccion": "1.2 Onboarding y configuración de práctica",
+   "auth": "Bearer",
+   "descripcion": "Define las pruebas seleccionadas, el formato (random = preguntas mezcladas; facsim = ensayo ordenado como el examen, exclusivo de planes de pago) y el nivel de dificultad (d1 básico a d4 élite). El alumno solo recibe preguntas de las pruebas elegidas.",
+   "entradas": [
+    {
+     "name": "selectedTests",
+     "in": "body",
+     "type": "array<enum>",
+     "required": "Sí",
+     "desc": "IDs de pruebas a practicar."
+    },
+    {
+     "name": "format",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "random | facsim."
+    },
+    {
+     "name": "difficulty",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "d1 | d2 | d3 | d4."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 422,
+     "code": "FORMAT_REQUIRES_PLAN",
+     "desc": "El formato facsímil requiere un plan de pago."
+    },
+    {
+     "status": 400,
+     "code": "NO_TESTS_SELECTED",
+     "desc": "Debe seleccionarse al menos una prueba."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"selectedTests\": [\"lectora\", \"m1\"], \"format\": \"random\", \"difficulty\": \"d2\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"selectedTests\": [\"lectora\",\"m1\"], \"format\": \"random\", \"difficulty\": \"d2\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/practice/next",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Entrega la siguiente pregunta a responder, elegida según las pruebas seleccionadas, el formato y el nivel de dificultad del alumno, descontando de la cuota diaria. Si la cuota está agotada, devuelve 422 con el código adecuado para que el cliente muestre el desbloqueo o el muro de pago. La respuesta correcta NO se incluye en este endpoint: solo se revela al responder.",
+   "entradas": [
+    {
+     "name": "testId",
+     "in": "query",
+     "type": "enum",
+     "required": "No",
+     "desc": "Fuerza una prueba concreta; por defecto usa las preferencias."
+    },
+    {
+     "name": "sessionId",
+     "in": "query",
+     "type": "string",
+     "required": "No",
+     "desc": "Agrupa preguntas de una misma sesión/ensayo."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "id",
+     "type": "id",
+     "desc": "Id de la pregunta."
+    },
+    {
+     "name": "testId",
+     "type": "enum",
+     "desc": "Prueba."
+    },
+    {
+     "name": "axis",
+     "type": "string",
+     "desc": "Eje temático."
+    },
+    {
+     "name": "difficulty",
+     "type": "enum",
+     "desc": "Nivel."
+    },
+    {
+     "name": "statement",
+     "type": "string",
+     "desc": "Enunciado."
+    },
+    {
+     "name": "options",
+     "type": "array<string>",
+     "desc": "Alternativas (sin marcar la correcta)."
+    },
+    {
+     "name": "progress",
+     "type": "object",
+     "desc": "Posición en la sesión (p. ej. 6 de 10)."
+    }
+   ],
+   "errores": [
+    {
+     "status": 422,
+     "code": "QUOTA_BASE_REACHED",
+     "desc": "Se alcanzó la cuota base de 10; se puede desbloquear +5."
+    },
+    {
+     "status": 422,
+     "code": "QUOTA_DAILY_LIMIT",
+     "desc": "Se alcanzó el límite diario; requiere plan de pago."
+    },
+    {
+     "status": 404,
+     "code": "NO_QUESTIONS_AVAILABLE",
+     "desc": "No quedan preguntas para los filtros actuales."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"id\": \"qst_4d21\", \"testId\": \"m1\", \"axis\": \"Álgebra\", \"difficulty\": \"d2\",    \"statement\": \"Si 3x + 7 = 22, ¿cuál es el valor de x?\",    \"options\": [\"x = 3\", \"x = 5\", \"x = 7\", \"x = 15\"],    \"progress\": { \"current\": 6, \"total\": 10 }  },  \"error\": null,  \"meta\": { \"quota\": { \"used\": 6, \"max\": 10 } }}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/questions/:id",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Devuelve una pregunta por su id (sin la respuesta correcta). Útil para abrir una pregunta compartida en un grupo o en la comunidad.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Identificador de la pregunta."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"id\": \"qst_4d21\", \"testId\": \"m1\", \"axis\": \"Álgebra\", \"difficulty\": \"d2\",    \"statement\": \"Si 3x + 7 = 22, ¿cuál es el valor de x?\",    \"options\": [\"x = 3\", \"x = 5\", \"x = 7\", \"x = 15\"]  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/questions/:id/answer",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Registra la respuesta del alumno. Devuelve si fue correcta, la alternativa correcta, una explicación breve, el tiempo empleado y el percentil frente a la cohorte. Si la respuesta es correcta, otorga 1 medalla de bronce. Descuenta de la cuota diaria.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Pregunta respondida."
+    },
+    {
+     "name": "selected",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Alternativa elegida (A–E)."
+    },
+    {
+     "name": "elapsedMs",
+     "in": "body",
+     "type": "integer",
+     "required": "Sí",
+     "desc": "Tiempo empleado en milisegundos."
+    },
+    {
+     "name": "sessionId",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Sesión/ensayo asociado."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "correct",
+     "type": "boolean",
+     "desc": "Si la respuesta fue correcta."
+    },
+    {
+     "name": "correctAnswer",
+     "type": "string",
+     "desc": "Alternativa correcta."
+    },
+    {
+     "name": "shortExplanation",
+     "type": "string",
+     "desc": "Explicación resumida."
+    },
+    {
+     "name": "cohortPercentile",
+     "type": "integer",
+     "desc": "Percentil de velocidad."
+    },
+    {
+     "name": "medalAwarded",
+     "type": "object",
+     "desc": "Medalla otorgada o null."
+    },
+    {
+     "name": "quota",
+     "type": "object",
+     "desc": "Cuota actualizada."
+    }
+   ],
+   "errores": [
+    {
+     "status": 409,
+     "code": "ALREADY_ANSWERED",
+     "desc": "La pregunta ya fue respondida en esta sesión."
+    },
+    {
+     "status": 422,
+     "code": "QUOTA_DAILY_LIMIT",
+     "desc": "Cuota diaria agotada."
+    },
+    {
+     "status": 400,
+     "code": "INVALID_OPTION",
+     "desc": "La alternativa enviada no existe en la pregunta."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"selected\": \"B\", \"elapsedMs\": 18000, \"sessionId\": \"ses_77\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{  \"data\": {    \"correct\": true, \"correctAnswer\": \"B\",    \"shortExplanation\": \"x = 5. Despejas restando 7 y divides por 3.\",    \"cohortPercentile\": 72,    \"medalAwarded\": { \"tier\": \"bronze\", \"amount\": 1 },    \"quota\": { \"used\": 6, \"max\": 10 }  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/questions/:id/explanation",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Devuelve la explicación detallada paso a paso de la pregunta (planteamiento, pasos, verificación y concepto clave), usada en la pantalla \"Explicación detallada\".",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Pregunta."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"title\": \"Cómo se llega a x = 5\",    \"subject\": \"Mat M1 · Ecuaciones de primer grado\",    \"steps\": [      { \"label\": \"Planteamiento\", \"body\": \"Partimos de 3x + 7 = 22.\" },      { \"label\": \"Paso 1 · Restar 7\", \"body\": \"3x = 15\" },      { \"label\": \"Paso 2 · Dividir por 3\", \"body\": \"x = 5\" }    ],    \"verification\": \"3·(5) + 7 = 22 ✓\",    \"keyConcept\": \"Lo que haces a un lado debes hacerlo al otro.\"  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/questions/:id/skill",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Devuelve la habilidad evaluada por la pregunta, el dominio actual del alumno sobre esa habilidad, el árbol de prerrequisitos (dominados, activo, bloqueados) y recursos recomendados para desarrollarla (videos, fichas, módulos guiados). Alimenta la pantalla \"¿Qué necesito saber para esto?\".",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Pregunta."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"skill\": { \"id\": \"skl_lin\", \"name\": \"Resolución de ecuaciones lineales\", \"test\": \"m1\", \"level\": 2, \"maxLevel\": 4 },    \"mastery\": { \"percent\": 58, \"correct\": 12, \"total\": 21, \"status\": \"in_progress\" },    \"prerequisites\": [      { \"name\": \"Operaciones aritméticas\", \"status\": \"done\" },      { \"name\": \"Propiedades de la igualdad\", \"status\": \"done\" },      { \"name\": \"Ecuaciones lineales\", \"status\": \"active\" },      { \"name\": \"Sistemas de ecuaciones\", \"status\": \"locked\" }    ],    \"resources\": [      { \"type\": \"video\", \"title\": \"Ecuaciones paso a paso\", \"duration\": \"8 min\", \"source\": \"Khan Academy\", \"url\": \"https://...\" },      { \"type\": \"pdf\", \"title\": \"Ficha de ejercicios: Álgebra M1\", \"url\": \"https://...\" }    ]  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/quota",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Devuelve el estado de la cuota diaria de preguntas. La cuota base es 10; declarar colegio suma +5 y declarar dirección/región suma +5, hasta un máximo de 20. Los planes de pago la dejan ilimitada.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"used\": 5, \"max\": 10, \"base\": 10,    \"bonuses\": { \"school\": false, \"address\": false },    \"unlimited\": false, \"resetsAt\": \"2026-06-05T03:00:00Z\"  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/me/quota/unlock",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Desbloquea +5 preguntas declarando colegio y/o región (pantalla \"¡Vas muy bien!\"). Cada tipo de bonificación solo puede reclamarse una vez. Otorga además 1 medalla de bronce.",
+   "entradas": [
+    {
+     "name": "type",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "school | address."
+    },
+    {
+     "name": "school",
+     "in": "body",
+     "type": "string",
+     "required": "Condicional",
+     "desc": "Requerido si type = school."
+    },
+    {
+     "name": "region",
+     "in": "body",
+     "type": "string",
+     "required": "Condicional",
+     "desc": "Requerido si type = address."
+    },
+    {
+     "name": "age",
+     "in": "body",
+     "type": "integer",
+     "required": "No",
+     "desc": "Edad opcional."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 409,
+     "code": "BONUS_ALREADY_CLAIMED",
+     "desc": "Esta bonificación de cuota ya fue reclamada."
+    },
+    {
+     "status": 422,
+     "code": "QUOTA_MAX_REACHED",
+     "desc": "La cuota ya está en su máximo."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"type\": \"school\", \"school\": \"Liceo Bicentenario\", \"age\": 17 }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"used\": 5, \"max\": 15, \"bonuses\": { \"school\": true, \"address\": false } }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/progress",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Devuelve el progreso del alumno por prueba (porcentaje de avance), usado en \"Tu progreso\" del inicio.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"testId\": \"lectora\", \"label\": \"C. Lectora\", \"percent\": 68 },    { \"testId\": \"m1\", \"label\": \"Matemática M1\", \"percent\": 54 }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/corrections",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Crea una solicitud de recorrección cuando el alumno cree que una pregunta o su respuesta oficial tiene un error. El equipo revisa en 48 h; si el error se confirma, el alumno recibe 250 medallas de bronce (el otorgamiento ocurre cuando admin aprueba la solicitud).",
+   "entradas": [
+    {
+     "name": "questionId",
+     "in": "body",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Pregunta cuestionada."
+    },
+    {
+     "name": "reason",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "wrong_answer | ambiguous | typo | bad_explanation | other."
+    },
+    {
+     "name": "comment",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Detalle en palabras del alumno."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 409,
+     "code": "CORRECTION_ALREADY_OPEN",
+     "desc": "Ya existe una solicitud abierta tuya para esta pregunta."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{  \"questionId\": \"qst_4d21\",  \"reason\": \"wrong_answer\",  \"comment\": \"Según la PAES 2023, la respuesta debería ser C.\"}"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{  \"data\": { \"id\": \"cor_55\", \"status\": \"pending\", \"expectedReviewBy\": \"2026-06-06T12:00:00Z\", \"potentialReward\": { \"tier\": \"bronze\", \"amount\": 250 } },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/corrections",
+   "seccion": "1.3 Práctica: preguntas, respuestas y recorrección",
+   "auth": "Bearer",
+   "descripcion": "Lista las solicitudes de recorrección del alumno con su estado (pending, confirmed, rejected).",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"cor_55\", \"questionId\": \"qst_4d21\", \"reason\": \"wrong_answer\", \"status\": \"confirmed\", \"rewardGranted\": { \"tier\": \"bronze\", \"amount\": 250 } }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/medals",
+   "seccion": "1.4 Medallas, canjes, regalos y beneficios",
+   "auth": "Bearer",
+   "descripcion": "Devuelve el saldo de medallas por nivel y el progreso hacia el siguiente nivel de cada uno.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"wallet\": { \"bronze\": 14, \"silver\": 3, \"gold\": 1, \"diamond\": 0, \"platinum\": 0 },    \"progress\": { \"bronze\": { \"have\": 4, \"needed\": 5, \"next\": \"silver\" } }  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/me/medals/exchange",
+   "seccion": "1.4 Medallas, canjes, regalos y beneficios",
+   "auth": "Bearer",
+   "descripcion": "Canjea 5 medallas de un nivel por 1 del siguiente. Operación irreversible. La ruta de progreso es: 625 bronce → 125 plata → 25 oro → 5 diamante → 1 platino.",
+   "entradas": [
+    {
+     "name": "from",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "bronze | silver | gold | diamond."
+    },
+    {
+     "name": "quantity",
+     "in": "body",
+     "type": "integer",
+     "required": "No",
+     "desc": "Múltiplos de 5 a canjear (por defecto 5)."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 422,
+     "code": "INSUFFICIENT_MEDALS",
+     "desc": "No tienes suficientes medallas para canjear."
+    },
+    {
+     "status": 400,
+     "code": "INVALID_TIER",
+     "desc": "El nivel de origen no admite canje."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"from\": \"bronze\", \"quantity\": 5 }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"wallet\": { \"bronze\": 9, \"silver\": 4 }, \"exchanged\": { \"from\": \"bronze\", \"to\": \"silver\", \"amount\": 1 } }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/gifts",
+   "seccion": "1.4 Medallas, canjes, regalos y beneficios",
+   "auth": "Bearer",
+   "descripcion": "Devuelve el estado de regalos del día (usados/máximo) y la lista de amigos de los grupos a quienes se puede regalar. El límite se reinicia a medianoche.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"daily\": { \"used\": 5, \"max\": 10 }, \"bronzeAvailable\": 14,    \"friends\": [ { \"userId\": \"usr_91bd\", \"name\": \"Camila R.\", \"giftedToday\": 0 } ]  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/me/gifts",
+   "seccion": "1.4 Medallas, canjes, regalos y beneficios",
+   "auth": "Bearer",
+   "descripcion": "Regala medallas de bronce a uno o varios amigos de los grupos. Descuenta del saldo propio y del cupo diario de regalos (máximo 10/día). Solo se puede regalar a miembros de grupos compartidos.",
+   "entradas": [
+    {
+     "name": "recipients",
+     "in": "body",
+     "type": "array<object>",
+     "required": "Sí",
+     "desc": "Lista de { userId, amount }."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 422,
+     "code": "DAILY_GIFT_LIMIT",
+     "desc": "Se superó el límite de 10 regalos diarios."
+    },
+    {
+     "status": 422,
+     "code": "INSUFFICIENT_MEDALS",
+     "desc": "No tienes suficientes bronces."
+    },
+    {
+     "status": 403,
+     "code": "NOT_IN_SHARED_GROUP",
+     "desc": "El destinatario no comparte ningún grupo contigo."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"recipients\": [ { \"userId\": \"usr_91bd\", \"amount\": 2 }, { \"userId\": \"usr_22aa\", \"amount\": 1 } ] }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"gifted\": 3, \"daily\": { \"used\": 8, \"max\": 10 }, \"bronzeAvailable\": 11 }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/benefits",
+   "seccion": "1.4 Medallas, canjes, regalos y beneficios",
+   "auth": "Bearer",
+   "descripcion": "Lista los beneficios de marca disponibles (de los sponsors), con su costo en medallas de Platino y si están desbloqueados para el alumno.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"ben_platzi\", \"name\": \"Platzi\", \"description\": \"1 mes de acceso completo\", \"costPlatinum\": 5, \"unlocked\": true, \"sponsor\": \"Platzi\" },    { \"id\": \"ben_spotify\", \"name\": \"Spotify Premium\", \"description\": \"3 meses gratis\", \"costPlatinum\": 5, \"unlocked\": false }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/benefits/:id/redeem",
+   "seccion": "1.4 Medallas, canjes, regalos y beneficios",
+   "auth": "Bearer",
+   "descripcion": "Canjea un beneficio de marca descontando 5 medallas de Platino. Devuelve el código o cupón entregado por el sponsor.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Id del beneficio."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 422,
+     "code": "INSUFFICIENT_MEDALS",
+     "desc": "Necesitas 5 medallas de Platino."
+    },
+    {
+     "status": 409,
+     "code": "BENEFIT_OUT_OF_STOCK",
+     "desc": "El beneficio se agotó."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"redemptionId\": \"rdm_19\", \"benefit\": \"Platzi\", \"couponCode\": \"APRUEBA-9F2A\", \"platinumSpent\": 5 }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/groups",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer",
+   "descripcion": "Lista los grupos del alumno con materia, número de miembros, promedio grupal y resultado propio.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"grp_1\", \"name\": \"Mates PAES 2025\", \"subject\": \"Matemática M1\", \"memberCount\": 4, \"avgScore\": 72, \"yourScore\": 81 }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/groups",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer",
+   "descripcion": "Crea un grupo con nombre y materia principal. El creador queda como primer miembro y owner.",
+   "entradas": [
+    {
+     "name": "name",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Nombre del grupo."
+    },
+    {
+     "name": "subjectTestId",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "Materia principal (id de prueba)."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "GROUP_NAME_REQUIRED",
+     "desc": "El nombre del grupo es obligatorio."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"name\": \"Lectura crítica\", \"subjectTestId\": \"lectora\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"id\": \"grp_2\", \"name\": \"Lectura crítica\", \"subject\": \"Comp. Lectora\", \"memberCount\": 1 }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/groups/:id",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (miembro)",
+   "descripcion": "Detalle de un grupo: miembros con su rendimiento y resumen de actividad.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Id del grupo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 403,
+     "code": "NOT_GROUP_MEMBER",
+     "desc": "No perteneces a este grupo."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"id\": \"grp_1\", \"name\": \"Mates PAES 2025\", \"subject\": \"Matemática M1\",    \"members\": [ { \"userId\": \"usr_91bd\", \"name\": \"Camila R.\", \"score\": 72, \"activeToday\": true } ]  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "PATCH",
+   "path": "/groups/:id",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (owner)",
+   "descripcion": "Actualiza el nombre o la materia del grupo. Solo el owner.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    },
+    {
+     "name": "name",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Nuevo nombre."
+    },
+    {
+     "name": "subjectTestId",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "Nueva materia."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 403,
+     "code": "AUTH_FORBIDDEN",
+     "desc": "El rol no autoriza la acción."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"name\": \"Mates PAES 2026\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"id\": \"grp_1\", \"name\": \"Mates PAES 2026\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "DELETE",
+   "path": "/groups/:id",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (owner)",
+   "descripcion": "Elimina el grupo. Solo el owner.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 403,
+     "code": "AUTH_FORBIDDEN",
+     "desc": "El rol no autoriza la acción."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": []
+  },
+  {
+   "method": "POST",
+   "path": "/groups/:id/invitations",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (miembro)",
+   "descripcion": "Invita a un compañero por correo. Genera una invitación pendiente y envía un correo con el enlace de aceptación.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    },
+    {
+     "name": "email",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Correo del invitado."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 409,
+     "code": "ALREADY_INVITED",
+     "desc": "Ese correo ya tiene una invitación pendiente."
+    },
+    {
+     "status": 409,
+     "code": "ALREADY_MEMBER",
+     "desc": "Ese usuario ya es miembro del grupo."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"email\": \"compañero@ejemplo.cl\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"id\": \"inv_7\", \"email\": \"compañero@ejemplo.cl\", \"status\": \"pending\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/groups/:id/invitations",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (miembro)",
+   "descripcion": "Lista las invitaciones pendientes del grupo.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": [ { \"id\": \"inv_7\", \"email\": \"compañero@ejemplo.cl\", \"status\": \"pending\" } ], \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/invitations/:token/accept",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer",
+   "descripcion": "Acepta una invitación a un grupo a partir del token recibido por correo. Agrega al alumno como miembro.",
+   "entradas": [
+    {
+     "name": "token",
+     "in": "path",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Token de la invitación."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "INVITATION_INVALID",
+     "desc": "La invitación es inválida o expiró."
+    },
+    {
+     "status": 409,
+     "code": "ALREADY_MEMBER",
+     "desc": "Ya eres miembro del grupo."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"groupId\": \"grp_1\", \"joined\": true }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "DELETE",
+   "path": "/groups/:id/members/:userId",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (owner o uno mismo)",
+   "descripcion": "Quita a un miembro del grupo. El owner puede quitar a cualquiera; un miembro puede quitarse a sí mismo (abandonar).",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    },
+    {
+     "name": "userId",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Miembro a quitar."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 403,
+     "code": "AUTH_FORBIDDEN",
+     "desc": "El rol no autoriza la acción."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": []
+  },
+  {
+   "method": "GET",
+   "path": "/groups/:id/stats",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (miembro)",
+   "descripcion": "Estadísticas del grupo: promedio grupal, mejores áreas de rendimiento y áreas a reforzar.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"avgScore\": 72, \"memberCount\": 4,    \"best\": [ { \"area\": \"Lectura\", \"avg\": 80 }, { \"area\": \"Álgebra\", \"avg\": 72 } ],    \"weak\": [ { \"area\": \"Cálculo\", \"avg\": 44 }, { \"area\": \"Estadística\", \"avg\": 58 } ]  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/groups/:id/shared",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (miembro)",
+   "descripcion": "Lista las preguntas compartidas en el grupo, con quién las compartió y su resultado.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"shr_3\", \"questionId\": \"qst_4d21\", \"sharedBy\": \"Camila R.\", \"result\": \"correct\", \"elapsed\": \"0:18\", \"comment\": \"Fácil 🙂\", \"sharedAt\": \"2026-06-04T10:00:00Z\" }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/groups/:id/shared",
+   "seccion": "1.5 Grupos de estudio",
+   "auth": "Bearer (miembro)",
+   "descripcion": "Comparte una pregunta ya respondida en el grupo, con un comentario opcional (pantalla \"Compartir al grupo\").",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Grupo destino."
+    },
+    {
+     "name": "questionId",
+     "in": "body",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Pregunta a compartir."
+    },
+    {
+     "name": "answerId",
+     "in": "body",
+     "type": "id",
+     "required": "No",
+     "desc": "Respuesta del alumno asociada."
+    },
+    {
+     "name": "comment",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Comentario."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"questionId\": \"qst_4d21\", \"answerId\": \"ans_88\", \"comment\": \"¿Por qué B y no C?\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"id\": \"shr_4\", \"questionId\": \"qst_4d21\", \"groupId\": \"grp_1\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/feed",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Devuelve el muro de la comunidad paginado, con publicaciones de otros alumnos y contadores de interacción.",
+   "entradas": [
+    {
+     "name": "cursor",
+     "in": "query",
+     "type": "string",
+     "required": "No",
+     "desc": "Cursor de paginación."
+    },
+    {
+     "name": "limit",
+     "in": "query",
+     "type": "integer",
+     "required": "No",
+     "desc": "Tamaño de página (máx. 100)."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"pst_10\", \"author\": { \"name\": \"Camila R.\" }, \"text\": \"¿Por qué la respuesta es B y no C?\", \"question\": { \"id\": \"qst_4d21\" }, \"likes\": 12, \"comments\": 4, \"createdAt\": \"2026-06-04T09:00:00Z\" }  ],  \"error\": null,  \"meta\": { \"pagination\": { \"nextCursor\": \"eyJ...\", \"limit\": 20 } }}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/posts",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Crea una publicación en la comunidad. Puede asociar una pregunta para compartirla.",
+   "entradas": [
+    {
+     "name": "text",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Texto de la publicación."
+    },
+    {
+     "name": "questionId",
+     "in": "body",
+     "type": "id",
+     "required": "No",
+     "desc": "Pregunta a adjuntar."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 422,
+     "code": "CONTENT_BLOCKED",
+     "desc": "El contenido infringe las normas de la comunidad."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"text\": \"Tip: en ecuaciones, verifica reemplazando el valor.\", \"questionId\": \"qst_4d21\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"id\": \"pst_11\", \"text\": \"Tip: ...\", \"likes\": 0, \"comments\": 0 }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/posts/:id/like",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Alterna el \"me gusta\" del alumno sobre una publicación. Devuelve el nuevo total y si quedó marcado.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Publicación."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"liked\": true, \"likes\": 13 }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/posts/:id/comments",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Lista los comentarios de una publicación.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Publicación."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": [ { \"id\": \"cmt_5\", \"author\": { \"name\": \"Juan L.\" }, \"text\": \"Es B por el despeje.\", \"createdAt\": \"2026-06-04T09:30:00Z\" } ], \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/posts/:id/comments",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Agrega un comentario a una publicación.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Publicación."
+    },
+    {
+     "name": "text",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Texto del comentario."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"text\": \"Gracias, ahora lo entiendo.\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"id\": \"cmt_6\", \"text\": \"Gracias, ahora lo entiendo.\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/plans",
+   "seccion": "1.6 Comunidad",
+   "auth": "Pública",
+   "descripcion": "Lista los planes vigentes con sus precios mensual y anual, características y límites. Alimenta el muro de pago.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"uni\", \"name\": \"1 prueba ilimitada\", \"features\": [\"Preguntas ilimitadas de 1 prueba\"], \"price\": { \"monthly\": 1, \"yearly\": 10 }, \"limits\": { \"qDay\": 0, \"groups\": 3, \"tests\": 1 } },    { \"id\": \"all\", \"name\": \"Todas las pruebas\", \"popular\": true, \"features\": [\"Acceso ilimitado a todas las pruebas PAES\", \"Modo facsímil\", \"Estadísticas avanzadas\"], \"price\": { \"monthly\": 5, \"yearly\": 50 }, \"limits\": { \"qDay\": 0, \"groups\": 0, \"tests\": 99 } }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/checkout/sessions",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Crea una sesión de pago para suscribirse a un plan. Devuelve el clientSecret de Stripe que el cliente usa para completar el pago con Apple Pay, Google Pay o tarjeta. Usar la cabecera Idempotency-Key para evitar cobros duplicados.",
+   "entradas": [
+    {
+     "name": "plan",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "uni | all."
+    },
+    {
+     "name": "billingCycle",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "monthly | yearly."
+    },
+    {
+     "name": "successUrl",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "URL de retorno tras el pago (clientes web)."
+    }
+   ],
+   "salidas": [
+    {
+     "name": "checkoutSessionId",
+     "type": "string",
+     "desc": "Id de la sesión."
+    },
+    {
+     "name": "clientSecret",
+     "type": "string",
+     "desc": "Secreto para el SDK de Stripe."
+    },
+    {
+     "name": "amount",
+     "type": "number",
+     "desc": "Importe a cobrar."
+    },
+    {
+     "name": "currency",
+     "type": "string",
+     "desc": "Moneda (CLP/USD)."
+    }
+   ],
+   "errores": [
+    {
+     "status": 409,
+     "code": "ALREADY_SUBSCRIBED",
+     "desc": "El usuario ya tiene una suscripción activa a ese plan."
+    },
+    {
+     "status": 400,
+     "code": "INVALID_PLAN",
+     "desc": "El plan o ciclo indicado no existe."
+    },
+    {
+     "status": 502,
+     "code": "PAYMENT_PROVIDER_ERROR",
+     "desc": "Error al comunicarse con Stripe."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"plan\": \"all\", \"billingCycle\": \"yearly\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{  \"data\": {    \"checkoutSessionId\": \"cs_test_a1b2\",    \"clientSecret\": \"pi_3Nx..._secret_...\",    \"amount\": 50, \"currency\": \"USD\",    \"plan\": \"all\", \"billingCycle\": \"yearly\"  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/subscription",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Devuelve la suscripción activa del alumno (plan, ciclo, próximo cobro, método de pago y si está marcada para cancelarse). Alimenta la pantalla \"Mi plan\".",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": {    \"id\": \"sub_77\", \"plan\": \"all\", \"billingCycle\": \"yearly\", \"status\": \"active\",    \"currentPeriodEnd\": \"2027-06-04\", \"cancelAtPeriodEnd\": false,    \"paymentMethod\": { \"brand\": \"visa\", \"last4\": \"4242\" }  },  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/me/subscription/change",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Cambia el plan o el ciclo de facturación de la suscripción vigente, prorrateando el cobro según Stripe.",
+   "entradas": [
+    {
+     "name": "plan",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "Nuevo plan."
+    },
+    {
+     "name": "billingCycle",
+     "in": "body",
+     "type": "enum",
+     "required": "No",
+     "desc": "Nuevo ciclo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NO_ACTIVE_SUBSCRIPTION",
+     "desc": "No hay suscripción activa para modificar."
+    },
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"plan\": \"uni\", \"billingCycle\": \"monthly\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"id\": \"sub_77\", \"plan\": \"uni\", \"billingCycle\": \"monthly\", \"status\": \"active\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/me/subscription/cancel",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Cancela la suscripción. Por defecto se marca para terminar al final del período en curso; el plan sigue activo hasta el próximo cobro.",
+   "entradas": [
+    {
+     "name": "immediate",
+     "in": "body",
+     "type": "boolean",
+     "required": "No",
+     "desc": "true para cancelar de inmediato; por defecto false."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NO_ACTIVE_SUBSCRIPTION",
+     "desc": "No hay suscripción activa."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"immediate\": false }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"id\": \"sub_77\", \"status\": \"active\", \"cancelAtPeriodEnd\": true, \"activeUntil\": \"2027-06-04\" }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "path": "/me/invoices",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Lista el historial de cobros/recibos del alumno.",
+   "entradas": [],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"in_01\", \"amount\": 50, \"currency\": \"USD\", \"status\": \"paid\", \"paidAt\": \"2026-06-04\", \"pdfUrl\": \"https://...\" }  ],  \"error\": null}"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/webhooks/stripe",
+   "seccion": "1.6 Comunidad",
+   "auth": "Firma Stripe (Stripe-Signature)",
+   "descripcion": "Recibe los eventos de Stripe. El backend verifica la cabecera Stripe-Signature contra el secreto del webhook antes de procesar. Procesa, entre otros: checkout.session.completed (activa el plan), invoice.paid (renueva el período), invoice.payment_failed (marca past_due), customer.subscription.deleted (vuelve a free) y casos de cobro duplicado para conciliación. No es consumido por los clientes.",
+   "entradas": [
+    {
+     "name": "Stripe-Signature",
+     "in": "header",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Firma del evento para verificación."
+    },
+    {
+     "name": "type",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Tipo de evento de Stripe."
+    },
+    {
+     "name": "data",
+     "in": "body",
+     "type": "object",
+     "required": "Sí",
+     "desc": "Carga útil del evento."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "WEBHOOK_SIGNATURE_INVALID",
+     "desc": "La firma Stripe-Signature no es válida."
+    },
+    {
+     "status": 400,
+     "code": "WEBHOOK_MALFORMED",
+     "desc": "El cuerpo del evento no se pudo interpretar."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{  \"id\": \"evt_1Nx...\",  \"type\": \"checkout.session.completed\",  \"data\": { \"object\": { \"id\": \"cs_test_a1b2\", \"customer\": \"cus_...\", \"subscription\": \"sub_...\" } }}"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"received\": true }"
+    }
+   ]
+  },
+  {
+   "method": "POST",
+   "path": "/devices",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Registra (o actualiza) el token push del dispositivo del alumno para recibir notificaciones. Idempotente por token.",
+   "entradas": [
+    {
+     "name": "platform",
+     "in": "body",
+     "type": "enum",
+     "required": "Sí",
+     "desc": "ios | android | web."
+    },
+    {
+     "name": "pushToken",
+     "in": "body",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Token del proveedor (APNs/FCM/Web Push)."
+    },
+    {
+     "name": "deviceId",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Identificador del dispositivo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"platform\": \"android\", \"pushToken\": \"fcm_dGhpc...\", \"deviceId\": \"dev_55\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 201 Created)",
+     "json": "{ \"data\": { \"id\": \"dev_55\", \"platform\": \"android\", \"registered\": true }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "DELETE",
+   "path": "/devices/:id",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Da de baja un dispositivo para dejar de enviarle notificaciones (p. ej. al cerrar sesión).",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "string",
+     "required": "Sí",
+     "desc": "Id del dispositivo."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": []
+  },
+  {
+   "method": "GET",
+   "path": "/me/notifications",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Lista las notificaciones del alumno (in-app), con estado de lectura.",
+   "entradas": [
+    {
+     "name": "unread",
+     "in": "query",
+     "type": "boolean",
+     "required": "No",
+     "desc": "Si true, solo las no leídas."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{  \"data\": [    { \"id\": \"ntf_1\", \"type\": \"correction_confirmed\", \"title\": \"¡Error confirmado!\", \"body\": \"Recibiste 250 medallas de bronce.\", \"read\": false, \"createdAt\": \"2026-06-04T08:00:00Z\" }  ],  \"error\": null,  \"meta\": { \"unreadCount\": 1 }}"
+    }
+   ]
+  },
+  {
+   "method": "PATCH",
+   "path": "/me/notifications/:id/read",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Marca una notificación como leída.",
+   "entradas": [
+    {
+     "name": "id",
+     "in": "path",
+     "type": "id",
+     "required": "Sí",
+     "desc": "Notificación."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 404,
+     "code": "NOT_FOUND",
+     "desc": "El recurso no existe."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"id\": \"ntf_1\", \"read\": true }, \"error\": null }"
+    }
+   ]
+  },
+  {
+   "method": "PUT",
+   "path": "/me/notifications/preferences",
+   "seccion": "1.6 Comunidad",
+   "auth": "Bearer",
+   "descripcion": "Configura las preferencias de notificación, incluyendo el recordatorio diario y su hora.",
+   "entradas": [
+    {
+     "name": "dailyReminder",
+     "in": "body",
+     "type": "boolean",
+     "required": "Sí",
+     "desc": "Activa/desactiva el recordatorio diario."
+    },
+    {
+     "name": "reminderTime",
+     "in": "body",
+     "type": "string",
+     "required": "No",
+     "desc": "Hora local del recordatorio (HH:mm)."
+    },
+    {
+     "name": "channels",
+     "in": "body",
+     "type": "object",
+     "required": "No",
+     "desc": "Canales por tipo de evento (push/email)."
+    }
+   ],
+   "salidas": [],
+   "errores": [
+    {
+     "status": 400,
+     "code": "VALIDATION_ERROR",
+     "desc": "Algún campo no supera la validación."
+    },
+    {
+     "status": 401,
+     "code": "AUTH_REQUIRED",
+     "desc": "Falta el token o es inválido."
+    }
+   ],
+   "ejemplos": [
+    {
+     "etiqueta": "Cuerpo de la solicitud (ejemplo)",
+     "json": "{ \"dailyReminder\": true, \"reminderTime\": \"19:00\" }"
+    },
+    {
+     "etiqueta": "Respuesta (ejemplo · 200 OK)",
+     "json": "{ \"data\": { \"dailyReminder\": true, \"reminderTime\": \"19:00\" }, \"error\": null }"
+    }
+   ]
+  }
+ ]
+}

@@ -12,7 +12,9 @@
     "dev": "node --watch src/index.js",
     "seed": "node src/seed/seed.js",
     "import:preguntas": "node src/seed/import-questions.js",
-    "smoke": "node src/seed/smoke.js"
+    "smoke": "node src/seed/smoke.js",
+    "openapi:generar": "node src/seed/seed.js && node src/docs/generar.js",
+    "openapi:verificar": "node src/docs/verificar.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -20,8 +22,12 @@
     "express": "^4.19.2",
     "firebase-admin": "^12.7.0",
     "helmet": "^8.3.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "swagger-ui-express": "^5.0.1"
   },
   "comment_firestore": "DATA_DRIVER=firestore usa firebase-admin; credenciales en FIREBASE_SERVICE_ACCOUNT o GOOGLE_APPLICATION_CREDENTIALS (ver .env.example)",
-  "comment_phone_auth": "La verificacion telefonica valida el idToken de Firebase Auth con firebase-admin. En desarrollo usa PHONE_AUTH_ALLOW_DEV_TOKEN=true y tokens 'dev:+56912345678'"
+  "comment_phone_auth": "La verificacion telefonica valida el idToken de Firebase Auth con firebase-admin. En desarrollo usa PHONE_AUTH_ALLOW_DEV_TOKEN=true y tokens 'dev:+56912345678'",
+  "devDependencies": {
+    "@readme/openapi-parser": "^2.7.0"
+  }
 }
