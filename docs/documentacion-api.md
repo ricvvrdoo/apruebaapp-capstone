@@ -6,8 +6,8 @@ El backend de `aprueba/aprueba_student_web` publica su contrato en formato
 
 | Qué | Dónde |
 |---|---|
-| Documentación navegable (Swagger UI) | https://aprueba-student-web.vercel.app/api/docs |
-| Especificación (JSON) | https://aprueba-student-web.vercel.app/api/v1/openapi.json |
+| Documentación navegable (Swagger UI) | https://aprueba-api.vercel.app/api/docs (pide usuario y contraseña) |
+| Especificación (JSON) | https://aprueba-api.vercel.app/api/v1/openapi.json (misma protección) |
 | Archivo en el repositorio | `backend/src/docs/openapi.json` |
 
 En la documentación navegable, **Authorize** recibe el `accessToken` de
