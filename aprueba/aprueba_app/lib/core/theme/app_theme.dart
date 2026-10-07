@@ -41,7 +41,7 @@ class AppTheme {
           color: t.brand,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: t.soft,
         elevation: 0,
         shape: RoundedRectangleBorder(
