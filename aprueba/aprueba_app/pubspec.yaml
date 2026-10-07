@@ -47,7 +47,8 @@ dependencies:
   flutter_local_notifications: ^17.2.1
 
   # Utilidades
-  intl: ^0.19.0
+  # flutter_localizations de Flutter 3.32+ fija intl 0.20.x.
+  intl: ^0.20.2
   collection: ^1.18.0
   url_launcher: ^6.3.0
 
