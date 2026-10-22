@@ -72,7 +72,16 @@ export default function Practice() {
   };
 
   if (step === 'loading') return <Spinner />;
-  if (step === 'error') return <div className="center"><div>{L('retry')} <button className="btn sec" onClick={loadNext}>{L('retry')}</button></div></div>;
+  if (step === 'error') {
+    return (
+      <div className="center">
+        <div style={{ textAlign: 'center' }}>
+          <p className="note" style={{ marginBottom: 10 }}>{L('error_generic')}</p>
+          <button className="btn sec" onClick={loadNext}>{L('retry')}</button>
+        </div>
+      </div>
+    );
+  }
   if (step === 'empty') return <div className="center">{L('empty_q')}</div>;
 
   if (step === 'quota') {

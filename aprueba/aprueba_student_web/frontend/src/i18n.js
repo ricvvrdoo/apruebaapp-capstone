@@ -56,7 +56,7 @@ es: {
   social_google:'Continuar con Google',social_apple:'Continuar con Apple',
   forgot_h:'Recuperar contraseña',forgot_sub:'Te enviaremos un enlace para restablecerla.',forgot_btn:'Enviar enlace',forgot_sent:'Si el correo existe, te enviamos un enlace.',back_login:'Volver a iniciar sesion',
   ob_h:'Que pruebas quieres practicar?',ob_sub:'Elige una o varias. Podras cambiarlo luego en Ajustes.',ob_format:'Formato de practica',ob_random:'Aleatorio',ob_facsim:'Facsimil (ensayo)',ob_facsim_note:'El facsimil requiere un plan de pago.',ob_difficulty:'Nivel de dificultad',ob_finish:'Comenzar',ob_d1:'Basico',ob_d2:'Intermedio',ob_d3:'Avanzado',ob_d4:'Elite',
-  loading:'Cargando...',retry:'Reintentar',empty_q:'No hay preguntas disponibles para tus filtros.'
+  loading:'Cargando...',retry:'Reintentar',error_generic:'No pudimos cargar esta informacion.',empty_q:'No hay preguntas disponibles para tus filtros.'
 },
 en: {
   nav_main:'Main',nav_account:'Account',
@@ -113,7 +113,7 @@ en: {
   social_google:'Continue with Google',social_apple:'Continue with Apple',
   forgot_h:'Reset password',forgot_sub:'We will send you a reset link.',forgot_btn:'Send link',forgot_sent:'If the email exists, we sent a link.',back_login:'Back to sign in',
   ob_h:'Which tests do you want to practice?',ob_sub:'Pick one or more. You can change it later in Settings.',ob_format:'Practice format',ob_random:'Random',ob_facsim:'Facsimile (mock)',ob_facsim_note:'Facsimile requires a paid plan.',ob_difficulty:'Difficulty level',ob_finish:'Start',ob_d1:'Basic',ob_d2:'Intermediate',ob_d3:'Advanced',ob_d4:'Elite',
-  loading:'Loading...',retry:'Retry',empty_q:'No questions available for your filters.'
+  loading:'Loading...',retry:'Retry',error_generic:'We could not load this information.',empty_q:'No questions available for your filters.'
 }};
 
 export function makeL(lang) {

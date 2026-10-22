@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
@@ -11,17 +11,35 @@ export default function Home() {
   const nav = useNavigate();
   const [state, setState] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      const [me, quota, medals, progress] = await Promise.all([
-        api.get('/me'), api.get('/me/quota'), api.get('/me/medals'), api.get('/me/progress'),
-      ]);
-      setState({ me: me.data, quota: quota.data, medals: medals.data.wallet, progress: progress.data });
-    })().catch(() => setState({ error: true }));
+  const load = useCallback(async () => {
+    setState(null);
+    // /me y /me/quota son imprescindibles; medallas y progreso degradan a vacio
+    // para que un fallo parcial no deje el dashboard entero en blanco.
+    const [me, quota, medals, progress] = await Promise.allSettled([
+      api.get('/me'), api.get('/me/quota'), api.get('/me/medals'), api.get('/me/progress'),
+    ]);
+    if (me.status === 'rejected' || quota.status === 'rejected') { setState({ error: true }); return; }
+    setState({
+      me: me.value.data,
+      quota: quota.value.data,
+      medals: medals.status === 'fulfilled' ? medals.value.data.wallet : Object.fromEntries(TIERS.map((t) => [t, 0])),
+      progress: progress.status === 'fulfilled' ? progress.value.data : [],
+    });
   }, []);
 
+  useEffect(() => { load(); }, [load]);
+
   if (!state) return <Spinner />;
-  if (state.error) return <div className="center">{L('retry')}</div>;
+  if (state.error) {
+    return (
+      <div className="center">
+        <div style={{ textAlign: 'center' }}>
+          <p className="note" style={{ marginBottom: 10 }}>{L('error_generic')}</p>
+          <button className="btn sec" onClick={load}>{L('retry')}</button>
+        </div>
+      </div>
+    );
+  }
   const { me, quota, medals, progress } = state;
   const free = me.plan === 'free';
   const prog = TIERS.find((t) => t !== 'platinum' && medals[t] > 0) || 'bronze';
