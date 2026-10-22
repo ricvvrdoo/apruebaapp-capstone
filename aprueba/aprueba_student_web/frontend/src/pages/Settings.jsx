@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Toast } from '../components/ui.jsx';
+import { Toast, notify } from '../components/ui.jsx';
 
 function Switch({ on, onClick }) {
   return (
@@ -28,14 +28,14 @@ export default function Settings() {
     api.get('/tests').then(({ data }) => setTests(data));
   }, []);
 
-  const toggleReminder = async () => { const v = !reminder; setReminder(v); try { await api.patch('/me/settings', { dailyReminder: v }); flash(L('set_saved')); } catch {} };
+  const toggleReminder = async () => { const v = !reminder; setReminder(v); try { await api.patch('/me/settings', { dailyReminder: v }); flash(L('set_saved')); } catch (e) { setReminder(!v); notify(e.message); } };
   const toggleTest = async (id) => {
     const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id];
     if (next.length === 0) return;
     setSelected(next);
     try { await api.put('/me/preferences', { selectedTests: next, format: 'random', difficulty: user?.difficulty || 'd2' }); flash(L('set_saved')); } catch (e) { flash(e.message); }
   };
-  const exportData = async () => { try { await api.get('/me/data-export'); flash('✓'); } catch {} };
+  const exportData = async () => { try { await api.get('/me/data-export'); flash('✓'); } catch (e) { notify(e.message); } };
   const deleteAccount = async () => {
     try { await api.del('/me', user.authProvider === 'password' ? { password: pwd } : {}); await logout(); nav('/login'); }
     catch (e) { flash(e.message); }

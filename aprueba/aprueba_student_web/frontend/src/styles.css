@@ -150,3 +150,8 @@ input[aria-invalid=true]{border-color:var(--danger)}
 .pw-bars{display:flex;gap:4px;flex:1}
 .pw-bars i{height:4px;flex:1;border-radius:2px;background:var(--line)}
 .pw-bars i.on.s1{background:var(--danger)}.pw-bars i.on.s2{background:#F5B041}.pw-bars i.on.s3,.pw-bars i.on.s4{background:var(--accent)}
+
+/* Esqueletos de carga */
+.skel{background:linear-gradient(90deg,var(--soft) 25%,var(--line) 50%,var(--soft) 75%);background-size:200% 100%;border-radius:8px;animation:skel 1.2s ease-in-out infinite}
+@keyframes skel{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skel,.spin{animation:none}}

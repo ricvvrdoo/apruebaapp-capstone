@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Coin, Spinner, Toast, initials } from '../components/ui.jsx';
+import { Coin, Skeleton, Toast, initials } from '../components/ui.jsx';
 
 const TIERS = ['bronze', 'silver', 'gold', 'diamond', 'platinum'];
 const NEXT = { bronze: 'silver', silver: 'gold', gold: 'diamond', diamond: 'platinum' };
@@ -33,7 +33,14 @@ export default function Medals() {
     catch (e) { flash(e.message); }
   };
 
-  if (!wallet) return <Spinner />;
+  if (!wallet) return (
+    <div role="status" aria-busy="true">
+      <div className="card"><Skeleton h={90} /></div>
+      <div className="dash" style={{ gridTemplateColumns: 'repeat(2,1fr)', marginTop: 18 }}>
+        {[0, 1, 2, 3].map((i) => <div key={i} className="card"><Skeleton h={14} w="40%" /><Skeleton h={80} style={{ marginTop: 12 }} /></div>)}
+      </div>
+    </div>
+  );
   return (
     <>
       <Toast msg={toast} />

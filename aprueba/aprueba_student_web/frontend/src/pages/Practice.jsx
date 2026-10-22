@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Bar, Opt, Spinner } from '../components/ui.jsx';
+import { Bar, Opt, Spinner, notify } from '../components/ui.jsx';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 const fmt = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -68,7 +68,7 @@ export default function Practice() {
   };
 
   const sendCorrection = async () => {
-    try { await api.post('/corrections', { questionId: q.id, reason: rc.reason, comment: rc.comment }); setRc({ ...rc, sent: true, open: true }); } catch (e) { alert(e.message); }
+    try { await api.post('/corrections', { questionId: q.id, reason: rc.reason, comment: rc.comment }); setRc({ ...rc, sent: true, open: true }); } catch (e) { notify(e.message); }
   };
 
   if (step === 'loading') return <Spinner />;

@@ -99,3 +99,34 @@ export function PasswordInput({ value, onChange, L, showStrength = false, invali
 export function FieldError({ id, children }) {
   return children ? <div id={id} className="field-err" role="alert">{children}</div> : null;
 }
+
+// Bloque gris animado mientras llega el contenido.
+export function Skeleton({ h = 16, w = '100%', style }) {
+  return <div className="skel" aria-hidden="true" style={{ height: h, width: w, ...style }} />;
+}
+
+export function SkeletonCards({ n = 3, h = 110 }) {
+  return (
+    <div role="status" aria-busy="true">
+      {Array.from({ length: n }, (_, i) => (
+        <div key={i} className="card" style={{ marginTop: 16 }}>
+          <Skeleton h={14} w="40%" /><Skeleton h={h - 40} style={{ marginTop: 12 }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Aviso global: cualquier modulo llama notify('texto') y el Layout lo muestra.
+export function notify(msg) { window.dispatchEvent(new CustomEvent('aprueba:toast', { detail: String(msg) })); }
+
+export function ToastHost() {
+  const [msg, setMsg] = React.useState('');
+  React.useEffect(() => {
+    let t;
+    const on = (e) => { setMsg(e.detail); clearTimeout(t); t = setTimeout(() => setMsg(''), 3000); };
+    window.addEventListener('aprueba:toast', on);
+    return () => { window.removeEventListener('aprueba:toast', on); clearTimeout(t); };
+  }, []);
+  return msg ? <div className="toast" role="status" aria-live="polite">{msg}</div> : null;
+}

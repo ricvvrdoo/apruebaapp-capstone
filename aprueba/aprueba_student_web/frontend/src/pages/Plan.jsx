@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Spinner } from '../components/ui.jsx';
+import { Spinner, notify } from '../components/ui.jsx';
 
 export default function Plan() {
   const { L, user, refreshUser } = useAuth();
@@ -34,11 +34,11 @@ export default function Plan() {
       await api.post(`/checkout/sessions/${data.checkoutSessionId}/confirm`, {});
       await refreshUser();
       setView('success');
-    } catch (e) { alert(e.message); } finally { setBusy(false); }
+    } catch (e) { notify(e.message); } finally { setBusy(false); }
   };
 
   const changePlan = () => setView('paywall');
-  const cancel = async () => { try { const { data } = await api.post('/me/subscription/cancel', { immediate: false }); setSub({ ...sub, cancelAtPeriodEnd: true }); } catch (e) { alert(e.message); } };
+  const cancel = async () => { try { const { data } = await api.post('/me/subscription/cancel', { immediate: false }); setSub({ ...sub, cancelAtPeriodEnd: true }); } catch (e) { notify(e.message); } };
 
   if (view === 'loading') return <Spinner />;
 

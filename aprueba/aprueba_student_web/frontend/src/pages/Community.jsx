@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Spinner, Toast, initials } from '../components/ui.jsx';
+import { SkeletonCards, Toast, initials } from '../components/ui.jsx';
 
 export default function Community() {
   const { L, user } = useAuth();
@@ -71,7 +71,7 @@ export default function Community() {
     onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } },
   });
 
-  if (!posts) return <Spinner />;
+  if (!posts) return <div style={{ maxWidth: 720, margin: '0 auto' }}><SkeletonCards n={3} /></div>;
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <Toast msg={toast} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Bar, Spinner, Toast, initials } from '../components/ui.jsx';
+import { Bar, Skeleton, Spinner, Toast, initials } from '../components/ui.jsx';
 
 const COLORS = ['#1A365D', '#10B981', '#6366F1', '#F5B041', '#EF4444'];
 
@@ -25,7 +25,11 @@ export default function Groups() {
   };
 
   if (open) return <GroupDetail id={open} onBack={() => { setOpen(null); loadList(); }} L={L} user={user} flash={flash} toast={toast} />;
-  if (!groups) return <Spinner />;
+  if (!groups) return (
+    <div className="dash" style={{ gridTemplateColumns: 'repeat(2,1fr)' }} role="status" aria-busy="true">
+      {[0, 1].map((i) => <div key={i} className="card"><Skeleton h={18} w="50%" /><Skeleton h={12} w="30%" style={{ marginTop: 10 }} /><Skeleton h={40} style={{ marginTop: 14 }} /></div>)}
+    </div>
+  );
 
   return (
     <>

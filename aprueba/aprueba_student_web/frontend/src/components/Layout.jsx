@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Logo, initials } from './ui.jsx';
+import { Logo, ToastHost, initials } from './ui.jsx';
 
 const NAV_MAIN = [
   ['inicio', '\u{1F3E0}', '/'],
@@ -63,6 +63,7 @@ export default function Layout() {
           </div>
         </header>
         <main className="content"><Outlet /></main>
+        <ToastHost />
       </div>
     </div>
   );
