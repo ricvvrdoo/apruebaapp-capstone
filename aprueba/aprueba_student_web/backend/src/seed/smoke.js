@@ -505,6 +505,14 @@ results.push('\n[20] JWT: solo se acepta el algoritmo HS256');
   check('el mismo token firmado con HS256 si entra (control)', r.status === 200, `(${r.status})`);
 }
 
+results.push('\n[21] Limite del cuerpo JSON');
+{
+  let r = await call('POST', '/posts', { token: free, body: { text: 'a'.repeat(200000) } });
+  check('cuerpo de 200 KB -> 413', r.status === 413, `(${r.status})`);
+  r = await call('POST', '/posts', { token: free, body: { text: 'a'.repeat(2000) } });
+  check('una publicacion de 2000 caracteres sigue entrando -> 201', r.status === 201, `(${r.status})`);
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);

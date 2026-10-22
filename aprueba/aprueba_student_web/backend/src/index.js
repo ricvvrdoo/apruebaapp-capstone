@@ -46,7 +46,7 @@ app.use(cors({
   credentials: false,
   maxAge: 600,
 }));
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '100kb' }));
 
 if (demoMode()) {
   console.warn('[demo] DEMO_MODE activo: se permiten activar planes sin pago, login social sin verificar '
