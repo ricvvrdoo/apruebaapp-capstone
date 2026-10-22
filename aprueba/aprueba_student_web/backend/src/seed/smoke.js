@@ -482,6 +482,18 @@ results.push('\n[18] Regalos de medallas: monto, destinatarios y saldo');
   check('el destinatario recibe 1 bronce', (await bronze(premium)) === camilaBefore + 1);
 }
 
+results.push('\n[19] Refresh de cuentas suspendidas');
+{
+  const { patch: patchUser, COL: COLS } = await import('../data/repo.js');
+  const juan = (await call('POST', '/auth/login', { body: { email: 'juan@correo.cl', password: 'demo1234' } })).json.data;
+  await patchUser(COLS.users, 'usr_juan', { state: 'suspended' });
+  let r = await call('POST', '/auth/refresh', { body: { refreshToken: juan.refreshToken } });
+  check('refresh de una cuenta suspendida -> 403 ACCOUNT_SUSPENDED', r.status === 403 && r.json?.error?.code === 'ACCOUNT_SUSPENDED', `(${r.status})`);
+  await patchUser(COLS.users, 'usr_juan', { state: 'active' });
+  r = await call('POST', '/auth/refresh', { body: { refreshToken: juan.refreshToken } });
+  check('reactivada la cuenta, el refresh vuelve a funcionar', r.status === 200, `(${r.status})`);
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);

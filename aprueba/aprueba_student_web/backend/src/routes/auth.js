@@ -235,6 +235,7 @@ r.post('/auth/refresh', wrap(async (req, res) => {
   if (payload.typ !== 'refresh') return fail(res, 401, 'REFRESH_TOKEN_INVALID', 'Tipo de token invalido');
   const user = await get(COL.users, payload.sub);
   if (!user) return fail(res, 401, 'REFRESH_TOKEN_INVALID', 'Usuario no encontrado');
+  if (user.state === 'suspended') return fail(res, 403, 'ACCOUNT_SUSPENDED', 'La cuenta esta suspendida');
   return ok(res, { accessToken: signAccess(user), refreshToken: signRefresh(user), expiresIn: accessTtl });
 }));
 
