@@ -6,8 +6,9 @@ import { Logo } from '../components/ui.jsx';
 export default function Login() {
   const { L, login, social } = useAuth();
   const nav = useNavigate();
-  const [email, setEmail] = useState('demo@aprueba.cl');
-  const [password, setPassword] = useState('demo1234');
+  // Las credenciales demo solo se precargan al desarrollar (npm run dev).
+  const [email, setEmail] = useState(import.meta.env.DEV ? 'demo@aprueba.cl' : '');
+  const [password, setPassword] = useState(import.meta.env.DEV ? 'demo1234' : '');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
