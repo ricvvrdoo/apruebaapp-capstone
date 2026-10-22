@@ -6,12 +6,13 @@ import 'package:flutter/foundation.dart';
 class AppConfig {
   AppConfig._();
 
-  /// Raíz versionada del backend (ver Aprueba_API_Backend).
-  /// Producción: https://api.aprueba.cl/api/v1
-  /// Staging:    https://api.staging.aprueba.cl/api/v1
+  /// Raíz versionada del backend. Por defecto, el despliegue en Vercel
+  /// (docs/despliegue-vercel.md). Para apuntar a la API local:
+  ///   emulador Android: --dart-define=API_BASE_URL=http://10.0.2.2:4100/api/v1
+  ///   simulador iOS:    --dart-define=API_BASE_URL=http://localhost:4100/api/v1
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.staging.aprueba.cl/api/v1',
+    defaultValue: 'https://aprueba-api.vercel.app/api/v1',
   );
 
   /// Clave publicable de Stripe (pk_test_... o pk_live_...).
