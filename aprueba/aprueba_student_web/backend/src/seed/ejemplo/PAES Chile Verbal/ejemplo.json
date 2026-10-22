@@ -1,0 +1,96 @@
+[
+  {
+    "pregunta": "«El bosque callaba, como si esperara una respuesta que nadie se atrevía a dar.» En esta oración, la expresión «callaba» es un ejemplo de:",
+    "alternativas": ["Hipérbole", "Personificación", "Comparación literal", "Ironía", "Antítesis"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "Se atribuye a un bosque una acción humana (callar), lo que corresponde a una personificación.",
+    "habilidad_requerida": "Reconocer recursos literarios"
+  },
+  {
+    "pregunta": "¿Cuál de las siguientes palabras es sinónimo de «efímero»?",
+    "alternativas": ["Eterno", "Pasajero", "Valioso", "Antiguo", "Frágil"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "«Efímero» significa que dura muy poco tiempo, igual que «pasajero».",
+    "habilidad_requerida": "Vocabulario contextual"
+  },
+  {
+    "pregunta": "«Las bibliotecas de barrio ofrecen talleres gratuitos, préstamo de libros y espacios de estudio. Por ello, son un aporte clave a la educación de la comunidad.» ¿Cuál es la idea principal del texto?",
+    "alternativas": [
+      "Las bibliotecas prestan libros",
+      "Los talleres son gratuitos",
+      "Las bibliotecas de barrio contribuyen a la educación de la comunidad",
+      "Estudiar en una biblioteca es mejor que en casa",
+      "Las bibliotecas necesitan más financiamiento"
+    ],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "Los servicios mencionados son ejemplos que sustentan la conclusión: las bibliotecas aportan a la educación de la comunidad.",
+    "habilidad_requerida": "Identificar la idea principal"
+  },
+  {
+    "pregunta": "En la oración «Aunque llovía, salimos a caminar», la palabra «aunque» expresa una relación de:",
+    "alternativas": ["Causa", "Consecuencia", "Concesión", "Finalidad", "Condición"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "«Aunque» introduce un obstáculo que no impide la acción principal; es una relación de concesión.",
+    "habilidad_requerida": "Conectores y relaciones lógicas"
+  },
+  {
+    "pregunta": "«No hay mal que por bien no venga.» ¿Qué sentido tiene este refrán?",
+    "alternativas": [
+      "Las desgracias siempre se repiten",
+      "Algo malo puede traer algo bueno",
+      "Es mejor evitar los problemas",
+      "El bien nunca llega solo",
+      "Los males se curan con el tiempo"
+    ],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "El refrán sostiene que una situación adversa puede terminar generando un resultado positivo.",
+    "habilidad_requerida": "Interpretar sentido figurado"
+  },
+  {
+    "pregunta": "Un texto que busca convencer al lector de adoptar una postura mediante argumentos es un texto:",
+    "alternativas": ["Narrativo", "Descriptivo", "Instructivo", "Argumentativo", "Lírico"],
+    "respuesta_correcta": "D",
+    "explicacion_respuesta": "El propósito de persuadir con argumentos caracteriza al texto argumentativo.",
+    "habilidad_requerida": "Reconocer tipos de texto"
+  },
+  {
+    "pregunta": "¿Qué función cumple la expresión «que vive en Valdivia» en la oración «Mi hermana, que vive en Valdivia, llegó ayer»?",
+    "alternativas": [
+      "Introduce una oración que agrega información sobre «hermana»",
+      "Indica el lugar donde llegó",
+      "Expresa una pregunta",
+      "Une dos acciones simultáneas",
+      "Señala una causa"
+    ],
+    "respuesta_correcta": "A",
+    "explicacion_respuesta": "«Que vive en Valdivia» es una oración subordinada que agrega información sobre el sustantivo «hermana».",
+    "habilidad_requerida": "Análisis gramatical"
+  },
+  {
+    "pregunta": "Si un narrador cuenta la historia usando «yo» y participa de los hechos, se trata de un narrador:",
+    "alternativas": ["Omnisciente", "Testigo", "Protagonista", "Objetivo", "Externo"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "Cuando el narrador usa la primera persona y es parte central de la historia, es un narrador protagonista.",
+    "habilidad_requerida": "Tipos de narrador"
+  },
+  {
+    "pregunta": "«La ciudad dormía bajo un manto de niebla.» ¿Qué sugiere principalmente la imagen?",
+    "alternativas": ["Peligro inminente", "Calma y silencio", "Alegría festiva", "Abandono total", "Movimiento intenso"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "«Dormía» y «manto de niebla» transmiten quietud y silencio en la ciudad.",
+    "habilidad_requerida": "Interpretar imágenes literarias"
+  },
+  {
+    "pregunta": "¿Cuál de las siguientes oraciones está escrita correctamente?",
+    "alternativas": [
+      "Haber si vienes mañana",
+      "A ver si vienes mañana",
+      "A ver sí vienes mañana",
+      "Haber sí vienes mañana",
+      "Aber si vienes mañana"
+    ],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "«A ver» (preposición y verbo) se usa para expresar duda o expectativa; «si» condicional no lleva tilde.",
+    "habilidad_requerida": "Ortografía y uso de la lengua"
+  }
+]

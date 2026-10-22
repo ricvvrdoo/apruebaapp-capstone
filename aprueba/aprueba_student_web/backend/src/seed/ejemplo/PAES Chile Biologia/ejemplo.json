@@ -1,0 +1,84 @@
+[
+  {
+    "pregunta": "¿Qué organelo celular es el principal responsable de producir energía (ATP) mediante la respiración celular?",
+    "alternativas": ["Núcleo", "Ribosoma", "Mitocondria", "Aparato de Golgi", "Lisosoma"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "La mitocondria realiza la respiración celular aeróbica y produce la mayor parte del ATP de la célula.",
+    "habilidad_requerida": "Organelos celulares"
+  },
+  {
+    "pregunta": "¿Qué molécula transporta la información genética en las células?",
+    "alternativas": ["ADN", "Glucosa", "Colesterol", "Hemoglobina", "Almidón"],
+    "respuesta_correcta": "A",
+    "explicacion_respuesta": "El ADN almacena la información genética en secuencias de nucleótidos.",
+    "habilidad_requerida": "Material genético"
+  },
+  {
+    "pregunta": "Durante la fotosíntesis, las plantas absorben dióxido de carbono y liberan:",
+    "alternativas": ["Nitrógeno", "Oxígeno", "Hidrógeno", "Metano", "Vapor de agua únicamente"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "En la fotosíntesis se produce glucosa y se libera oxígeno como subproducto.",
+    "habilidad_requerida": "Fotosíntesis"
+  },
+  {
+    "pregunta": "¿Cuál es el nivel trófico de un herbívoro en una cadena alimentaria?",
+    "alternativas": ["Productor", "Consumidor primario", "Consumidor secundario", "Descomponedor", "Consumidor terciario"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "Los herbívoros se alimentan de productores, por lo tanto son consumidores primarios.",
+    "habilidad_requerida": "Cadenas alimentarias"
+  },
+  {
+    "pregunta": "Si ambos padres son heterocigotos (Aa) para un rasgo, ¿qué proporción de sus hijos se espera con genotipo aa?",
+    "alternativas": ["0%", "25%", "50%", "75%", "100%"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "En el cruce Aa x Aa la descendencia esperada es 1 AA : 2 Aa : 1 aa, es decir 25% aa.",
+    "habilidad_requerida": "Genética mendeliana"
+  },
+  {
+    "pregunta": "¿Qué proceso de división celular da origen a los gametos?",
+    "alternativas": ["Mitosis", "Meiosis", "Fisión binaria", "Gemación", "Citoquinesis únicamente"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "La meiosis reduce a la mitad el número de cromosomas y forma células sexuales o gametos.",
+    "habilidad_requerida": "División celular"
+  },
+  {
+    "pregunta": "¿Cuál de las siguientes estructuras es exclusiva de las células vegetales?",
+    "alternativas": ["Membrana plasmática", "Ribosomas", "Pared celular", "Mitocondrias", "Citoplasma"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "La pared celular de celulosa está presente en las células vegetales y no en las animales.",
+    "habilidad_requerida": "Célula animal y vegetal"
+  },
+  {
+    "pregunta": "Los anticuerpos son proteínas producidas por el sistema inmune que:",
+    "alternativas": [
+      "Transportan oxígeno en la sangre",
+      "Reconocen y neutralizan antígenos",
+      "Almacenan energía",
+      "Regulan la temperatura corporal",
+      "Digieren los alimentos"
+    ],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "Los anticuerpos se unen a antígenos específicos para neutralizarlos o marcarlos para su eliminación.",
+    "habilidad_requerida": "Sistema inmune"
+  },
+  {
+    "pregunta": "¿Qué hormona regula principalmente los niveles de glucosa disminuyéndolos en la sangre?",
+    "alternativas": ["Glucagón", "Adrenalina", "Insulina", "Tiroxina", "Cortisol"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "La insulina, producida por el páncreas, favorece la entrada de glucosa a las células y baja su nivel en sangre.",
+    "habilidad_requerida": "Regulación hormonal"
+  },
+  {
+    "pregunta": "La selección natural favorece a los individuos que:",
+    "alternativas": [
+      "Son más grandes en cualquier ambiente",
+      "Tienen características que aumentan su supervivencia y reproducción",
+      "Viven más años siempre",
+      "No presentan variaciones",
+      "Se adaptan solo por decisión propia"
+    ],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "Los individuos con rasgos ventajosos en un ambiente dejan más descendencia, y esos rasgos se hacen más frecuentes.",
+    "habilidad_requerida": "Evolución y selección natural"
+  }
+]

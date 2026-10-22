@@ -1,0 +1,72 @@
+[
+  {
+    "pregunta": "Si 3x + 5 = 20, ¿cuál es el valor de x?",
+    "alternativas": ["3", "5", "7", "15", "25"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "Se resta 5 a ambos lados: 3x = 15. Luego se divide por 3: x = 5.",
+    "habilidad_requerida": "Resolver ecuaciones lineales"
+  },
+  {
+    "pregunta": "¿Cuál es el resultado de (-4) · (-3) + 2?",
+    "alternativas": ["-14", "-10", "10", "14", "24"],
+    "respuesta_correcta": "D",
+    "explicacion_respuesta": "El producto de dos negativos es positivo: (-4) · (-3) = 12. Luego 12 + 2 = 14.",
+    "habilidad_requerida": "Operatoria con números enteros"
+  },
+  {
+    "pregunta": "Un artículo cuesta $20.000 y tiene un 25% de descuento. ¿Cuál es su precio final?",
+    "alternativas": ["$5.000", "$15.000", "$17.500", "$19.750", "$25.000"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "El descuento es 25% de 20.000, es decir $5.000. El precio final es 20.000 - 5.000 = $15.000.",
+    "habilidad_requerida": "Porcentajes"
+  },
+  {
+    "pregunta": "¿Cuál es el valor de la expresión 2² + 3³?",
+    "alternativas": ["13", "20", "31", "35", "108"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "2² = 4 y 3³ = 27, por lo tanto la suma es 31.",
+    "habilidad_requerida": "Potencias"
+  },
+  {
+    "pregunta": "Si f(x) = 2x - 1, ¿cuál es el valor de f(4)?",
+    "alternativas": ["3", "5", "7", "8", "9"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "Se reemplaza x por 4: f(4) = 2 · 4 - 1 = 8 - 1 = 7.",
+    "habilidad_requerida": "Evaluar funciones"
+  },
+  {
+    "pregunta": "¿Cuál es el área de un rectángulo de 8 cm de largo y 5 cm de ancho?",
+    "alternativas": ["13 cm²", "26 cm²", "40 cm²", "45 cm²", "80 cm²"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "El área de un rectángulo es largo por ancho: 8 · 5 = 40 cm².",
+    "habilidad_requerida": "Áreas de figuras planas"
+  },
+  {
+    "pregunta": "En el conjunto de datos 2, 4, 4, 6, 9, ¿cuál es la mediana?",
+    "alternativas": ["2", "4", "5", "6", "9"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "Con los datos ordenados, el valor central (el tercero de cinco) es 4.",
+    "habilidad_requerida": "Medidas de tendencia central"
+  },
+  {
+    "pregunta": "¿Cuál es el resultado de simplificar (x² - 9) / (x - 3), con x distinto de 3?",
+    "alternativas": ["x - 3", "x + 3", "x² - 3", "3x", "x + 9"],
+    "respuesta_correcta": "B",
+    "explicacion_respuesta": "x² - 9 es una diferencia de cuadrados: (x - 3)(x + 3). Al simplificar con el denominador queda x + 3.",
+    "habilidad_requerida": "Factorización y álgebra"
+  },
+  {
+    "pregunta": "Se lanza un dado común una vez. ¿Cuál es la probabilidad de obtener un número par?",
+    "alternativas": ["1/6", "1/3", "1/2", "2/3", "5/6"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "Hay 3 resultados pares (2, 4 y 6) de 6 posibles, es decir 3/6 = 1/2.",
+    "habilidad_requerida": "Probabilidades"
+  },
+  {
+    "pregunta": "¿Cuál es la pendiente de la recta que pasa por los puntos (1, 2) y (3, 8)?",
+    "alternativas": ["1", "2", "3", "4", "6"],
+    "respuesta_correcta": "C",
+    "explicacion_respuesta": "La pendiente es (8 - 2) / (3 - 1) = 6 / 2 = 3.",
+    "habilidad_requerida": "Rectas en el plano cartesiano"
+  }
+]
