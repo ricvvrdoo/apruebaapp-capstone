@@ -50,6 +50,13 @@ export const TEST_LABELS_EN = {
   hist: 'History & social sciences',
 };
 
+// Ejes del banco (cada carpeta PAES trae uno solo; ver seed/questions.js).
+export const AXIS_LABELS_EN = {
+  'Comprension lectora': 'Reading comprehension',
+  'Numeros y Algebra': 'Numbers & Algebra',
+  Biologia: 'Biology',
+};
+
 const range = (n, from = 1) => Array.from({ length: n }, (_, i) => i + from);
 
 export const GRADE_GROUPS = {

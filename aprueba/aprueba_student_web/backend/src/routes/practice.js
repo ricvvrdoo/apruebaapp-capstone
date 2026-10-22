@@ -7,13 +7,14 @@ import { createHash } from 'crypto';
 import { COL, get, set, add, create, query, list } from '../data/repo.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA } from '../lib/quota.js';
 import { award } from '../lib/medals.js';
+import { langOf, testLabel, axisLabel } from '../lib/lang.js';
 
 const r = Router();
 r.use(authRequired);
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 const save = (u) => set(COL.users, u.id, u);
-const publicQuestion = (q) => ({
-  id: q.id, testId: q.testId, axis: q.axis, difficulty: q.difficulty,
+const publicQuestion = (q, lang = 'es') => ({
+  id: q.id, testId: q.testId, axis: axisLabel(q.axis, lang), difficulty: q.difficulty,
   statement: q.statement, options: q.options,
 });
 
@@ -54,14 +55,14 @@ r.get('/practice/next', wrap(async (req, res) => {
   if (!q) return fail(res, 404, 'NO_QUESTIONS_AVAILABLE', 'No quedan preguntas para los filtros actuales');
   const sessionTotal = 10;
   const current = (u.quota.used % sessionTotal) + 1;
-  return ok(res, { ...publicQuestion(q), progress: { current, total: sessionTotal } }, 200, { quota: { used: u.quota.used, max } });
+  return ok(res, { ...publicQuestion(q, langOf(req)), progress: { current, total: sessionTotal } }, 200, { quota: { used: u.quota.used, max } });
 }));
 
 // GET /questions/:id
 r.get('/questions/:id', wrap(async (req, res) => {
   const q = await get(COL.questions, req.params.id);
   if (!q) return fail(res, 404, 'NOT_FOUND', 'La pregunta no existe');
-  return ok(res, publicQuestion(q));
+  return ok(res, publicQuestion(q, langOf(req)));
 }));
 
 // POST /questions/:id/answer
@@ -107,7 +108,7 @@ r.get('/questions/:id/explanation', wrap(async (req, res) => {
   if (q.explanationDetailed) return ok(res, q.explanationDetailed);
   // Generar a partir del texto disponible.
   return ok(res, {
-    title: `Explicacion`, subject: `${q.testLabel || q.testId} · ${q.axis || ''}`.trim(),
+    title: `Explicacion`, subject: `${testLabel({ id: q.testId, label: q.testLabel || q.testId }, langOf(req))} · ${axisLabel(q.axis || '', langOf(req))}`.trim(),
     steps: [{ label: 'Planteamiento', body: q.statement }, { label: 'Resolucion', body: q.explanation || q.shortExplanation || '' }],
     verification: '', keyConcept: q.habilidad || '',
   });

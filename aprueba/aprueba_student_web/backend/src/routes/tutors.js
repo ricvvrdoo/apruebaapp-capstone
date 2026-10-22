@@ -9,6 +9,7 @@ import { authRequired } from '../middleware/auth.js';
 import { premiumRequired } from '../middleware/premium.js';
 import { COL, get, set, add, query, queryOne, list } from '../data/repo.js';
 import { paginate } from '../lib/paginate.js';
+import { langOf } from '../lib/lang.js';
 import { buildGapAnalysis, weakAreaNames } from '../lib/gap.js';
 import { findGrade, loc } from '../data/catalog.js';
 import {
@@ -19,7 +20,6 @@ import {
 const r = Router();
 r.use(authRequired);
 
-const langOf = (req) => (String(req.query.lang || req.user?.language || req.user?.locale || 'es') === 'en' ? 'en' : 'es');
 const isActive = (t) => (t.status || 'active') === 'active';
 
 async function activeTutors() {

@@ -11,6 +11,7 @@ import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt 
 import { verifyPhone } from '../lib/jwt.js';
 import { demoMode } from '../lib/demo.js';
 import { findCountry, findGrade } from '../data/catalog.js';
+import { langOf, testLabel } from '../lib/lang.js';
 
 const r = Router();
 r.use(authRequired);
@@ -180,7 +181,7 @@ r.get('/me/progress', wrap(async (req, res) => {
     const t = tests.find((x) => x.id === id);
     const s = byTest[id];
     const percent = s ? Math.round((s.correct / s.total) * 100) : (u.progressSeed?.[id] ?? 0);
-    return { testId: id, label: t?.label || id, percent };
+    return { testId: id, label: t ? testLabel(t, langOf(req)) : id, percent };
   });
   return ok(res, data);
 }));

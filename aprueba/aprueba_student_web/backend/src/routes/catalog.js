@@ -5,6 +5,7 @@ import { ok, created, fail } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { COL, list, get, add, set, query } from '../data/repo.js';
+import { langOf } from '../lib/lang.js';
 import { genId } from '../data/repo.js';
 import {
   COUNTRIES, GRADE_GROUPS, SUBJECT_SETS, TEST_LABELS_EN,
@@ -13,7 +14,6 @@ import {
 
 const r = Router();
 
-const langOf = (req) => (String(req.query.lang || req.user?.language || req.user?.locale || 'es') === 'en' ? 'en' : 'es');
 
 // GET /countries  (publico: se consulta antes de tener cuenta)
 r.get('/countries', wrap(async (req, res) => {

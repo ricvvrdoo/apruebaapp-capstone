@@ -416,6 +416,21 @@ results.push('\n[15] CORS (API y frontend en dominios distintos)');
   }
 }
 
+results.push('\n[17] Idioma: grupos, pruebas y busqueda en ingles');
+{
+  const setLocale = (locale) => call('PATCH', '/me/settings', { token: free, body: { locale } });
+  const mates = (d) => d.find((g) => g.id === 'grp_mates');
+  await setLocale('en');
+  await expect('PATCH /me/settings locale=en cambia el idioma de las respuestas', 'GET', '/tests', { token: free }, 200,
+    (d) => d.some((t) => t.id === 'm1' && t.label === 'Maths M1'));
+  await expect('grupos: la materia sale en ingles', 'GET', '/groups', { token: free }, 200, (d) => mates(d)?.subject === 'Maths M1');
+  await expect('detalle de grupo: materia en ingles', 'GET', '/groups/grp_mates', { token: free }, 200, (d) => d.subject === 'Maths M1');
+  await expect('progreso por prueba: etiquetas en ingles', 'GET', '/me/progress', { token: free }, 200, (d) => d.some((p) => p.label === 'Maths M1'));
+  await expect('pregunta de practica: eje en ingles', 'GET', '/practice/next?testId=m1', { token: free }, 200, (d) => d.axis === 'Numbers & Algebra');
+  await setLocale('es');
+  await expect('de vuelta en espanol: grupos', 'GET', '/groups', { token: free }, 200, (d) => mates(d)?.subject === 'Matematica M1');
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);

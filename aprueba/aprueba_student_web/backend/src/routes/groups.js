@@ -4,12 +4,18 @@ import { ok, created, fail, noContent } from '../lib/envelope.js';
 import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { COL, get, set, add, del, query, list, genId } from '../data/repo.js';
+import { langOf, getTests, testLabel } from '../lib/lang.js';
 
 const r = Router();
 r.use(authRequired);
 
 const INVITATION_TTL_MS = 7 * 24 * 3600e3; // las invitaciones vencen a los 7 dias
 
+// La materia se guarda en espanol al crear el grupo; al responder se traduce desde la prueba.
+async function subjectOf(g, lang) {
+  const t = (await getTests()).find((x) => x.id === g.subjectTestId);
+  return t ? testLabel(t, lang) : g.subject;
+}
 async function subjectLabel(testId) {
   const t = await get(COL.tests, testId);
   return t?.label || testId;
@@ -28,7 +34,7 @@ r.get('/groups', wrap(async (req, res) => {
     if (!g) continue;
     const members = await query(COL.groupMembers, [['groupId', '==', g.id]]);
     const avg = members.length ? Math.round(members.reduce((s, m) => s + (m.score || 0), 0) / members.length) : 0;
-    out.push({ id: g.id, name: g.name, subject: g.subject, memberCount: members.length, avgScore: avg, yourScore: mem.score || 0 });
+    out.push({ id: g.id, name: g.name, subject: await subjectOf(g, langOf(req)), memberCount: members.length, avgScore: avg, yourScore: mem.score || 0 });
   }
   return ok(res, out);
 }));
@@ -41,7 +47,7 @@ r.post('/groups', wrap(async (req, res) => {
   const subject = await subjectLabel(subjectTestId);
   const g = await add(COL.groups, { name, subjectTestId, subject, ownerId: req.user.id, createdAt: new Date().toISOString() }, 'grp');
   await add(COL.groupMembers, { groupId: g.id, userId: req.user.id, name: req.user.name, role: 'owner', score: 0, activeToday: true }, 'gm');
-  return created(res, { id: g.id, name: g.name, subject: g.subject, memberCount: 1 });
+  return created(res, { id: g.id, name: g.name, subject: await subjectOf(g, langOf(req)), memberCount: 1 });
 }));
 
 // GET /groups/:id
@@ -51,7 +57,7 @@ r.get('/groups/:id', wrap(async (req, res) => {
   if (!(await isMember(g.id, req.user.id))) return fail(res, 403, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
   const members = await query(COL.groupMembers, [['groupId', '==', g.id]]);
   return ok(res, {
-    id: g.id, name: g.name, subject: g.subject, ownerId: g.ownerId,
+    id: g.id, name: g.name, subject: await subjectOf(g, langOf(req)), ownerId: g.ownerId,
     members: members.map((m) => ({ userId: m.userId, name: m.name, score: m.score || 0, activeToday: !!m.activeToday, role: m.role })),
   });
 }));
@@ -65,7 +71,7 @@ r.patch('/groups/:id', wrap(async (req, res) => {
   if (name) g.name = name;
   if (subjectTestId) { g.subjectTestId = subjectTestId; g.subject = await subjectLabel(subjectTestId); }
   await set(COL.groups, g.id, g);
-  return ok(res, { id: g.id, name: g.name, subject: g.subject });
+  return ok(res, { id: g.id, name: g.name, subject: await subjectOf(g, langOf(req)) });
 }));
 
 // DELETE /groups/:id  (owner)
