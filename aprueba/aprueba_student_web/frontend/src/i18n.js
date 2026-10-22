@@ -57,6 +57,7 @@ es: {
   forgot_h:'Recuperar contraseña',forgot_sub:'Te enviaremos un enlace para restablecerla.',forgot_btn:'Enviar enlace',forgot_sent:'Si el correo existe, te enviamos un enlace.',back_login:'Volver a iniciar sesion',
   ob_h:'Que pruebas quieres practicar?',ob_sub:'Elige una o varias. Podras cambiarlo luego en Ajustes.',ob_format:'Formato de practica',ob_random:'Aleatorio',ob_facsim:'Facsimil (ensayo)',ob_facsim_note:'El facsimil requiere un plan de pago.',ob_difficulty:'Nivel de dificultad',ob_finish:'Comenzar',ob_d1:'Basico',ob_d2:'Intermedio',ob_d3:'Avanzado',ob_d4:'Elite',
   pw_show:'Ver',pw_hide:'Ocultar',pw_strength_0:'Muy debil',pw_strength_1:'Debil',pw_strength_2:'Aceptable',pw_strength_3:'Buena',pw_strength_4:'Fuerte',
+  search_groups:'Mis grupos',search_topics:'Pruebas',search_none:'Sin resultados',search_error:'No se pudo buscar. Intenta de nuevo.',
   com_empty:'Aun no hay publicaciones. Se la primera!',load_more:'Ver mas',post_delete:'Eliminar',post_delete_confirm:'Eliminar esta publicacion?',comment_delete:'Eliminar comentario',
   loading:'Cargando...',retry:'Reintentar',error_generic:'No pudimos cargar esta informacion.',empty_q:'No hay preguntas disponibles para tus filtros.'
 },
@@ -116,6 +117,7 @@ en: {
   forgot_h:'Reset password',forgot_sub:'We will send you a reset link.',forgot_btn:'Send link',forgot_sent:'If the email exists, we sent a link.',back_login:'Back to sign in',
   ob_h:'Which tests do you want to practice?',ob_sub:'Pick one or more. You can change it later in Settings.',ob_format:'Practice format',ob_random:'Random',ob_facsim:'Facsimile (mock)',ob_facsim_note:'Facsimile requires a paid plan.',ob_difficulty:'Difficulty level',ob_finish:'Start',ob_d1:'Basic',ob_d2:'Intermediate',ob_d3:'Advanced',ob_d4:'Elite',
   pw_show:'Show',pw_hide:'Hide',pw_strength_0:'Very weak',pw_strength_1:'Weak',pw_strength_2:'Fair',pw_strength_3:'Good',pw_strength_4:'Strong',
+  search_groups:'My groups',search_topics:'Tests',search_none:'No results',search_error:'Search failed. Please try again.',
   com_empty:'No posts yet. Be the first!',load_more:'Load more',post_delete:'Delete',post_delete_confirm:'Delete this post?',comment_delete:'Delete comment',
   loading:'Loading...',retry:'Retry',error_generic:'We could not load this information.',empty_q:'No questions available for your filters.'
 }};

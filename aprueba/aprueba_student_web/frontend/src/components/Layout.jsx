@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Logo, ToastHost, initials } from './ui.jsx';
+import SearchBox from './SearchBox.jsx';
 
 const NAV_MAIN = [
   ['inicio', '\u{1F3E0}', '/'],
@@ -53,7 +54,7 @@ export default function Layout() {
         <header className="topbar">
           <button className="hamb" onClick={() => setOpen(true)}>☰</button>
           <div className="page-title">{L('nav_' + titleKey)}</div>
-          <div className="search"><input placeholder={L('search_ph')} /></div>
+          <SearchBox />
           <div className="tb-right">
             <span className="chip">{"\u{1F525}"} {user?.streak || 0}</span>
             <select className="ctl" value={lang} onChange={(e) => setLang(e.target.value)}>

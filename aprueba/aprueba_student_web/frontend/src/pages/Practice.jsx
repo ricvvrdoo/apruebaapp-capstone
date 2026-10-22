@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Bar, Opt, Spinner, notify } from '../components/ui.jsx';
@@ -10,6 +10,8 @@ const fmt = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 
 export default function Practice() {
   const { L, refreshUser } = useAuth();
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  const testId = params.get('testId'); // /practicar?testId=... (viene del buscador)
   const [step, setStep] = useState('loading'); // loading|question|result|explanation|quota|empty|error
   const [q, setQ] = useState(null);
   const [progress, setProgress] = useState(null);
@@ -29,14 +31,14 @@ export default function Practice() {
   const loadNext = useCallback(async () => {
     setStep('loading'); setSel(null); setResult(null); setDetail(null); setRc({ open: false, reason: 'wrong_answer', comment: '', sent: false });
     try {
-      const res = await api.get('/practice/next');
+      const res = await api.get(testId ? `/practice/next?testId=${encodeURIComponent(testId)}` : '/practice/next');
       setQ(res.data); setProgress(res.data.progress); setStep('question'); startTimer();
     } catch (e) {
       if (e.code === 'QUOTA_BASE_REACHED' || e.code === 'QUOTA_DAILY_LIMIT') { setQuotaCode(e.code); setStep('quota'); }
       else if (e.code === 'NO_QUESTIONS_AVAILABLE') setStep('empty');
       else setStep('error');
     }
-  }, []);
+  }, [testId]);
 
   useEffect(() => { loadNext(); return stopTimer; }, [loadNext]);
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Bar, Skeleton, Spinner, Toast, initials } from '../components/ui.jsx';
@@ -8,7 +9,10 @@ const COLORS = ['#1A365D', '#10B981', '#6366F1', '#F5B041', '#EF4444'];
 export default function Groups() {
   const { L, user, lang } = useAuth();
   const [groups, setGroups] = useState(null);
-  const [open, setOpen] = useState(null); // group detail
+  const [params, setParams] = useSearchParams();
+  const idParam = params.get('id'); // /grupos?id=... (viene del buscador)
+  const [open, setOpen] = useState(idParam); // group detail
+  useEffect(() => { if (idParam) setOpen(idParam); }, [idParam]);
   const [tests, setTests] = useState([]);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ name: '', subjectTestId: '' });
@@ -24,7 +28,7 @@ export default function Groups() {
     catch (e) { flash(e.message); }
   };
 
-  if (open) return <GroupDetail id={open} onBack={() => { setOpen(null); loadList(); }} L={L} user={user} flash={flash} toast={toast} />;
+  if (open) return <GroupDetail id={open} onBack={() => { setOpen(null); setParams({}); loadList(); }} L={L} user={user} flash={flash} toast={toast} />;
   if (!groups) return (
     <div className="dash" style={{ gridTemplateColumns: 'repeat(2,1fr)' }} role="status" aria-busy="true">
       {[0, 1].map((i) => <div key={i} className="card"><Skeleton h={18} w="50%" /><Skeleton h={12} w="30%" style={{ marginTop: 10 }} /><Skeleton h={40} style={{ marginTop: 14 }} /></div>)}
