@@ -6,6 +6,9 @@ import 'api_exception.dart';
 import 'api_response.dart';
 import 'endpoints.dart';
 
+/// Resultado de renovar la sesion: `rejected` = el servidor no acepta el refresh token.
+enum _Refresh { ok, rejected, unavailable }
+
 /// Cliente HTTP central. Adjunta el access token, renueva con el refresh token
 /// de forma transparente (rotación) y desempaqueta el envelope { data, error, meta }.
 class ApiClient {
@@ -23,7 +26,7 @@ class ApiClient {
   final Dio _dio;
   final SecureStorage _storage;
   final void Function()? onSessionExpired;
-  bool _refreshing = false;
+  Future<_Refresh>? _refreshInFlight;
 
   Dio get raw => _dio;
 
@@ -42,25 +45,46 @@ class ApiClient {
       onError: (e, handler) async {
         final is401 = e.response?.statusCode == 401;
         final isRefreshCall = e.requestOptions.path == Endpoints.refresh;
-        if (is401 && !isRefreshCall && !_refreshing) {
-          try {
-            final ok = await _tryRefresh();
-            if (ok) {
-              final clone = await _retry(e.requestOptions);
-              return handler.resolve(clone);
-            }
-          } catch (_) {/* cae al manejo normal */}
+        // Las peticiones sin sesion (login, registro...) no tienen nada que renovar:
+        // un 401 ahi son credenciales incorrectas, no una sesion vencida.
+        final skipAuth = e.requestOptions.extra['skipAuth'] == true;
+        if (!is401 || isRefreshCall || skipAuth) return handler.next(e);
+
+        // Si tras renovar el mismo pedido vuelve a dar 401, el token fue revocado:
+        // se cierra la sesion y no se vuelve a intentar (evita un bucle).
+        if (e.requestOptions.extra['retried'] == true) {
           onSessionExpired?.call();
+          return handler.next(e);
         }
-        handler.next(e);
+
+        switch (await _refreshOnce()) {
+          case _Refresh.ok:
+            try {
+              return handler.resolve(await _retry(e.requestOptions));
+            } on DioException catch (retryError) {
+              // El error del reintento es el real (422, 500...): no es una sesion vencida.
+              return handler.next(retryError);
+            }
+          case _Refresh.rejected:
+            onSessionExpired?.call();
+            return handler.next(e);
+          case _Refresh.unavailable:
+            // Sin red o el servidor fallo: la sesion sigue guardada, se informa el error.
+            return handler.next(e);
+        }
       },
     );
   }
 
-  Future<bool> _tryRefresh() async {
+  /// Varias peticiones pueden recibir 401 a la vez: todas esperan la misma renovacion.
+  /// Con rotacion de refresh tokens, una segunda renovacion en paralelo invalidaria la primera.
+  Future<_Refresh> _refreshOnce() {
+    return _refreshInFlight ??= _tryRefresh().whenComplete(() => _refreshInFlight = null);
+  }
+
+  Future<_Refresh> _tryRefresh() async {
     final refresh = await _storage.refreshToken;
-    if (refresh == null) return false;
-    _refreshing = true;
+    if (refresh == null) return _Refresh.rejected;
     try {
       final res = await _dio.post(
         Endpoints.refresh,
@@ -72,18 +96,21 @@ class ApiClient {
         access: data['accessToken'] as String,
         refresh: (data['refreshToken'] ?? refresh) as String,
       );
-      return true;
-    } finally {
-      _refreshing = false;
+      return _Refresh.ok;
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      // Solo si el servidor dice que el token no vale se cierra la sesion.
+      return (code == 400 || code == 401 || code == 403) ? _Refresh.rejected : _Refresh.unavailable;
+    } catch (_) {
+      return _Refresh.unavailable;
     }
   }
-
   Future<Response<dynamic>> _retry(RequestOptions ro) {
     return _dio.request(
       ro.path,
       data: ro.data,
       queryParameters: ro.queryParameters,
-      options: Options(method: ro.method, headers: ro.headers, extra: ro.extra),
+      options: Options(method: ro.method, headers: ro.headers, extra: {...ro.extra, 'retried': true}),
     );
   }
 
