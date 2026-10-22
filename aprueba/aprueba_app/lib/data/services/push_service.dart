@@ -15,7 +15,10 @@ class PushService {
   PushService(this._notifications);
   final NotificationsRepository _notifications;
 
-  final _fcm = FirebaseMessaging.instance;
+  // Se obtiene al usarlo, dentro del try: si Firebase no se inicializo (faltan
+  // google-services.json / GoogleService-Info.plist), FirebaseMessaging.instance
+  // lanza y, como campo, rompia la creacion del servicio.
+  FirebaseMessaging get _fcm => FirebaseMessaging.instance;
 
   Future<void> registerForPush({String? deviceId}) async {
     try {
