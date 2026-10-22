@@ -230,9 +230,19 @@ r.post('/me/gifts', wrap(async (req, res) => {
   const { recipients } = req.body || {};
   if (!Array.isArray(recipients) || recipients.length === 0) return fail(res, 400, 'VALIDATION_ERROR', 'recipients es obligatorio');
   const u = req.user;
+  // Un monto negativo o decimal pasaba las validaciones y sumaba medallas al emisor.
+  const seen = new Set();
+  for (const rcp of recipients) {
+    if (!rcp || typeof rcp.userId !== 'string' || !Number.isInteger(rcp.amount) || rcp.amount < 1) {
+      return fail(res, 400, 'VALIDATION_ERROR', 'Cada destinatario necesita userId y un amount entero positivo', { field: 'recipients' });
+    }
+    if (rcp.userId === u.id) return fail(res, 422, 'CANNOT_GIFT_SELF', 'No puedes regalarte medallas a ti mismo');
+    if (seen.has(rcp.userId)) return fail(res, 400, 'VALIDATION_ERROR', 'Hay destinatarios repetidos', { field: 'recipients' });
+    seen.add(rcp.userId);
+  }
   const today = new Date().toISOString().slice(0, 10);
   if (u.giftDay !== today) { u.giftDay = today; u.giftUsed = 0; }
-  const total = recipients.reduce((s, x) => s + (x.amount || 0), 0);
+  const total = recipients.reduce((s, x) => s + x.amount, 0);
   if (u.giftUsed + total > 10) return fail(res, 422, 'DAILY_GIFT_LIMIT', 'Se supero el limite de 10 regalos diarios');
   if ((u.medals.bronze || 0) < total) return fail(res, 422, 'INSUFFICIENT_MEDALS', 'No tienes suficientes bronces');
   // validar grupo compartido
@@ -240,11 +250,15 @@ r.post('/me/gifts', wrap(async (req, res) => {
   for (const rcp of recipients) {
     const shares = await query(COL.groupMembers, [['userId', '==', rcp.userId]], (m) => myGroups.has(m.groupId));
     if (shares.length === 0) return fail(res, 403, 'NOT_IN_SHARED_GROUP', 'El destinatario no comparte ningun grupo contigo');
+    // Si la cuenta ya no existe (membresia huerfana), las medallas se descontaban y se perdian.
+    if (!(await get(COL.users, rcp.userId))) return fail(res, 404, 'NOT_FOUND', 'El destinatario no existe');
   }
   for (const rcp of recipients) {
     u.medals.bronze -= rcp.amount;
     const target = await get(COL.users, rcp.userId);
-    if (target) { target.medals = target.medals || {}; target.medals.bronze = (target.medals.bronze || 0) + rcp.amount; await set(COL.users, target.id, target); }
+    target.medals = target.medals || {};
+    target.medals.bronze = (target.medals.bronze || 0) + rcp.amount;
+    await set(COL.users, target.id, target);
   }
   u.giftUsed += total;
   await save(u);

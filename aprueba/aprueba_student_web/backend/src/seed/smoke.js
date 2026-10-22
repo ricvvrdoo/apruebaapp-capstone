@@ -457,6 +457,31 @@ results.push('\n[17] Idioma: grupos, pruebas y busqueda en ingles');
     (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matematica M1'));
 }
 
+results.push('\n[18] Regalos de medallas: monto, destinatarios y saldo');
+{
+  const bronze = async (tok) => (await call('GET', '/me/medals', { token: tok })).json.data.wallet.bronze;
+  const gift = (recipients) => call('POST', '/me/gifts', { token: free, body: { recipients } });
+  const before = await bronze(free);
+  const camilaBefore = await bronze(premium);
+
+  for (const [label, amount] of [['negativo', -100], ['cero', 0], ['decimal', 1.5], ['texto', '5']]) {
+    const r = await gift([{ userId: 'usr_camila', amount }]);
+    check(`regalo con monto ${label} -> 400`, r.status === 400, `(${r.status})`);
+  }
+  let r = await gift([{ userId: 'usr_demo', amount: 1 }]);
+  check('regalo a uno mismo -> 422 CANNOT_GIFT_SELF', r.status === 422 && r.json?.error?.code === 'CANNOT_GIFT_SELF', `(${r.status})`);
+  r = await gift([{ userId: 'usr_camila', amount: 1 }, { userId: 'usr_camila', amount: 1 }]);
+  check('destinatario repetido -> 400', r.status === 400, `(${r.status})`);
+  r = await gift([{ amount: 1 }]);
+  check('destinatario sin userId -> 400', r.status === 400, `(${r.status})`);
+  check('los rechazos no mueven las medallas del emisor', (await bronze(free)) === before);
+  check('ni las del destinatario', (await bronze(premium)) === camilaBefore);
+  r = await gift([{ userId: 'usr_camila', amount: 1 }]);
+  check('regalo valido -> 200', r.status === 200, `(${r.status})`);
+  check('el emisor pierde 1 bronce', (await bronze(free)) === before - 1);
+  check('el destinatario recibe 1 bronce', (await bronze(premium)) === camilaBefore + 1);
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);
