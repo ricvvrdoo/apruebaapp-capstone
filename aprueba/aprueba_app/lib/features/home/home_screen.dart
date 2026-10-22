@@ -99,11 +99,11 @@ class _MedalsCard extends StatelessWidget {
     return SoftCard(
       child: Column(children: [
         Row(children: [
-          Text('TUS MEDALLAS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: t.muted)),
+          Text(context.s('home_medals'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: t.muted)),
           const Spacer(),
           GestureDetector(
             onTap: () => GoRouter.of(context).go('/medals'),
-            child: Text('Ver todo →', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: t.brand)),
+            child: Text(context.s('view_all'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: t.brand)),
           ),
         ]),
         const SizedBox(height: 8),
@@ -142,7 +142,7 @@ class _QuotaCard extends ConsumerWidget {
           const SizedBox(height: 8),
           ProgressBar(value: q.unlimited ? 1 : (q.max == 0 ? 0 : q.used / q.max)),
           const SizedBox(height: 6),
-          Text('10 base · +5 colegio · +5 dirección · 20 máx',
+          Text(context.s('quota_rule'),
               style: TextStyle(fontSize: 11, color: t.muted)),
         ]),
         loading: () => const SizedBox(height: 40, child: Center(child: CircularProgressIndicator())),

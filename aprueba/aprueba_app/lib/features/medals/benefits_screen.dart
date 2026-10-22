@@ -25,7 +25,7 @@ class BenefitsScreen extends ConsumerWidget {
           context: context,
           builder: (_) => AlertDialog(
             title: Text(r.benefit),
-            content: Text('Tu cupón: ${r.couponCode}'),
+            content: Text('${context.s('coupon_is')}: ${r.couponCode}'),
             actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
           ),
         );

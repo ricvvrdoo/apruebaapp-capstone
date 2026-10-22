@@ -37,16 +37,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
     final email = _email.text.trim();
-    if (!email.contains('@') || _pass.text.length < 6 || _name.text.trim().isEmpty) {
+    // El backend exige al menos 8 caracteres (WEAK_PASSWORD).
+    if (!email.contains('@') || _pass.text.length < 8 || _name.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Revisa nombre, correo y contraseña (mín. 6).')));
+          SnackBar(content: Text(context.s('reg_invalid'))));
       return;
     }
     if (!_consent) return;
     final onboarding = ref.read(onboardingProvider);
     if (!onboarding.isPhoneVerified || onboarding.gradeId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Completa la verificacion telefonica y la seleccion de grado.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.s('reg_need_phone'))));
       return;
     }
     setState(() => _busy = true);

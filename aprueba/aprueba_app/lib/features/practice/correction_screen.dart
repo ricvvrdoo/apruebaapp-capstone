@@ -107,7 +107,7 @@ class _CorrectionScreenState extends ConsumerState<CorrectionScreen> {
             child: Row(children: [
               const MedalCoin('bronze', size: 24),
               const SizedBox(width: 8),
-              const Expanded(child: Text('Si el error se confirma, recibirás 250 medallas de bronce.', style: TextStyle(fontSize: 12))),
+              Expanded(child: Text(context.s('corr_reward'), style: const TextStyle(fontSize: 12))),
             ]),
           ),
           const SizedBox(height: 12),

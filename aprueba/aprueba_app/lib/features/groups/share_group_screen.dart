@@ -30,7 +30,7 @@ class _ShareGroupScreenState extends ConsumerState<ShareGroupScreen> {
     try {
       await ref.read(groupsRepositoryProvider).share(_groupId!, questionId: q.id, comment: _comment.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compartido en el grupo')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.s('shared_ok'))));
         context.pop();
       }
     } on ApiException catch (e) {

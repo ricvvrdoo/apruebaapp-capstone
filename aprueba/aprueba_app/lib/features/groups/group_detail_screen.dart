@@ -46,7 +46,7 @@ class GroupDetailScreen extends ConsumerWidget {
             Row(children: [
               Expanded(child: OutlinedButton(onPressed: () => context.push('/groups/$groupId/invite'), child: Text('+ ${context.s('grp_invite_h')}'))),
               const SizedBox(width: 8),
-              Expanded(child: OutlinedButton(onPressed: () => context.push('/groups/$groupId/stats'), child: const Text('📊 Stats'))),
+              Expanded(child: OutlinedButton(onPressed: () => context.push('/groups/$groupId/stats'), child: Text(context.s('stats_btn')))),
             ]),
           ]),
         ),

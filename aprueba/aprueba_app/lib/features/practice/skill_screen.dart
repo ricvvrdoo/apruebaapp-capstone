@@ -60,7 +60,7 @@ class SkillScreen extends ConsumerWidget {
             SoftCard(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  Text('Tu dominio'),
+                  Text(context.s('your_mastery')),
                   const Spacer(),
                   Text('${s.masteryPercent}%',
                       style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 18, color: t.brand)),
