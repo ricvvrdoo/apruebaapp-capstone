@@ -57,7 +57,7 @@ export default function Settings() {
             {tests.map((t) => <span key={t.id} className="tag" onClick={() => toggleTest(t.id)} style={{ cursor: 'pointer', background: selected.includes(t.id) ? 'var(--brand)' : 'var(--chip)', color: selected.includes(t.id) ? '#fff' : 'var(--muted)' }}>{t.label}</span>)}
           </div>
         </div>
-        <div className="flex between" style={{ padding: '12px 0', cursor: 'pointer' }} onClick={() => nav('/plan')}><b style={{ fontSize: 13 }}>{L('set_plan')}</b><span className="note">{user?.plan === 'free' ? L('plan_free') : (user?.plan === 'uni' ? '1 prueba' : 'Todas')} ›</span></div>
+        <div className="flex between" style={{ padding: '12px 0', cursor: 'pointer' }} onClick={() => nav('/plan')}><b style={{ fontSize: 13 }}>{L('set_plan')}</b><span className="note">{user?.plan === 'free' ? L('plan_free') : (user?.plan === 'uni' ? L('plan_uni_short') : L('plan_all_short'))} ›</span></div>
       </div>
       <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={exportData}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_privacy')}</b><span className="note">›</span></div></div>
       <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={logout}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_logout')}</b><span className="note">›</span></div></div>

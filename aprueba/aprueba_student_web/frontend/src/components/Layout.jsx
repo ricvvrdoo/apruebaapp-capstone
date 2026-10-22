@@ -44,7 +44,7 @@ export default function Layout() {
         <div className="side-foot">
           <div className="side-user" onClick={() => { nav('/ajustes'); setOpen(false); }}>
             <div className="side-avatar">{initials(user?.name)}</div>
-            <div><div className="nm">{user?.name}</div><div className="pl">{free ? L('plan_free') : (user?.plan === 'uni' ? '1 prueba ilimitada' : 'Todas las pruebas')}</div></div>
+            <div><div className="nm">{user?.name}</div><div className="pl">{free ? L('plan_free') : (user?.plan === 'uni' ? L('plan_uni') : L('plan_all'))}</div></div>
           </div>
         </div>
       </aside>

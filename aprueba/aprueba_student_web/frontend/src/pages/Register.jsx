@@ -36,7 +36,7 @@ export default function Register() {
           {err && <div className="err">{err}</div>}
           <button className="btn full" style={{ marginTop: 14 }} disabled={busy}>{busy ? L('loading') : L('reg_btn')}</button>
         </form>
-        <div className="or-sep">o</div>
+        <div className="or-sep">{L('or_sep')}</div>
         <button className="paybtn google" onClick={() => doSocial('google')}>{L('social_google')}</button>
         <p className="note" style={{ textAlign: 'center', marginTop: 16 }}>
           {L('have_account')} <Link to="/login" className="muted-link">{L('login_link')}</Link>

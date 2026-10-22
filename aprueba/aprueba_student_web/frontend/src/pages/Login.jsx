@@ -32,7 +32,7 @@ export default function Login() {
           {err && <div className="err">{err}</div>}
           <button className="btn full" style={{ marginTop: 16 }} disabled={busy}>{busy ? L('loading') : L('login_btn')}</button>
         </form>
-        <div className="or-sep">{L('co_or').includes('card') ? 'or' : 'o'}</div>
+        <div className="or-sep">{L('or_sep')}</div>
         <button className="paybtn google" onClick={() => doSocial('google')}>{L('social_google')}</button>
         <button className="paybtn apple" onClick={() => doSocial('apple')}>{L('social_apple')}</button>
         <p className="note" style={{ textAlign: 'center', marginTop: 16 }}>

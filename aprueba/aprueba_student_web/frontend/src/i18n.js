@@ -3,7 +3,7 @@ export const T = {
 es: {
   nav_main:'Principal',nav_account:'Cuenta',
   nav_inicio:'Inicio',nav_practicar:'Practicar',nav_medallas:'Medallas',nav_grupos:'Grupos',nav_comunidad:'Comunidad',nav_plan:'Mi plan',nav_ajustes:'Ajustes',
-  search_ph:'Buscar pregunta, tema o grupo...',plan_free:'Plan Gratis',
+  search_ph:'Buscar pregunta, tema o grupo...',plan_free:'Plan Gratis',plan_uni:'1 prueba ilimitada',plan_uni_short:'1 prueba',plan_all:'Todas las pruebas',plan_all_short:'Todas',or_sep:'o',
   greeting:'Hola',welcome_sub:'Esto es lo que tienes para hoy.',
   quota:'Cuota diaria',used:'usadas',of:'de',quota_note:'10 base · +5 colegio · +5 direccion · 20 max',unlimited:'Ilimitada',
   streak:'Racha',days:'dias',keep_streak:'Sigue asi! No pierdas tu racha.',
@@ -61,7 +61,7 @@ es: {
 en: {
   nav_main:'Main',nav_account:'Account',
   nav_inicio:'Home',nav_practicar:'Practice',nav_medallas:'Medals',nav_grupos:'Groups',nav_comunidad:'Community',nav_plan:'My plan',nav_ajustes:'Settings',
-  search_ph:'Search question, topic or group...',plan_free:'Free plan',
+  search_ph:'Search question, topic or group...',plan_free:'Free plan',plan_uni:'1 unlimited test',plan_uni_short:'1 test',plan_all:'All tests',plan_all_short:'All',or_sep:'or',
   greeting:'Hi',welcome_sub:'Here is what you have for today.',
   quota:'Daily quota',used:'used',of:'of',quota_note:'10 base · +5 school · +5 address · 20 max',unlimited:'Unlimited',
   streak:'Streak',days:'days',keep_streak:'Keep it up! Do not lose your streak.',
