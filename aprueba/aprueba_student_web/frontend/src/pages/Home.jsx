@@ -7,7 +7,7 @@ import { Coin, Bar, Spinner } from '../components/ui.jsx';
 const TIERS = ['bronze', 'silver', 'gold', 'diamond', 'platinum'];
 
 export default function Home() {
-  const { L, user } = useAuth();
+  const { L, user, lang } = useAuth();
   const nav = useNavigate();
   const [state, setState] = useState(null);
 
@@ -25,7 +25,7 @@ export default function Home() {
       medals: medals.status === 'fulfilled' ? medals.value.data.wallet : Object.fromEntries(TIERS.map((t) => [t, 0])),
       progress: progress.status === 'fulfilled' ? progress.value.data : [],
     });
-  }, []);
+  }, [lang]); // las etiquetas de las pruebas vienen traducidas del servidor
 
   useEffect(() => { load(); }, [load]);
 

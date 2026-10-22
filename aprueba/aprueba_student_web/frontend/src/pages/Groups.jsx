@@ -6,7 +6,7 @@ import { Bar, Skeleton, Spinner, Toast, initials } from '../components/ui.jsx';
 const COLORS = ['#1A365D', '#10B981', '#6366F1', '#F5B041', '#EF4444'];
 
 export default function Groups() {
-  const { L, user } = useAuth();
+  const { L, user, lang } = useAuth();
   const [groups, setGroups] = useState(null);
   const [open, setOpen] = useState(null); // group detail
   const [tests, setTests] = useState([]);
@@ -16,7 +16,7 @@ export default function Groups() {
   const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 2500); };
 
   const loadList = async () => { const { data } = await api.get('/groups'); setGroups(data); };
-  useEffect(() => { loadList().catch(() => setGroups([])); api.get('/tests').then(({ data }) => { setTests(data); setForm((f) => ({ ...f, subjectTestId: data[0]?.id || '' })); }); }, []);
+  useEffect(() => { loadList().catch(() => setGroups([])); api.get('/tests').then(({ data }) => { setTests(data); setForm((f) => ({ ...f, subjectTestId: f.subjectTestId || data[0]?.id || '' })); }); }, [lang]);
 
   const create = async () => {
     if (!form.name) return;

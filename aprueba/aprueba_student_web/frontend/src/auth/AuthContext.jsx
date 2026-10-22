@@ -56,7 +56,9 @@ export function AuthProvider({ children }) {
   const refreshUser = useCallback(async () => { try { const me = (await api.get('/me')).data; setUser((u) => ({ ...u, ...me })); return me; } catch {} }, []);
 
   const toggleTheme = async () => { const v = !dark; setDark(v); try { await api.patch('/me/settings', { theme: v ? 'dark' : 'light' }); } catch {} };
-  const changeLang = async (l) => { setLang(l); try { await api.patch('/me/settings', { locale: l }); } catch {} };
+  // Primero se guarda en el servidor y despues se cambia la pantalla: las paginas vuelven a pedir
+  // sus datos al cambiar `lang`, y el backend responde segun el idioma guardado.
+  const changeLang = async (l) => { try { await api.patch('/me/settings', { locale: l }); } catch {} setLang(l); };
 
   return (
     <Ctx.Provider value={{ user, setUser, lang, setLang: changeLang, dark, toggleTheme, L, loading, login, register, social, logout, refreshUser }}>
