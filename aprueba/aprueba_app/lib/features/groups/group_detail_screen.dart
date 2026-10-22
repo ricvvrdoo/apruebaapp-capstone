@@ -29,7 +29,7 @@ class GroupDetailScreen extends ConsumerWidget {
               decoration: BoxDecoration(color: t.brand, borderRadius: BorderRadius.circular(14)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(g.name, style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 15, color: Colors.white)),
-                Text('${g.subject} · ${g.memberCount} ${context.s('grp_members_n')}', style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(.75))),
+                Text('${g.subject} · ${g.memberCount} ${context.s('grp_members_n')}', style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: .75))),
               ]),
             ),
             const SizedBox(height: 12),

@@ -133,7 +133,7 @@ class PremiumNotice extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: t.brand.withOpacity(.06),
+          color: t.brand.withValues(alpha: .06),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: t.brand, width: 1.5),
         ),

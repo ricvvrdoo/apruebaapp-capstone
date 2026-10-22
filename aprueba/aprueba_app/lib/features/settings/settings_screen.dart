@@ -90,7 +90,7 @@ class SettingsScreen extends ConsumerWidget {
           OutlinedButton(onPressed: () => ref.read(authControllerProvider.notifier).logout(), child: Text(context.s('logout'))),
           const SizedBox(height: 16),
           SoftCard(
-            background: AppColors.error.withOpacity(.06),
+            background: AppColors.error.withValues(alpha: .06),
             borderColor: AppColors.error,
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               GestureDetector(

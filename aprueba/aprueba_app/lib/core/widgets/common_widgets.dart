@@ -116,15 +116,15 @@ class Tag extends StatelessWidget {
     late Color bg, fg;
     switch (variant) {
       case 'g':
-        bg = AppColors.exito.withOpacity(.13);
+        bg = AppColors.exito.withValues(alpha: .13);
         fg = const Color(0xFF059669);
         break;
       case 'w':
-        bg = AppColors.oro.withOpacity(.18);
+        bg = AppColors.oro.withValues(alpha: .18);
         fg = const Color(0xFFB45309);
         break;
       case 'd':
-        bg = AppColors.error.withOpacity(.13);
+        bg = AppColors.error.withValues(alpha: .13);
         fg = const Color(0xFFDC2626);
         break;
       default:

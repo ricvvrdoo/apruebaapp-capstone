@@ -57,7 +57,6 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   Widget build(BuildContext context) {
     final session = ref.watch(practiceSessionProvider);
     final q = session.question;
-    final t = context.tokens;
     if (q == null) {
       return Scaffold(appBar: AppBar(), body: const Center(child: CircularProgressIndicator()));
     }
@@ -128,7 +127,7 @@ class _OptionTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: selected ? t.brand : t.line, width: 1.5),
-            color: selected ? t.brand.withOpacity(.06) : null,
+            color: selected ? t.brand.withValues(alpha: .06) : null,
           ),
           child: Row(children: [
             CircleAvatar(

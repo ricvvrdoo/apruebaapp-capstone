@@ -247,7 +247,7 @@ class TutorReviewsScreen extends ConsumerWidget {
           data: (data) => ListView(padding: const EdgeInsets.all(16), children: [
             SoftCard(
               borderColor: t.brand,
-              background: t.brand.withOpacity(.05),
+              background: t.brand.withValues(alpha: .05),
               child: Column(children: [
                 Text(data.overall.toStringAsFixed(1),
                     style: TextStyle(

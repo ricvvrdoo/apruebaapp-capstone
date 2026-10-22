@@ -370,7 +370,7 @@ class LocaleConfirmationScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
-                  value: selected.code,
+                  initialValue: selected.code,
                   items: [
                     for (final c in list)
                       DropdownMenuItem(value: c.code, child: Text('${c.name} (${c.dialCode})')),
@@ -385,7 +385,7 @@ class LocaleConfirmationScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
-                  value: language,
+                  initialValue: language,
                   items: [
                     for (final lang in languages)
                       DropdownMenuItem(
@@ -481,7 +481,7 @@ class EducationStageScreen extends ConsumerWidget {
                               .read(onboardingProvider.notifier)
                               .setGrade(id: level.id, label: level.label),
                           borderColor: state.gradeId == level.id ? t.brand : null,
-                          background: state.gradeId == level.id ? t.brand.withOpacity(.07) : null,
+                          background: state.gradeId == level.id ? t.brand.withValues(alpha: .07) : null,
                           child: Row(children: [
                             Icon(
                               state.gradeId == level.id

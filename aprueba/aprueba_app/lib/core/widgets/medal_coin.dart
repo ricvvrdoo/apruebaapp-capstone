@@ -24,8 +24,8 @@ class MedalCoin extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(.5), width: 2),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(.15), blurRadius: 6, offset: const Offset(0, 2))],
+        border: Border.all(color: Colors.white.withValues(alpha: .5), width: 2),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .15), blurRadius: 6, offset: const Offset(0, 2))],
       ),
       child: Text(medalEmoji[tier] ?? '🏅', style: TextStyle(fontSize: size * 0.46)),
     );

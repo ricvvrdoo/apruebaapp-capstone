@@ -54,7 +54,7 @@ class _GiftScreenState extends ConsumerState<GiftScreen> {
                 Text(context.s('med_gift_note'), style: TextStyle(color: t.muted)),
                 const SizedBox(height: 10),
                 SoftCard(
-                  background: AppColors.bronze.withOpacity(.12),
+                  background: AppColors.bronze.withValues(alpha: .12),
                   borderColor: AppColors.bronze,
                   child: Row(children: [
                     const MedalCoin('bronze', size: 24),

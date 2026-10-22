@@ -60,7 +60,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
                 SoftCard(
                   borderColor: t.brand,
-                  background: AppColors.azul.withOpacity(.05),
+                  background: AppColors.azul.withValues(alpha: .05),
                   onTap: () => context.push('/paywall'),
                   child: Row(children: [
                     const Text('🚀', style: TextStyle(fontSize: 22)),

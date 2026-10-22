@@ -5,8 +5,9 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
-  # WidgetStatePropertyAll (antes MaterialStateProperty) exige Flutter 3.22+.
-  flutter: '>=3.22.0'
+  # 3.33+: Color.withValues, DropdownButtonFormField.initialValue y la intl 0.20
+  # que fija flutter_localizations.
+  flutter: '>=3.33.0'
 
 dependencies:
   flutter:

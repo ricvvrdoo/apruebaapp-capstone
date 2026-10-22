@@ -50,7 +50,7 @@ class BenefitsScreen extends ConsumerWidget {
             Text(context.s('med_benefits_sub'), style: TextStyle(color: t.muted)),
             const SizedBox(height: 10),
             SoftCard(
-              background: AppColors.platinum.withOpacity(.14),
+              background: AppColors.platinum.withValues(alpha: .14),
               borderColor: AppColors.platinum,
               child: Row(children: [
                 const MedalCoin('platinum', size: 40),

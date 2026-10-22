@@ -291,7 +291,7 @@ class _ContactSharingCard extends StatelessWidget {
     final t = context.tokens;
     return SoftCard(
       borderColor: AppColors.oro,
-      background: AppColors.oro.withOpacity(.09),
+      background: AppColors.oro.withValues(alpha: .09),
       padding: const EdgeInsets.all(11),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [

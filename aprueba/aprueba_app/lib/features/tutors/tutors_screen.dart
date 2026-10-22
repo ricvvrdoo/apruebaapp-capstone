@@ -193,7 +193,7 @@ class _GapAnalysisCard extends StatelessWidget {
     return SoftCard(
       onTap: () => context.push('/tutors/analysis'),
       borderColor: AppColors.oro,
-      background: AppColors.oro.withOpacity(.09),
+      background: AppColors.oro.withValues(alpha: .09),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           const Text('🎯', style: TextStyle(fontSize: 22)),

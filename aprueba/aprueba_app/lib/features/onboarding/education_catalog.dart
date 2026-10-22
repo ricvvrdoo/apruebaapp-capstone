@@ -62,7 +62,7 @@ class EducationCatalog {
         label: en ? 'Primary education' : 'Educacion basica',
         items: [
           for (var n = 1; n <= 8; n++)
-            GradeOption(id: 'cl-basic-$n', label: en ? 'Year $n' : '${n}º Basico'),
+            GradeOption(id: 'cl-basic-$n', label: en ? 'Year $n' : '$nº Basico'),
         ],
       ),
       GradeGroup(
@@ -70,7 +70,7 @@ class EducationCatalog {
         label: en ? 'Secondary education' : 'Educacion media',
         items: [
           for (var n = 1; n <= 4; n++)
-            GradeOption(id: 'cl-media-$n', label: en ? 'Secondary $n' : '${n}º Medio'),
+            GradeOption(id: 'cl-media-$n', label: en ? 'Secondary $n' : '$nº Medio'),
         ],
       ),
       GradeGroup(

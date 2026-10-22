@@ -48,7 +48,7 @@ class TabScaffold extends ConsumerWidget {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: t.surface,
-          indicatorColor: t.brand.withOpacity(.12),
+          indicatorColor: t.brand.withValues(alpha: .12),
           labelTextStyle: WidgetStatePropertyAll(
             TextStyle(fontSize: 10, fontWeight: FontWeight.w700, fontFamily: 'Montserrat', color: t.muted),
           ),

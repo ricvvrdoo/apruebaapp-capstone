@@ -29,7 +29,7 @@ class SplashScreen extends ConsumerWidget {
                 const SizedBox(height: 6),
                 Text(context.s('tagline'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white.withOpacity(.75), fontSize: 13)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: .75), fontSize: 13)),
               ]),
             ),
             const Spacer(),

@@ -16,10 +16,12 @@ class ManagePlanScreen extends ConsumerWidget {
 
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    // El texto se resuelve antes del await para no usar el contexto después.
+    final cancelledMsg = context.s('mng_cancelled');
     try {
       await ref.read(subscriptionRepositoryProvider).cancel();
       ref.invalidate(subscriptionProvider);
-      messenger.showSnackBar(SnackBar(content: Text(context.s('mng_cancelled'))));
+      messenger.showSnackBar(SnackBar(content: Text(cancelledMsg)));
     } on ApiException catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
     }

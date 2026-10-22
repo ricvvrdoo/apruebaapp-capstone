@@ -72,7 +72,7 @@ class GapAnalysisScreen extends ConsumerWidget {
               const SizedBox(height: 10),
               SoftCard(
                 borderColor: t.brand,
-                background: t.brand.withOpacity(.05),
+                background: t.brand.withValues(alpha: .05),
                 child: Row(children: [
                   const Text('📊', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 10),

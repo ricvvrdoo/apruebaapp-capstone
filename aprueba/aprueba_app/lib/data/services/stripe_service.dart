@@ -37,7 +37,7 @@ class StripeService {
       paymentSheetParameters: SetupPaymentSheetParameters(
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: merchantDisplayName,
-        applePay: PaymentSheetApplePay(merchantCountryCode: 'CL'),
+        applePay: const PaymentSheetApplePay(merchantCountryCode: 'CL'),
         googlePay: const PaymentSheetGooglePay(merchantCountryCode: 'CL', testEnv: true),
         style: ThemeMode.system,
       ),
