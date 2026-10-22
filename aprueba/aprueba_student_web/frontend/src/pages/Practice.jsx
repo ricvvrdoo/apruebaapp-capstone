@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Bar, Spinner } from '../components/ui.jsx';
+import { Bar, Opt, Spinner } from '../components/ui.jsx';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 const fmt = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -98,7 +98,7 @@ export default function Practice() {
         <div className="card" style={{ marginTop: 12 }}>
           <div className="h" style={{ fontSize: 19 }}>{q.statement}</div>
           {q.options.map((o, i) => (
-            <div key={i} className={`opt ${sel === i ? 'sel' : ''}`} onClick={() => setSel(i)}><span className="k">{LETTERS[i]}</span>{o}</div>
+            <Opt key={i} selected={sel === i} onSelect={() => setSel(i)}><span className="k">{LETTERS[i]}</span>{o}</Opt>
           ))}
         </div>
         <p className="note" style={{ marginTop: 12 }}>{L('speed_note')}</p>
@@ -118,7 +118,7 @@ export default function Practice() {
         </div>
         <div className="card">
           {q.options.map((o, i) => (
-            <div key={i} className={`opt ${i === correctIdx ? 'ok' : (i === sel && !ok ? 'no' : '')}`}><span className="k">{LETTERS[i]}</span>{o}</div>
+            <Opt key={i} state={i === correctIdx ? 'ok' : (i === sel && !ok ? 'no' : '')}><span className="k">{LETTERS[i]}</span>{o}</Opt>
           ))}
           <div className="divider" /><p className="note" style={{ margin: 0 }}>{result.shortExplanation}</p>
         </div>

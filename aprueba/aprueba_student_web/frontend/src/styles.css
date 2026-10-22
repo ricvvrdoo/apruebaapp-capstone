@@ -139,3 +139,6 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--muted);margin
   .search{display:none}
 }
 @media(max-width:620px){.dash{grid-template-columns:1fr}.span2,.span3{grid-column:span 1}.content{padding:16px}.topbar{padding:10px 14px}}
+
+/* Foco visible para quienes navegan con teclado */
+.opt:focus-visible,.btn:focus-visible,.seg div:focus-visible,[role=button]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}

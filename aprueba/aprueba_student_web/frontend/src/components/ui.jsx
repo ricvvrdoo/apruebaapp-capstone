@@ -31,3 +31,26 @@ export function Logo({ size = 26 }) {
     </svg>
   );
 }
+
+// Opcion seleccionable (respuesta, prueba). Se opera con teclado: Tab para
+// llegar, Enter o Espacio para elegir. Sin onSelect queda solo de lectura.
+export function Opt({ selected = false, state = '', onSelect, role = 'radio', children, style }) {
+  const interactive = !!onSelect;
+  const onKeyDown = (e) => {
+    if (!interactive) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); }
+  };
+  return (
+    <div
+      className={`opt ${selected ? 'sel' : ''} ${state}`.trim()}
+      style={style}
+      role={interactive ? role : undefined}
+      aria-checked={interactive ? selected : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={onSelect}
+      onKeyDown={onKeyDown}
+    >
+      {children}
+    </div>
+  );
+}

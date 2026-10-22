@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Logo, Spinner } from '../components/ui.jsx';
+import { Logo, Opt, Spinner } from '../components/ui.jsx';
 
 export default function Onboarding() {
   const { L, user, setUser } = useAuth();
@@ -37,10 +37,10 @@ export default function Onboarding() {
         <p className="sub">{L('ob_sub')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
           {tests.map((t) => (
-            <div key={t.id} onClick={() => toggle(t.id)} className={`opt ${selected.includes(t.id) ? 'sel' : ''}`} style={{ marginTop: 0 }}>
+            <Opt key={t.id} role="checkbox" selected={selected.includes(t.id)} onSelect={() => toggle(t.id)} style={{ marginTop: 0 }}>
               <span className="k" style={selected.includes(t.id) ? { background: t.color, color: '#fff', borderColor: t.color } : {}}>✓</span>
               {t.label}
-            </div>
+            </Opt>
           ))}
         </div>
 
