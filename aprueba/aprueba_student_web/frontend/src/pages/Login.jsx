@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Logo } from '../components/ui.jsx';
+import { Logo, PasswordInput } from '../components/ui.jsx';
 
 export default function Login() {
   const { L, login, social } = useAuth();
@@ -27,10 +27,10 @@ export default function Login() {
         <p className="sub" style={{ textAlign: 'center' }}>{L('login_sub')}</p>
         <form onSubmit={submit}>
           <label className="fld">{L('email')}</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
           <label className="fld">{L('password')}</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          {err && <div className="err">{err}</div>}
+          <PasswordInput L={L} value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+          {err && <div className="err" role="alert">{err}</div>}
           <button className="btn full" style={{ marginTop: 16 }} disabled={busy}>{busy ? L('loading') : L('login_btn')}</button>
         </form>
         <div className="or-sep">{L('or_sep')}</div>

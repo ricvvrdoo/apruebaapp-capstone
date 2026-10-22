@@ -54,3 +54,48 @@ export function Opt({ selected = false, state = '', onSelect, role = 'radio', ch
     </div>
   );
 }
+
+// Puntaje 0-4 de la contraseña: largo, mayuscula, numero y simbolo.
+export function passwordScore(pw = '') {
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+  if (/\d/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return s;
+}
+
+// Campo de contrasena con boton para ver/ocultar y, opcional, indicador de fuerza.
+export function PasswordInput({ value, onChange, L, showStrength = false, invalid = false, autoComplete, id, ...rest }) {
+  const [shown, setShown] = React.useState(false);
+  const score = passwordScore(value);
+  return (
+    <>
+      <div style={{ position: 'relative' }}>
+        <input
+          id={id} type={shown ? 'text' : 'password'} value={value} onChange={onChange}
+          autoComplete={autoComplete} aria-invalid={invalid || undefined}
+          style={{ paddingRight: 64 }} {...rest}
+        />
+        <button
+          type="button" className="btn gho" onClick={() => setShown((v) => !v)}
+          aria-label={shown ? L('pw_hide') : L('pw_show')} aria-pressed={shown}
+          style={{ position: 'absolute', right: 4, top: 4, padding: '6px 10px', fontSize: 12 }}
+        >
+          {shown ? L('pw_hide') : L('pw_show')}
+        </button>
+      </div>
+      {showStrength && value ? (
+        <div className="pw-meter" aria-live="polite">
+          <div className="pw-bars">{[1, 2, 3, 4].map((n) => <i key={n} className={n <= score ? `on s${score}` : ''} />)}</div>
+          <span className="note">{L('pw_strength_' + score)}</span>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+// Mensaje de error de un campo, enlazado con aria-describedby.
+export function FieldError({ id, children }) {
+  return children ? <div id={id} className="field-err" role="alert">{children}</div> : null;
+}

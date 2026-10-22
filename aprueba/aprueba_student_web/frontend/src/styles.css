@@ -142,3 +142,11 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--muted);margin
 
 /* Foco visible para quienes navegan con teclado */
 .opt:focus-visible,.btn:focus-visible,.seg div:focus-visible,[role=button]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* Formularios: error por campo y fuerza de contrasena */
+.field-err{color:var(--danger);font-size:12px;margin-top:4px}
+input[aria-invalid=true]{border-color:var(--danger)}
+.pw-meter{display:flex;align-items:center;gap:10px;margin-top:6px}
+.pw-bars{display:flex;gap:4px;flex:1}
+.pw-bars i{height:4px;flex:1;border-radius:2px;background:var(--line)}
+.pw-bars i.on.s1{background:var(--danger)}.pw-bars i.on.s2{background:#F5B041}.pw-bars i.on.s3,.pw-bars i.on.s4{background:var(--accent)}
