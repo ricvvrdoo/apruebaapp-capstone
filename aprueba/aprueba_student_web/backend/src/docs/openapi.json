@@ -57,6 +57,10 @@
       "description": "Conversaciones con tutores por REST + polling: bandeja, historial paginado, envío, lectura y consentimiento para compartir WhatsApp."
     },
     {
+      "name": "Búsqueda",
+      "description": "Búsqueda global del alumno entre sus grupos, las pruebas y las preguntas que ya respondió."
+    },
+    {
       "name": "Pagos (modo demo)",
       "description": "Los pagos están fuera del alcance del MVP. Sin Stripe integrado, activar un plan sin pagar solo se permite con DEMO_MODE=true; el webhook está deshabilitado."
     },
@@ -20116,6 +20120,273 @@
                   "status": "ok",
                   "service": "aprueba-student-api",
                   "driver": "memory"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Interno"
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "Búsqueda"
+        ],
+        "operationId": "getSearch",
+        "summary": "Buscar grupos, pruebas y preguntas respondidas",
+        "description": "Busca sin distinguir tildes ni mayúsculas en los grupos del alumno, las pruebas y las preguntas que ya respondió (nunca en el banco completo, para no saltarse la cuota diaria). No devuelve la respuesta correcta. Límite de 30 búsquedas por minuto por usuario (429 RATE_LIMITED).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Texto a buscar, mínimo 2 caracteres."
+          },
+          {
+            "name": "types",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Lista separada por comas: groups, topics, questions. Por defecto, las tres."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Resultados por tipo, de 1 a 10. Por defecto 5."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "error",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "groups": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "subject": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "topics": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "testId": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "questions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "testId": {
+                                "type": "string"
+                              },
+                              "statement": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "null"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "requestId": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "q": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "groups": [
+                      {
+                        "id": "grp_a1b2c3d4e5",
+                        "name": "Algebra avanzada",
+                        "subject": "Matematica M1"
+                      }
+                    ],
+                    "topics": [
+                      {
+                        "testId": "m1",
+                        "label": "Matematica M1"
+                      }
+                    ],
+                    "questions": [
+                      {
+                        "id": "qst_f6e5d4c3b2",
+                        "testId": "m1",
+                        "statement": "Resuelve la ecuación x + 2 = 5"
+                      }
+                    ]
+                  },
+                  "error": null,
+                  "meta": {
+                    "requestId": "req_0a1b2c3d4e5f",
+                    "timestamp": "2026-09-30T12:00:00.000Z",
+                    "q": "algebra"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`VALIDATION_ERROR`: q debe tener al menos 2 caracteres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "summary": "VALIDATION_ERROR",
+                    "value": {
+                      "data": null,
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "q debe tener al menos 2 caracteres",
+                        "details": [],
+                        "field": null
+                      },
+                      "meta": {
+                        "requestId": "req_0a1b2c3d4e5f",
+                        "timestamp": "2026-09-30T12:00:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`AUTH_REQUIRED`: Falta el token de acceso\n\n`AUTH_INVALID`: Tipo de token invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "AUTH_REQUIRED": {
+                    "summary": "AUTH_REQUIRED",
+                    "value": {
+                      "data": null,
+                      "error": {
+                        "code": "AUTH_REQUIRED",
+                        "message": "Falta el token de acceso",
+                        "details": [],
+                        "field": null
+                      },
+                      "meta": {
+                        "requestId": "req_0a1b2c3d4e5f",
+                        "timestamp": "2026-09-30T12:00:00.000Z"
+                      }
+                    }
+                  },
+                  "AUTH_INVALID": {
+                    "summary": "AUTH_INVALID",
+                    "value": {
+                      "data": null,
+                      "error": {
+                        "code": "AUTH_INVALID",
+                        "message": "Tipo de token invalido",
+                        "details": [],
+                        "field": null
+                      },
+                      "meta": {
+                        "requestId": "req_0a1b2c3d4e5f",
+                        "timestamp": "2026-09-30T12:00:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`RATE_LIMITED`: Demasiadas busquedas; espera un momento",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "RATE_LIMITED": {
+                    "summary": "RATE_LIMITED",
+                    "value": {
+                      "data": null,
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Demasiadas busquedas; espera un momento",
+                        "details": [],
+                        "field": null
+                      },
+                      "meta": {
+                        "requestId": "req_0a1b2c3d4e5f",
+                        "timestamp": "2026-09-30T12:00:00.000Z"
+                      }
+                    }
+                  }
                 }
               }
             }

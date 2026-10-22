@@ -19,6 +19,7 @@ export const TAGS = [
   { archivo: 'community.js', name: 'Comunidad', description: 'Feed, publicaciones, comentarios, likes y reposts.' },
   { archivo: 'tutors.js', name: 'Tutores', description: 'Marketplace de tutores: búsqueda, perfil, reseñas, solicitudes de contacto y análisis de falencias. Los tutores se administran desde la consola admin; el alumno solo lee, reseña y contacta.' },
   { archivo: 'conversations.js', name: 'Chat con tutores', description: 'Conversaciones con tutores por REST + polling: bandeja, historial paginado, envío, lectura y consentimiento para compartir WhatsApp.' },
+  { archivo: 'search.js', name: 'Búsqueda', description: 'Búsqueda global del alumno entre sus grupos, las pruebas y las preguntas que ya respondió.' },
   { archivo: 'checkout.js', name: 'Pagos (modo demo)', description: 'Los pagos están fuera del alcance del MVP. Sin Stripe integrado, activar un plan sin pagar solo se permite con DEMO_MODE=true; el webhook está deshabilitado.' },
   { archivo: 'index.js', name: 'Sistema', description: 'Estado del servicio.' },
 ];
@@ -90,6 +91,7 @@ export const RESUMENES = {
   'GET /groups/:id/shared': 'Listar preguntas compartidas',
   'POST /groups/:id/shared': 'Compartir una pregunta en el grupo',
   'GET /feed': 'Obtener el feed de la comunidad',
+  'GET /search': 'Buscar grupos, pruebas y preguntas respondidas',
   'POST /posts': 'Publicar en la comunidad',
   'DELETE /posts/:id': 'Eliminar una publicación propia',
   'POST /posts/:id/like': 'Dar o quitar like',
@@ -121,6 +123,14 @@ export const RESUMENES = {
 const E = (name, where, type, required, desc) => ({ name, in: where, type, required: required ? 'Sí' : 'No', desc });
 
 export const EXTRA = {
+  'GET /search': {
+    descripcion: 'Busca sin distinguir tildes ni mayúsculas en los grupos del alumno, las pruebas y las preguntas que ya respondió (nunca en el banco completo, para no saltarse la cuota diaria). No devuelve la respuesta correcta. Límite de 30 búsquedas por minuto por usuario (429 RATE_LIMITED).',
+    entradas: [
+      E('q', 'query', 'string', true, 'Texto a buscar, mínimo 2 caracteres.'),
+      E('types', 'query', 'string', false, 'Lista separada por comas: groups, topics, questions. Por defecto, las tres.'),
+      E('limit', 'query', 'integer', false, 'Resultados por tipo, de 1 a 10. Por defecto 5.'),
+    ],
+  },
   'GET /health': { descripcion: 'Indica si el servicio responde y qué driver de datos usa.' },
   // Diferencia conocida con el documento: se aclara en vez de documentar algo que no ocurre.
   'POST /auth/logout': {
