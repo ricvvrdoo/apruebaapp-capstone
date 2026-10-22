@@ -494,6 +494,17 @@ results.push('\n[19] Refresh de cuentas suspendidas');
   check('reactivada la cuenta, el refresh vuelve a funcionar', r.status === 200, `(${r.status})`);
 }
 
+results.push('\n[20] JWT: solo se acepta el algoritmo HS256');
+{
+  const { default: jwtLib } = await import('jsonwebtoken');
+  const secret = process.env.JWT_SECRET || 'dev-secret';
+  const forged = (alg) => jwtLib.sign({ sub: 'usr_demo', typ: 'access' }, secret, { algorithm: alg, expiresIn: 300 });
+  let r = await call('GET', '/me', { token: forged('HS512') });
+  check('token firmado con HS512 -> 401', r.status === 401, `(${r.status})`);
+  r = await call('GET', '/me', { token: forged('HS256') });
+  check('el mismo token firmado con HS256 si entra (control)', r.status === 200, `(${r.status})`);
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);
