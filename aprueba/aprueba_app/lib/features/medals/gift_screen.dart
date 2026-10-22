@@ -106,9 +106,9 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: value > 0 ? () => onChanged(value - 1) : null),
+      IconButton(tooltip: context.s('a11y_less'), icon: const Icon(Icons.remove_circle_outline), onPressed: value > 0 ? () => onChanged(value - 1) : null),
       Text('$value', style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800)),
-      IconButton(icon: const Icon(Icons.add_circle_outline), onPressed: () => onChanged(value + 1)),
+      IconButton(tooltip: context.s('a11y_more'), icon: const Icon(Icons.add_circle_outline), onPressed: () => onChanged(value + 1)),
     ]);
   }
 }

@@ -81,6 +81,7 @@ class _TutorsScreenState extends ConsumerState<TutorsScreen> {
                 suffixIcon: (filters.query ?? '').isEmpty
                     ? null
                     : IconButton(
+                        tooltip: context.s('a11y_clear'),
                         icon: const Icon(Icons.close_rounded, size: 18),
                         onPressed: () {
                           _search.clear();

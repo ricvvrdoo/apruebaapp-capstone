@@ -41,6 +41,7 @@ class StarPicker extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 2),
           constraints: const BoxConstraints(),
           onPressed: () => onChanged(i),
+          tooltip: '$i / 5',
           icon: Icon(
             i <= value ? Icons.star_rounded : Icons.star_border_rounded,
             size: size,

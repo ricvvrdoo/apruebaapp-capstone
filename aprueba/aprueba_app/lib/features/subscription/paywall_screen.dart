@@ -45,7 +45,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               child: Row(children: [
                 for (final c in [('monthly', context.s('bill_mo')), ('yearly', '${context.s('bill_yr')} · ${context.s('bill_save')}')])
                   Expanded(
-                    child: GestureDetector(
+                    child: Semantics(button: true, selected: _cycle == c.$1, child: GestureDetector(
                       onTap: () => setState(() => _cycle = c.$1),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 9),
@@ -53,7 +53,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         decoration: BoxDecoration(color: _cycle == c.$1 ? t.brand : Colors.transparent, borderRadius: BorderRadius.circular(8)),
                         child: Text(c.$2, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, fontFamily: 'Montserrat', color: _cycle == c.$1 ? Colors.white : t.muted)),
                       ),
-                    ),
+                    )),
                   ),
               ]),
             ),

@@ -93,10 +93,10 @@ class SettingsScreen extends ConsumerWidget {
             background: AppColors.error.withValues(alpha: .06),
             borderColor: AppColors.error,
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              GestureDetector(
+              Semantics(button: true, child: GestureDetector(
                 onTap: () => _confirmDelete(context, ref),
                 child: Text(context.s('delete_account'), style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w700, color: AppColors.error)),
-              ),
+              )),
               const SizedBox(height: 4),
               Text(context.s('delete_account_p'), style: TextStyle(fontSize: 11, color: t.muted)),
             ]),

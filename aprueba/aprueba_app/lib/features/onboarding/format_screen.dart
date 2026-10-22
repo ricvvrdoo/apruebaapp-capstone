@@ -91,7 +91,7 @@ class _Segment extends StatelessWidget {
       child: Row(children: [
         for (final e in options.entries)
           Expanded(
-            child: GestureDetector(
+            child: Semantics(button: true, selected: value == e.key, child: GestureDetector(
               onTap: () => onChanged(e.key),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 9),
@@ -107,7 +107,7 @@ class _Segment extends StatelessWidget {
                         fontSize: 12,
                         color: value == e.key ? Colors.white : t.muted)),
               ),
-            ),
+            )),
           ),
       ]),
     );

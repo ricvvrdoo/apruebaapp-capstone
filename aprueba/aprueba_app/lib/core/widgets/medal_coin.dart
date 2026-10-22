@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
 
 const medalEmoji = {
@@ -17,7 +18,7 @@ class MedalCoin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = AppColors.medalColor(tier);
-    return Container(
+    return Semantics(label: context.s('med_$tier'), image: true, excludeSemantics: true, child: Container(
       width: size,
       height: size,
       alignment: Alignment.center,
@@ -28,6 +29,6 @@ class MedalCoin extends StatelessWidget {
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .15), blurRadius: 6, offset: const Offset(0, 2))],
       ),
       child: Text(medalEmoji[tier] ?? '🏅', style: TextStyle(fontSize: size * 0.46)),
-    );
+    ));
   }
 }

@@ -61,7 +61,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             child: SoftCard(
               child: Row(children: [
                 Expanded(child: TextField(controller: _post, decoration: InputDecoration(hintText: context.s('post_ph'), border: InputBorder.none, filled: false))),
-                IconButton(onPressed: _publish, icon: Icon(Icons.send, color: t.brand)),
+                IconButton(onPressed: _publish, tooltip: context.s('a11y_send_post'), icon: Icon(Icons.send, color: t.brand)),
               ]),
             ),
           ),

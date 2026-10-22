@@ -79,7 +79,7 @@ class SelectChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return GestureDetector(
+    return Semantics(button: true, selected: selected, child: GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 6, bottom: 6),
@@ -101,7 +101,7 @@ class SelectChip extends StatelessWidget {
                   color: selected ? Colors.white : t.ink)),
         ]),
       ),
-    );
+    ));
   }
 }
 

@@ -101,10 +101,10 @@ class _MedalsCard extends StatelessWidget {
         Row(children: [
           Text(context.s('home_medals'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: t.muted)),
           const Spacer(),
-          GestureDetector(
+          Semantics(button: true, child: GestureDetector(
             onTap: () => GoRouter.of(context).go('/medals'),
             child: Text(context.s('view_all'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: t.brand)),
-          ),
+          )),
         ]),
         const SizedBox(height: 8),
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
