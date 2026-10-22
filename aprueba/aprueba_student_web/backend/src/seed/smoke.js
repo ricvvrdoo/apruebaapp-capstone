@@ -416,6 +416,24 @@ results.push('\n[15] CORS (API y frontend en dominios distintos)');
   }
 }
 
+results.push('\n[16] Busqueda global');
+{
+  const g = (await call('POST', '/groups', { token: free, body: { name: 'Algebra avanzada', subjectTestId: 'm1' } })).json.data;
+  await expect('encuentra el grupo sin importar tildes ni mayusculas', 'GET', '/search?q=ALGEBRA&types=groups', { token: free }, 200,
+    (d) => d.groups.some((x) => x.id === g.id));
+  await expect('no mezcla grupos de otros alumnos', 'GET', '/search?q=algebra&types=groups', { token: premium }, 200,
+    (d) => !d.groups.some((x) => x.id === g.id));
+  await expect('busca en pruebas', 'GET', '/search?q=matematica&types=topics', { token: free }, 200, (d) => d.topics.length >= 1);
+  await expect('preguntas: nunca expone la respuesta correcta', 'GET', '/search?q=de&types=questions', { token: free }, 200,
+    (d) => d.questions.every((x) => !('correctIndex' in x) && !('options' in x)));
+  await expect('q muy corta -> 400', 'GET', '/search?q=a', { token: free }, 400);
+  await expect('types invalido -> 400', 'GET', '/search?q=algebra&types=foo', { token: free }, 400);
+  await expect('exige sesion', 'GET', '/search?q=algebra', {}, 401);
+  let last = 0;
+  for (let i = 0; i < 31; i++) last = (await call('GET', '/search?q=algebra&types=topics', { token: premium })).status;
+  check('rate limit: pasadas 30 busquedas responde 429', last === 429, `(${last})`);
+}
+
 results.push('\n[17] Idioma: grupos, pruebas y busqueda en ingles');
 {
   const setLocale = (locale) => call('PATCH', '/me/settings', { token: free, body: { locale } });
@@ -426,9 +444,17 @@ results.push('\n[17] Idioma: grupos, pruebas y busqueda en ingles');
   await expect('grupos: la materia sale en ingles', 'GET', '/groups', { token: free }, 200, (d) => mates(d)?.subject === 'Maths M1');
   await expect('detalle de grupo: materia en ingles', 'GET', '/groups/grp_mates', { token: free }, 200, (d) => d.subject === 'Maths M1');
   await expect('progreso por prueba: etiquetas en ingles', 'GET', '/me/progress', { token: free }, 200, (d) => d.some((p) => p.label === 'Maths M1'));
+  await expect('buscar "maths" encuentra prueba y grupo', 'GET', '/search?q=maths&types=topics,groups', { token: free }, 200,
+    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Maths M1') && d.groups.some((g) => g.id === 'grp_mates' && g.subject === 'Maths M1'));
+  await expect('en ingles tambien encuentra escribiendo en espanol', 'GET', '/search?q=matematica&types=topics', { token: free }, 200,
+    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Maths M1'));
+  await expect('?lang=es manda sobre el ajuste del alumno', 'GET', '/search?q=maths&types=topics&lang=es', { token: free }, 200,
+    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matematica M1'));
   await expect('pregunta de practica: eje en ingles', 'GET', '/practice/next?testId=m1', { token: free }, 200, (d) => d.axis === 'Numbers & Algebra');
   await setLocale('es');
   await expect('de vuelta en espanol: grupos', 'GET', '/groups', { token: free }, 200, (d) => mates(d)?.subject === 'Matematica M1');
+  await expect('de vuelta en espanol: buscar "maths" sigue encontrando', 'GET', '/search?q=maths&types=topics', { token: free }, 200,
+    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matematica M1'));
 }
 
 console.log(results.join('\n'));

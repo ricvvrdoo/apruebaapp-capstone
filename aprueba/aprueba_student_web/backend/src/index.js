@@ -18,6 +18,7 @@ import communityRoutes from './routes/community.js';
 import checkoutRoutes from './routes/checkout.js';
 import tutorsRoutes from './routes/tutors.js';
 import conversationsRoutes from './routes/conversations.js';
+import searchRoutes from './routes/search.js';
 
 const app = express();
 app.use(helmet());
@@ -80,6 +81,7 @@ v1.use(groupsRoutes);     // /groups/*, /invitations/*
 v1.use(communityRoutes);  // /feed, /posts/*
 v1.use(tutorsRoutes);     // /tutors/*, /me/gap-analysis
 v1.use(conversationsRoutes); // /me/conversations, /conversations/*
+v1.use(searchRoutes);     // /search
 app.use('/api/v1', v1);
 
 app.use(notFound);
