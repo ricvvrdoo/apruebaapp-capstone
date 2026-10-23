@@ -17,6 +17,7 @@ class User {
     this.email = '',
     this.plan = 'free',
     this.streak = 0,
+    this.streakStatus = 'none',
     this.quotaUsed = 0,
     this.quotaMax = 10,
     this.medals = const Medals(),
@@ -30,6 +31,7 @@ class User {
     this.language = 'es',
     this.gradeId,
     this.onboarded = false,
+    this.timezone,
   });
 
   final String id;
@@ -37,6 +39,7 @@ class User {
   final String email;
   final String plan; // free | uni | all
   final int streak;
+  final String streakStatus; // done_today | at_risk | none
   final int quotaUsed;
   final int quotaMax;
   final Medals medals;
@@ -50,6 +53,7 @@ class User {
   final String language; // es | en
   final String? gradeId;
   final bool onboarded;
+  final String? timezone; // nombre IANA; define cuando empieza el dia del alumno
 
   bool get isPaid => plan != 'free';
 
@@ -61,6 +65,7 @@ class User {
       email: _str(j['email']),
       plan: _str(j['plan'], 'free'),
       streak: _int(j['streak']),
+      streakStatus: _str(j['streakStatus'], 'none'),
       quotaUsed: _int(quota?['used']),
       quotaMax: _int(quota?['max'], 10),
       medals: Medals.fromJson(_as<Map>(j['medals'])?.cast<String, dynamic>() ?? const {}),
@@ -74,6 +79,7 @@ class User {
       language: _str(j['language'], 'es'),
       gradeId: _as<String>(j['gradeId']),
       onboarded: _bool(j['onboarded']),
+      timezone: _as<String>(j['timezone']),
     );
   }
 
@@ -83,6 +89,7 @@ class User {
         'email': email,
         'plan': plan,
         'streak': streak,
+        'streakStatus': streakStatus,
         'quota': {'used': quotaUsed, 'max': quotaMax},
         'medals': medals.toJson(),
         'school': school,
@@ -95,6 +102,7 @@ class User {
         'language': language,
         'gradeId': gradeId,
         'onboarded': onboarded,
+        'timezone': timezone,
       };
 }
 
@@ -530,12 +538,63 @@ class QuotaState {
 }
 
 class ProgressItem {
-  ProgressItem(this.testId, this.label, this.percent);
+  ProgressItem(this.testId, this.label, this.percent, {this.hasData = true, this.answered = 0, this.recent = 0});
   final String testId;
   final String label;
+  /// Acierto de las ultimas 20 respuestas de la prueba (entero; 0 sin respuestas).
   final int percent;
-  factory ProgressItem.fromJson(Map<String, dynamic> j) =>
-      ProgressItem(_str(j['testId']), _str(j['label']), _int(j['percent']));
+  /// false mientras haya menos de [minAnswers] respuestas recientes: se muestra "sin datos".
+  /// Una respuesta sin este campo (cache anterior) se considera con datos.
+  final bool hasData;
+  final int answered; // respuestas historicas
+  final int recent; // las usadas en el porcentaje (maximo 20)
+  static const minAnswers = 5;
+
+  /// Respuestas que faltan para poder mostrar el progreso.
+  int get missingForData => hasData ? 0 : (minAnswers - recent).clamp(0, minAnswers);
+
+  factory ProgressItem.fromJson(Map<String, dynamic> j) => ProgressItem(
+        _str(j['testId']),
+        _str(j['label']),
+        _int(j['percent']),
+        hasData: j['hasData'] == null ? true : _bool(j['hasData']),
+        answered: _int(j['answered']),
+        recent: _int(j['recent']),
+      );
+
+  Map<String, dynamic> toJson() => {'testId': testId, 'label': label, 'percent': percent, 'hasData': hasData, 'answered': answered, 'recent': recent};
+}
+
+/// GET /me/progress: el progreso por prueba y, en `meta`, la actividad reciente.
+class ProgressSummary {
+  ProgressSummary({required this.items, this.lastTestId, this.answeredToday = 0, this.answeredThisWeek = 0});
+  final List<ProgressItem> items;
+  /// Prueba de la respuesta mas reciente (null si aun no respondio nada o la prueba ya no existe).
+  final String? lastTestId;
+  final int answeredToday;
+  final int answeredThisWeek; // ultimos 7 dias incluyendo hoy
+
+  ProgressItem? get lastItem {
+    for (final p in items) {
+      if (p.testId == lastTestId) return p;
+    }
+    return null;
+  }
+
+  factory ProgressSummary.fromApi(List<dynamic> raw, Map<String, dynamic>? meta) => ProgressSummary(
+        items: raw.map((e) => ProgressItem.fromJson((e as Map).cast<String, dynamic>())).toList(),
+        lastTestId: _as<String>(meta?['lastTestId']),
+        answeredToday: _int(meta?['answeredToday']),
+        answeredThisWeek: _int(meta?['answeredThisWeek']),
+      );
+
+  /// Forma guardada en la cache offline.
+  Map<String, dynamic> toJson() => {
+        'data': [for (final p in items) p.toJson()],
+        'meta': {'lastTestId': lastTestId, 'answeredToday': answeredToday, 'answeredThisWeek': answeredThisWeek},
+      };
+  factory ProgressSummary.fromJson(Map<String, dynamic> j) =>
+      ProgressSummary.fromApi((j['data'] as List?) ?? const [], _as<Map>(j['meta'])?.cast<String, dynamic>());
 }
 
 class Correction {
@@ -558,16 +617,35 @@ class Correction {
   }
 }
 
+/// Progreso hacia un canje: `have` medallas (maximo `needed`), `exchangeable` canjes ya posibles y
+/// `missing` medallas que faltan para el primero.
+typedef MedalProgress = ({int have, int needed, String next, int exchangeable, int missing});
+
 class MedalWalletState {
   MedalWalletState({required this.wallet, this.progress = const {}});
   final Medals wallet;
-  final Map<String, ({int have, int needed, String next})> progress;
+  final Map<String, MedalProgress> progress;
+
+  /// Nivel que destaca el servidor para Inicio: el mas bajo que ya se puede canjear o, si ninguno,
+  /// el mas cercano a poder hacerlo.
+  String? get featuredTier => progress.isEmpty ? null : progress.keys.first;
+  MedalProgress? get featured => featuredTier == null ? null : progress[featuredTier];
+
   factory MedalWalletState.fromJson(Map<String, dynamic> j) {
-    final prog = <String, ({int have, int needed, String next})>{};
+    final prog = <String, MedalProgress>{};
     final p = _as<Map>(j['progress'])?.cast<String, dynamic>() ?? const {};
     p.forEach((k, v) {
       final m = (v as Map).cast<String, dynamic>();
-      prog[k] = (have: _int(m['have']), needed: _int(m['needed'], 5), next: _str(m['next']));
+      final have = _int(m['have']);
+      final needed = _int(m['needed'], 5);
+      prog[k] = (
+        have: have,
+        needed: needed,
+        next: _str(m['next']),
+        // Una respuesta anterior no trae estos dos: se deducen de have y needed.
+        exchangeable: m.containsKey('exchangeable') ? _int(m['exchangeable']) : (needed == 0 ? 0 : have ~/ needed),
+        missing: m.containsKey('missing') ? _int(m['missing']) : (needed - have).clamp(0, needed),
+      );
     });
     return MedalWalletState(
       wallet: Medals.fromJson(_as<Map>(j['wallet'])?.cast<String, dynamic>() ?? const {}),
