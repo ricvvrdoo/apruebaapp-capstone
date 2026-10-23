@@ -49,20 +49,22 @@ class ProfileRepository {
     return res.data;
   }
 
-  Future<List<ProgressItem>> progress() async {
+  /// Progreso por prueba más la actividad reciente (`meta`). Sin red usa la última copia; acepta
+  /// también la forma anterior de la cache (solo la lista).
+  Future<ProgressSummary> progressSummary() async {
     try {
       List<dynamic> raw = const [];
-      final res = await _api.get<List<ProgressItem>>(Endpoints.meProgress, parse: (d) {
+      final res = await _api.get<ProgressSummary>(Endpoints.meProgress, parse: (d) {
         raw = (d as List?) ?? const [];
-        return raw.map((e) => ProgressItem.fromJson((e as Map).cast<String, dynamic>())).toList();
+        return ProgressSummary.fromApi(raw, null);
       });
-      await _db.writeCache('progress', raw);
-      return res.data;
+      final summary = ProgressSummary.fromApi(raw, res.meta);
+      await _db.writeCache('progress', summary.toJson());
+      return summary;
     } on ApiException {
       final cached = await _db.readCache('progress');
-      if (cached is List) {
-        return cached.map((e) => ProgressItem.fromJson((e as Map).cast<String, dynamic>())).toList();
-      }
+      if (cached is Map) return ProgressSummary.fromJson(cached.cast<String, dynamic>());
+      if (cached is List) return ProgressSummary.fromApi(cached, null);
       rethrow;
     }
   }

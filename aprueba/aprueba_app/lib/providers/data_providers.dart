@@ -16,8 +16,10 @@ final meProvider = FutureProvider<User>((ref) {
 final isPaidPlanProvider =
     Provider<bool>((ref) => ref.watch(meProvider).valueOrNull?.isPaid ?? false);
 final quotaProvider = FutureProvider<QuotaState>((ref) => ref.watch(profileRepositoryProvider).quota());
+final progressSummaryProvider =
+    FutureProvider<ProgressSummary>((ref) => ref.watch(profileRepositoryProvider).progressSummary());
 final progressProvider =
-    FutureProvider<List<ProgressItem>>((ref) => ref.watch(profileRepositoryProvider).progress());
+    FutureProvider<List<ProgressItem>>((ref) async => (await ref.watch(progressSummaryProvider.future)).items);
 final testsProvider =
     FutureProvider<List<TestInfo>>((ref) => ref.watch(profileRepositoryProvider).tests());
 final preferencesProvider =
