@@ -51,7 +51,7 @@ es: {
   priv_intro:'Aquí ves los datos que Aprueba guarda de ti y puedes eliminar tu cuenta.',priv_data_h:'Tus datos',
   priv_f_name:'Nombre',priv_f_email:'Correo',priv_f_phone:'Teléfono',priv_f_verified:'verificado',priv_f_unverified:'sin verificar',priv_f_country:'País',priv_f_grade:'Grado',priv_f_school:'Colegio',priv_f_age:'Edad',priv_f_region:'Región',priv_f_lang:'Idioma',priv_f_tz:'Zona horaria',priv_f_plan:'Plan',priv_f_empty:'No indicado',
   
-  priv_delete_h:'Si eliminas tu cuenta',priv_delete_1:'Se borran tus respuestas, medallas, notificaciones, mensajes con tutores y tu pertenencia a los grupos.',priv_delete_2:'Tus publicaciones, comentarios y reseñas se conservan, pero sin tu nombre.',priv_delete_3:'Las boletas se conservan sin vincularse a ti, por obligación contable.',priv_delete_btn:'Ir a eliminar mi cuenta',
+  priv_delete_h:'Si eliminas tu cuenta',priv_delete_1:'Se borran tus respuestas, medallas, notificaciones, mensajes con tutores y tu pertenencia a los grupos.',priv_delete_2:'Tus publicaciones, comentarios y reseñas se conservan, pero sin tu nombre.',priv_delete_3:'Las boletas se conservan sin vincularse a ti, por obligación contable.',
   on:'Activado',off:'Desactivado',
   // auth
   login_h:'Inicia sesión',login_sub:'Practica para la PAES sin límites.',email:'Correo',password:'Contraseña',login_btn:'Entrar',
@@ -122,7 +122,7 @@ en: {
   priv_intro:'Here are the details Aprueba stores about you. You can also delete your account.',priv_data_h:'Your data',
   priv_f_name:'Name',priv_f_email:'Email',priv_f_phone:'Phone',priv_f_verified:'verified',priv_f_unverified:'not verified',priv_f_country:'Country',priv_f_grade:'Grade',priv_f_school:'School',priv_f_age:'Age',priv_f_region:'Region',priv_f_lang:'Language',priv_f_tz:'Time zone',priv_f_plan:'Plan',priv_f_empty:'Not provided',
   
-  priv_delete_h:'If you delete your account',priv_delete_1:'Your answers, medals, notifications, messages with tutors and group memberships are deleted.',priv_delete_2:'Your posts, comments and reviews are kept, but without your name.',priv_delete_3:'Invoices are kept without being linked to you, as required for accounting.',priv_delete_btn:'Go to delete my account',
+  priv_delete_h:'If you delete your account',priv_delete_1:'Your answers, medals, notifications, messages with tutors and group memberships are deleted.',priv_delete_2:'Your posts, comments and reviews are kept, but without your name.',priv_delete_3:'Invoices are kept without being linked to you, as required for accounting.',
   on:'On',off:'Off',
   login_h:'Sign in',login_sub:'Practice for the PAES with no limits.',email:'Email',password:'Password',login_btn:'Sign in',
   no_account:'No account?',register_link:'Sign up',forgot_link:'Forgot your password?',

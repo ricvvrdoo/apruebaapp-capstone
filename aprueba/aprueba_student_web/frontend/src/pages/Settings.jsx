@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Toast, notify } from '../components/ui.jsx';
+import Accordion from '../components/Accordion.jsx';
+import MyData from '../components/MyData.jsx';
 
 function Switch({ on, onClick }) {
   return (
@@ -51,14 +53,14 @@ export default function Settings() {
         <div className="flex between" style={{ padding: '12px 0', borderBottom: '1px solid var(--line)' }}><b style={{ fontSize: 13 }}>{L('set_lang')}</b>
           <select style={{ width: 'auto', background: 'none', border: 'none', color: 'var(--brand)', fontWeight: 700 }} value={lang} onChange={(e) => setLang(e.target.value)}><option value="es">Español</option><option value="en">English</option></select></div>
         <div className="flex between" style={{ padding: '12px 0', borderBottom: '1px solid var(--line)' }}><b style={{ fontSize: 13 }}>{L('set_notif')}</b><Switch on={reminder} onClick={toggleReminder} /></div>
-        <div style={{ padding: '12px 0', borderBottom: '1px solid var(--line)' }}><b style={{ fontSize: 13 }}>{L('set_tests')}</b>
-          <div className="flex" style={{ gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+        <Accordion title={L('set_tests')} hint={tests.length ? selected.map(testLabel).join(', ') : ''}>
+          <div className="flex" style={{ gap: 8, flexWrap: 'wrap' }}>
             {tests.map((t) => <span key={t.id} className="tag" onClick={() => toggleTest(t.id)} style={{ cursor: 'pointer', background: selected.includes(t.id) ? 'var(--brand)' : 'var(--chip)', color: selected.includes(t.id) ? '#fff' : 'var(--muted)' }}>{t.label}</span>)}
           </div>
-        </div>
-        <div className="flex between" style={{ padding: '12px 0', cursor: 'pointer' }} onClick={() => nav('/plan')}><b style={{ fontSize: 13 }}>{L('set_plan')}</b><span className="note">{user?.plan === 'free' ? L('plan_free') : (user?.plan === 'uni' ? L('plan_uni_short') : L('plan_all_short'))} ›</span></div>
+        </Accordion>
+        <div className="flex between" style={{ padding: '12px 0', cursor: 'pointer', borderBottom: '1px solid var(--line)' }} onClick={() => nav('/plan')}><b style={{ fontSize: 13 }}>{L('set_plan')}</b><span className="note">{user?.plan === 'free' ? L('plan_free') : (user?.plan === 'uni' ? L('plan_uni_short') : L('plan_all_short'))} ›</span></div>
+        <Accordion title={L('set_privacy')} last><MyData /></Accordion>
       </div>
-      <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={() => nav('/privacidad')}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_privacy')}</b><span className="note">›</span></div></div>
       <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={logout}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_logout')}</b><span className="note">›</span></div></div>
       <div className="card" style={{ marginTop: 14, borderColor: 'var(--danger)', background: 'rgba(239,68,68,.05)' }}>
         <b style={{ fontSize: 13, color: 'var(--danger)' }}>{L('set_danger')}</b><p className="note">{L('set_danger_p')}</p>

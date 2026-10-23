@@ -14,7 +14,6 @@ import Groups from './pages/Groups.jsx';
 import Community from './pages/Community.jsx';
 import Plan from './pages/Plan.jsx';
 import Settings from './pages/Settings.jsx';
-import Privacy from './pages/Privacy.jsx';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -47,7 +46,6 @@ export default function App() {
         <Route path="/comunidad" element={<Community />} />
         <Route path="/plan" element={<Plan />} />
         <Route path="/ajustes" element={<Settings />} />
-        <Route path="/privacidad" element={<Privacy />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

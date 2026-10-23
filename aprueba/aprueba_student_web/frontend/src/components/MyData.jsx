@@ -1,25 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Trash2, UserRound } from 'lucide-react';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Skeleton } from '../components/ui.jsx';
-
-function Section({ icon: Icon, title, children }) {
-  return (
-    <section className="card" style={{ marginTop: 14 }}>
-      <div className="flex" style={{ gap: 8, alignItems: 'center' }}><Icon size={18} aria-hidden="true" /><b>{title}</b></div>
-      {children}
-    </section>
-  );
-}
+import { Skeleton } from './ui.jsx';
 
 // Nombre del grado a partir de su id (los grados vienen agrupados por nivel).
 const gradeLabel = (groups, id) => groups.flatMap((g) => g.items || []).find((i) => i.id === id)?.label;
 
-export default function Privacy() {
+/** Los datos del alumno tal como los guarda la API y lo que pasa con ellos si elimina su cuenta. */
+export default function MyData() {
   const { L } = useAuth();
-  const nav = useNavigate();
   const [me, setMe] = useState(null);
   const [country, setCountry] = useState(null);
   const [grade, setGrade] = useState(null);
@@ -59,31 +48,23 @@ export default function Privacy() {
   ];
 
   return (
-    <div style={{ maxWidth: 620 }}>
-      <div className="h">{L('set_privacy')}</div>
-      <p className="note">{L('priv_intro')}</p>
-
-      <Section icon={UserRound} title={L('priv_data_h')}>
-        {failed ? <p className="note" style={{ marginTop: 8 }}>{L('error_generic')}</p>
-          : !rows ? <div style={{ marginTop: 10, display: 'grid', gap: 10 }}><Skeleton h={18} /><Skeleton h={18} /><Skeleton h={18} /></div>
-          : (
-            <dl style={{ margin: '10px 0 0', display: 'grid', gap: 0 }}>
-              {rows.map(([key, value]) => (
-                <div key={key} className="flex between" style={{ padding: '9px 0', borderBottom: '1px solid var(--line)', gap: 16 }}>
-                  <dt className="note" style={{ margin: 0 }}>{L(key)}</dt>
-                  <dd style={{ margin: 0, fontSize: 13, fontWeight: 600, textAlign: 'right', overflowWrap: 'anywhere', color: value ? 'inherit' : 'var(--muted)' }}>{value || empty}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-      </Section>
-
-      <Section icon={Trash2} title={L('priv_delete_h')}>
-        <ul className="note" style={{ margin: '8px 0 12px', paddingLeft: 18 }}>
-          {['priv_delete_1', 'priv_delete_2', 'priv_delete_3'].map((k) => <li key={k}>{L(k)}</li>)}
-        </ul>
-        <button className="btn sec" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }} onClick={() => nav('/ajustes')}>{L('priv_delete_btn')}</button>
-      </Section>
-    </div>
+    <>
+      {failed ? <p className="note">{L('error_generic')}</p>
+        : !rows ? <div style={{ display: 'grid', gap: 10 }}><Skeleton h={18} /><Skeleton h={18} /><Skeleton h={18} /></div>
+        : (
+          <dl style={{ margin: 0 }}>
+            {rows.map(([key, value]) => (
+              <div key={key} className="flex between" style={{ padding: '8px 0', borderBottom: '1px solid var(--line)', gap: 16 }}>
+                <dt className="note" style={{ margin: 0 }}>{L(key)}</dt>
+                <dd style={{ margin: 0, fontSize: 13, fontWeight: 600, textAlign: 'right', overflowWrap: 'anywhere', color: value ? 'inherit' : 'var(--muted)' }}>{value || empty}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      <b style={{ display: 'block', fontSize: 13, marginTop: 14 }}>{L('priv_delete_h')}</b>
+      <ul className="note" style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+        {['priv_delete_1', 'priv_delete_2', 'priv_delete_3'].map((k) => <li key={k}>{L(k)}</li>)}
+      </ul>
+    </>
   );
 }
