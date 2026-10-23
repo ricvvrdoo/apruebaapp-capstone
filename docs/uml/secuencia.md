@@ -7,8 +7,6 @@ Tres flujos clave del sistema, tal como están implementados en la rama `main`.
 El token de acceso dura 15 minutos y el de renovación, 30 días. Los clientes renuevan
 de forma transparente cuando reciben un `401`.
 
-![Secuencia de inicio de sesión](img/secuencia-sesion.png)
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -46,8 +44,6 @@ sequenceDiagram
 La respuesta se registra primero y de forma atómica: solo la solicitud que logra
 crearla descuenta cuota y entrega la medalla. Así, un doble clic no duplica nada.
 
-![Secuencia de responder una pregunta](img/secuencia-respuesta.png)
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -80,8 +76,6 @@ sequenceDiagram
 
 Cada cambio entra por un Pull Request; Vercel publica una vista previa y, al integrarse
 a `main`, despliega a producción.
-
-![Secuencia de despliegue continuo](img/secuencia-despliegue.png)
 
 ```mermaid
 sequenceDiagram

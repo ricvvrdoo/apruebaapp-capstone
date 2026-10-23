@@ -4,8 +4,6 @@ Dónde se ejecuta cada componente. La publicación continua en Vercel está oper
 entorno en contenedores Docker es el entregable final y está planificado para el
 Sprint 5 (PB-21 del [Product Backlog](../scrum/product-backlog.md)).
 
-![Diagrama de despliegue](img/despliegue.png)
-
 ```mermaid
 flowchart LR
     subgraph DEV["«dispositivo» Usuario"]

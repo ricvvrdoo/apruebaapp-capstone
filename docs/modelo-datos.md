@@ -6,7 +6,6 @@ especificación de la empresa (`Aprueba_Modelo_Datos_Firestore.docx`), con los a
 descritos más abajo. El diagrama de clases del dominio está en
 [uml/clases.md](uml/clases.md).
 
-![Modelo de datos por dominio](img/modelo-datos.png)
 
 ## Decisiones de diseño
 

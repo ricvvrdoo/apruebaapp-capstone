@@ -4,8 +4,6 @@ Actores y casos de uso del sistema del estudiante (sitio web y app móvil, a tra
 la API). Mermaid no tiene notación nativa de casos de uso: los actores se dibujan como
 nodos rectangulares y los casos de uso como óvalos dentro del límite del sistema.
 
-![Diagrama de casos de uso](img/casos-de-uso.png)
-
 ```mermaid
 flowchart LR
     V["👤 Visitante"]

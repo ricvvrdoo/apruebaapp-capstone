@@ -4,8 +4,6 @@ Entidades del dominio y sus relaciones. Cada clase corresponde a una colección 
 Cloud Firestore; las relaciones se implementan como referencias por identificador
 (por ejemplo, `Answer.userId`). Ver también el [modelo de datos](../modelo-datos.md).
 
-![Diagrama de clases](img/clases.png)
-
 ```mermaid
 classDiagram
     direction LR

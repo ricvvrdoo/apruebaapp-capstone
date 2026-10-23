@@ -1,7 +1,7 @@
 # Diagramas UML
 
 Diagramas del sistema en [Mermaid](https://mermaid.js.org/), que GitHub dibuja
-directamente. Cada documento incluye además una imagen PNG en [img/](img).
+directamente al abrir cada archivo.
 
 | Diagrama | Qué muestra |
 |---|---|

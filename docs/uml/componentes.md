@@ -4,8 +4,6 @@ Organización interna de la API y su relación con los clientes y los servicios
 externos. Las rutas se agrupan en routers de Express; todas usan la misma capa de
 acceso a datos (`data/repo.js`), que elige el driver según `DATA_DRIVER`.
 
-![Diagrama de componentes](img/componentes.png)
-
 ```mermaid
 flowchart TB
     subgraph CL["Clientes"]
