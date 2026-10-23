@@ -62,17 +62,31 @@ after(async () => {
   await browser?.close();
 });
 
-test('Ajustes lleva a la pantalla con lo que se guarda, la descarga y lo que pasa al eliminar', async () => {
-  const { page, errors } = await open(await newStudent());
+test('muestra los datos reales del alumno, la descarga y lo que pasa al eliminar', async () => {
+  const s = await newStudent();
+  const { page, errors } = await open(s);
   await page.goto(`${WEB}/ajustes`);
   await page.getByText('Mis datos y privacidad').click();
   await page.waitForURL(`${WEB}/privacidad`);
-  const text = await page.locator('main, .content, body').first().innerText();
-  assert.match(text, /Qué guardamos/);
-  assert.match(text, /Tu perfil: nombre, correo/);
-  assert.match(text, /Descargar mis datos/);
-  assert.match(text, /Si eliminas tu cuenta/);
-  assert.match(text, /Las boletas se conservan sin vincularse a ti/);
+  const datos = page.locator('.card', { hasText: 'Tus datos' }).first();
+  await datos.getByText('Alumno Privacidad').waitFor();
+  // El país y el grado se resuelven con el catálogo, un poco después del perfil.
+  await datos.getByText('Chile').waitFor();
+  await datos.getByText('PAES').waitFor();
+  const text = await datos.innerText();
+  const fila = (etiqueta, valor) => assert.ok(text.includes(etiqueta) && new RegExp(`${etiqueta}\\s*${valor}`).test(text), `${etiqueta}: ${valor} en ${text}`);
+  fila('Nombre', 'Alumno Privacidad');
+  fila('Correo', s.email.replace('.', '\\.'));
+  fila('País', 'Chile');
+  fila('Grado', 'PAES');
+  fila('Colegio', 'No indicado');
+  fila('Idioma', 'Español');
+  fila('Plan', 'Gratis');
+  const todo = await page.locator('body').innerText();
+  assert.match(todo, /Descargar mis datos/);
+  assert.match(todo, /Si eliminas tu cuenta/);
+  assert.match(todo, /Las boletas se conservan sin vincularse a ti/);
+  assert.doesNotMatch(todo, /Qué guardamos/);
   assert.deepEqual(errors, []);
 });
 
@@ -129,8 +143,11 @@ test('en inglés la pantalla también está traducida', async () => {
   const { page } = await open(s);
   await page.goto(`${WEB}/privacidad`);
   await page.getByText('Download my data').first().waitFor();
+  await page.getByText('Chile').first().waitFor();
   const text = await page.locator('body').innerText();
-  assert.match(text, /What we store/);
+  assert.match(text, /Your data/);
+  assert.match(text, /Name\s*Alumno Privacidad/);
+  assert.match(text, /Country\s*Chile/);
   assert.match(text, /If you delete your account/);
   assert.doesNotMatch(text, /priv_/);
 });
