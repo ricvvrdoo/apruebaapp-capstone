@@ -59,6 +59,59 @@ class ProgressBar extends StatelessWidget {
   }
 }
 
+/// Tarjeta con un encabezado que abre y cierra su contenido en la misma vista. El encabezado se anuncia
+/// como botón desplegable; el contenido solo existe mientras está abierta (lo que carga datos lo hace al abrirse).
+class ExpandableCard extends StatefulWidget {
+  const ExpandableCard({super.key, required this.title, required this.child, this.initiallyOpen = false});
+  final String title;
+  final Widget child;
+  final bool initiallyOpen;
+  @override
+  State<ExpandableCard> createState() => _ExpandableCardState();
+}
+
+class _ExpandableCardState extends State<ExpandableCard> {
+  late bool _open = widget.initiallyOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return SoftCard(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 4),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Semantics(
+          button: true,
+          expanded: _open,
+          label: widget.title,
+          excludeSemantics: true,
+          onTap: () => setState(() => _open = !_open),
+          child: InkWell(
+            onTap: () => setState(() => _open = !_open),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(children: [
+                Expanded(child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14))),
+                AnimatedRotation(
+                  turns: _open ? .5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(Icons.expand_more, color: t.muted),
+                ),
+              ]),
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          alignment: Alignment.topCenter,
+          child: _open
+              ? Padding(padding: const EdgeInsets.only(bottom: 12), child: widget.child)
+              : const SizedBox(width: double.infinity),
+        ),
+      ]),
+    );
+  }
+}
+
 /// Botón primario (oro) a ancho completo.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({super.key, required this.label, this.onPressed, this.icon});

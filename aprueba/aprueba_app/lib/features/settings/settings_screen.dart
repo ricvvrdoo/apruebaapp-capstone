@@ -10,6 +10,7 @@ import '../../core/widgets/common_widgets.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_controller.dart';
 import '../../providers/data_providers.dart';
+import 'my_data_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -46,47 +47,44 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(padding: const EdgeInsets.all(16), children: [
           Text(context.s('set_h'), style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w800, fontSize: 16)),
           const SizedBox(height: 10),
-          SoftCard(
-            child: Row(children: [
-              Expanded(child: Text(context.s('set_theme'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
-              Switch(
-                value: themeMode == ThemeMode.dark,
-                onChanged: (_) => ref.read(themeControllerProvider.notifier).toggle(),
+          ExpandableCard(
+            title: context.s('set_h'),
+            initiallyOpen: true,
+            child: Column(children: [
+              Row(children: [
+                Expanded(child: Text(context.s('set_theme'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
+                Switch(
+                  value: themeMode == ThemeMode.dark,
+                  onChanged: (_) => ref.read(themeControllerProvider.notifier).toggle(),
+                ),
+              ]),
+              Row(children: [
+                Expanded(child: Text(context.s('set_lang'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
+                DropdownButton<String>(
+                  value: locale.languageCode,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(value: 'es', child: Text('Español')),
+                    DropdownMenuItem(value: 'en', child: Text('English')),
+                  ],
+                  onChanged: (v) => ref.read(localeControllerProvider.notifier).set(v ?? 'es'),
+                ),
+              ]),
+              InkWell(
+                onTap: () => context.push('/manage-plan'),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(children: [
+                    Expanded(child: Text(context.s('set_plan'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
+                    Text(user?.isPaid == true ? user!.plan.toUpperCase() : context.s('set_free'), style: TextStyle(fontSize: 12, color: t.muted)),
+                    const Icon(Icons.chevron_right),
+                  ]),
+                ),
               ),
             ]),
           ),
           const SizedBox(height: 8),
-          SoftCard(
-            child: Row(children: [
-              Expanded(child: Text(context.s('set_lang'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
-              DropdownButton<String>(
-                value: locale.languageCode,
-                underline: const SizedBox.shrink(),
-                items: const [
-                  DropdownMenuItem(value: 'es', child: Text('Español')),
-                  DropdownMenuItem(value: 'en', child: Text('English')),
-                ],
-                onChanged: (v) => ref.read(localeControllerProvider.notifier).set(v ?? 'es'),
-              ),
-            ]),
-          ),
-          const SizedBox(height: 8),
-          SoftCard(
-            onTap: () => context.push('/manage-plan'),
-            child: Row(children: [
-              Expanded(child: Text(context.s('set_plan'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
-              Text(user?.isPaid == true ? user!.plan.toUpperCase() : context.s('set_free'), style: TextStyle(fontSize: 12, color: t.muted)),
-              const Icon(Icons.chevron_right),
-            ]),
-          ),
-          const SizedBox(height: 8),
-          SoftCard(
-            onTap: () => context.push('/privacy'),
-            child: Row(children: [
-              Expanded(child: Text(context.s('set_privacy'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
-              const Icon(Icons.chevron_right),
-            ]),
-          ),
+          ExpandableCard(title: context.s('set_privacy'), child: const MyDataSection()),
           const SizedBox(height: 16),
           OutlinedButton(onPressed: () => ref.read(authControllerProvider.notifier).logout(), child: Text(context.s('logout'))),
           const SizedBox(height: 16),

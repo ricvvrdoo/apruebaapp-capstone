@@ -27,7 +27,6 @@ import '../../features/practice/quota_unlock_screen.dart';
 import '../../features/practice/result_screen.dart';
 import '../../features/practice/skill_screen.dart';
 import '../../features/settings/settings_screen.dart';
-import '../../features/settings/privacy_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/subscription/checkout_screen.dart';
 import '../../features/subscription/manage_plan_screen.dart';
@@ -179,7 +178,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           }),
       GoRoute(path: '/pay-success', parentNavigatorKey: _rootKey, builder: (_, __) => const PaymentSuccessScreen()),
       GoRoute(path: '/manage-plan', parentNavigatorKey: _rootKey, builder: (_, __) => const ManagePlanScreen()),
-      GoRoute(path: '/privacy', parentNavigatorKey: _rootKey, builder: (_, __) => const PrivacyScreen()),
     ],
   );
   ref.onDispose(() {
