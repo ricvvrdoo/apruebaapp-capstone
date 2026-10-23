@@ -40,7 +40,8 @@ backend/
 | npm | La de Node 22 | Dependencias (hay `package-lock.json`) |
 | Firebase CLI | 15 o superior | Emulador de Firestore y publicación de reglas e índices |
 | Java | 21 | Requisito del emulador de Firestore |
-| Flutter | Dart 3.3 o superior | App móvil |
+| Flutter | 3.33 o superior | App móvil |
+| Android Studio y Android SDK | Android 6.0 (API 23) o superior | Compilar y emular la app |
 | Vercel CLI | Opcional | Despliegues manuales y variables de entorno |
 
 En Windows, clonar con `git config --global core.longpaths true`: algunas rutas de
@@ -153,10 +154,151 @@ detalle de configuración, variables y verificación está en
 5. Abrir el Pull Request, revisar la vista previa y cumplir la
    [Definition of Done](scrum/definition-of-done.md).
 
-## 10. Solución de problemas
+## 10. Sitio web del estudiante
+
+Aplicación de una sola página en React 18 con Vite y React Router, ubicada en
+`aprueba/aprueba_student_web/frontend`. Consume la API por HTTPS; no tiene
+credenciales propias.
+
+### Estructura
+
+```
+frontend/
+  index.html
+  vite.config.js        Puerto 5174 y proxy /api -> http://localhost:4100 (solo en desarrollo)
+  public/               Íconos y favicon
+  src/
+    main.jsx            Punto de entrada: BrowserRouter y AuthProvider
+    App.jsx             Rutas públicas, protegidas y onboarding
+    api/client.js       Cliente HTTP: envelope, token Bearer y renovación automática
+    auth/AuthContext.jsx  Sesión, usuario, idioma y tema
+    components/         Layout (menú lateral y barra superior), buscador y componentes de interfaz
+    pages/              Una página por vista: Login, Register, Forgot, Onboarding, Home,
+                        Practice, Medals, Groups, Community, Plan, Settings
+    i18n.js             Textos en español e inglés
+    styles.css          Estilos y tokens de marca (tema claro y oscuro)
+```
+
+### Rutas
+
+| Ruta | Página | Acceso |
+|---|---|---|
+| `/login`, `/register`, `/forgot` | Acceso y registro | Solo sin sesión |
+| `/onboarding` | Elección de pruebas | Con sesión, la primera vez |
+| `/`, `/practicar`, `/medallas`, `/grupos`, `/comunidad`, `/plan`, `/ajustes` | Vistas principales dentro del `Layout` | Con sesión y onboarding completo |
+
+`Protected` redirige a `/login` sin sesión y a `/onboarding` si el alumno aún no elige
+sus pruebas; cualquier otra ruta vuelve a `/`.
+
+### Comunicación con la API
+
+- La URL de la API se fija **al compilar** con `VITE_API_URL`. Sin ella, el cliente usa
+  la ruta relativa `/api/v1`, que en desarrollo atiende el proxy de Vite.
+- `api/client.js` agrega `Authorization: Bearer`, interpreta `{ data, error, meta }` y,
+  ante un `401`, renueva una vez con el token de renovación y reintenta la solicitud. Si
+  la renovación falla, cierra la sesión.
+- Los tokens se guardan en `localStorage`; la política de seguridad de contenido (CSP)
+  reduce el riesgo de que un script ajeno los lea. El paso a una cookie `httpOnly` queda
+  pendiente hasta tener dominios propios (ver [despliegue-vercel.md](despliegue-vercel.md)).
+- El idioma y el tema se guardan en el navegador y se sincronizan con `GET /me/settings`.
+
+### Compilación y despliegue
+
+```bash
+cd aprueba/aprueba_student_web/frontend
+npm ci
+VITE_API_URL=https://aprueba-api.vercel.app npm run build   # genera frontend/dist
+npm run preview                                             # sirve el build localmente
+```
+
+En Vercel, el proyecto `aprueba-student-web` usa `aprueba/aprueba_student_web/vercel.json`:
+
+- instala y compila el frontend, y publica `frontend/dist`;
+- redirige toda ruta a `index.html`, para que funcione recargar una ruta interna;
+- agrega las cabeceras de seguridad (CSP, HSTS, `X-Frame-Options`, `Referrer-Policy`,
+  `Permissions-Policy` y COOP) y caché larga para `/assets`.
+
+**Si cambia el dominio de la API**, actualizar `VITE_API_URL` en Vercel, el
+`connect-src` de la CSP en `vercel.json` y, si cambia el dominio del sitio,
+`CORS_ORIGINS` en la API.
+
+### Agregar una vista
+
+1. Crear la página en `src/pages/` y llamar a la API con `api.get`, `api.post`, etc.
+2. Registrar la ruta en `App.jsx` dentro del `Layout` protegido y el acceso en el menú
+   de `components/Layout.jsx`.
+3. Agregar los textos en español e inglés en `i18n.js`.
+4. Verificar en local contra la API y en la vista previa del Pull Request.
+
+## 11. App móvil
+
+Aplicación Flutter para Android e iOS, ubicada en `aprueba/aprueba_app`. Comparte el
+contrato de la API con el sitio web.
+
+### Arquitectura
+
+| Capa | Ubicación | Tecnología |
+|---|---|---|
+| Arranque y tema | `lib/main.dart`, `lib/app/` | `MaterialApp.router` con tema claro y oscuro |
+| Navegación | `lib/core/router/app_router.dart` | GoRouter |
+| Estado | `lib/providers/` | Riverpod |
+| Red | `lib/core/network/api_client.dart` | Dio con interceptor de autenticación |
+| Sesión | `lib/core/storage/` | `flutter_secure_storage` (Keychain en iOS, Keystore en Android) |
+| Datos | `lib/data/` | Modelos, repositorios por dominio y caché local con Drift (SQLite) |
+| Funcionalidades | `lib/features/` | Una carpeta por dominio: auth, onboarding, home, practice, medals, groups, community, tutors, subscription, settings |
+| Textos | `lib/core/l10n/` | Español e inglés |
+
+El cliente de red adjunta el token de acceso y, ante un `401`, renueva una sola vez con
+el token de renovación guardado en almacenamiento seguro; si falla, notifica que la
+sesión expiró para volver al inicio de sesión.
+
+### Configuración
+
+La app no guarda claves en el código: se pasan al compilar con `--dart-define`
+(valores por defecto en `lib/core/config/app_config.dart`).
+
+| Clave | Uso | Nota |
+|---|---|---|
+| `API_BASE_URL` | URL base de la API | **Obligatoria**: el valor por defecto (`api.staging.aprueba.cl`) aún no existe. Producción: `https://aprueba-api.vercel.app/api/v1`; emulador Android contra la API local: `http://10.0.2.2:4100/api/v1` |
+| `PHONE_AUTH_DEV_TOKEN` | Enviar un token de teléfono de desarrollo en vez del SMS | Activo en modo debug; la API lo acepta solo con `PHONE_AUTH_ALLOW_DEV_TOKEN=true` o `DEMO_MODE=true` |
+| `STRIPE_PUBLISHABLE_KEY`, `STRIPE_MERCHANT_ID` | Pagos | Fuera del alcance del MVP |
+| `GOOGLE_SERVER_CLIENT_ID` | Inicio de sesión con Google | Pendiente de decisión de la empresa |
+
+### Compilación y ejecución
+
+```bash
+cd aprueba/aprueba_app
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # genera el código de Drift
+flutter run --dart-define=API_BASE_URL=https://aprueba-api.vercel.app/api/v1
+flutter build apk --dart-define=API_BASE_URL=https://aprueba-api.vercel.app/api/v1
+flutter test
+```
+
+`build_runner` es obligatorio después de clonar o de cambiar las tablas de Drift: sin él
+falta `database.g.dart` y la app no compila.
+
+### Plataformas
+
+- **Android:** proyecto nativo en `android/` (paquete `cl.aprueba.aprueba_app`, Android
+  6.0 o superior). La configuración nativa de `setup/android` ya está aplicada. Para
+  publicar en una tienda falta definir la firma de release: hoy el build de release usa
+  la firma de depuración.
+- **iOS:** la carpeta `ios/` aún no existe. Se genera con `flutter create` y se le aplica
+  `setup/ios`, pero no se puede compilar ni firmar sin un equipo Mac con Xcode (PB-26).
+- La autenticación por teléfono, las notificaciones push y los pagos requieren los
+  archivos de Firebase (`google-services.json`, `GoogleService-Info.plist`) y las claves
+  de la empresa; mientras no existan, funcionan en modo de demostración o quedan
+  deshabilitados.
+
+## 12. Solución de problemas
 
 | Síntoma | Causa | Solución |
 |---|---|---|
+| El sitio web compilado llama a sí mismo en vez de a la API | Se compiló sin `VITE_API_URL` | Definir la variable en Vercel y volver a desplegar |
+| Recargar una ruta del sitio web da `404` | Falta la reescritura a `index.html` | Mantener `rewrites` en `aprueba_student_web/vercel.json` |
+| La app no se conecta | `API_BASE_URL` sin definir (apunta a un dominio inexistente) | Compilar con `--dart-define=API_BASE_URL=...` |
+| La app compila con errores de Drift | Falta el código generado | `dart run build_runner build --delete-conflicting-outputs` |
 | El emulador no inicia | Java distinto de 21 | Instalar Java 21 y ponerlo primero en el `PATH` |
 | `npm run seed` falla con "Falta PAES_DIR" | El banco oficial no está en el repositorio | Usar `npm run seed:ejemplo` o definir `PAES_DIR` |
 | La API no arranca en producción | `JWT_SECRET` ausente, de ejemplo o corto | Cargar un secreto aleatorio de 32 caracteres o más |

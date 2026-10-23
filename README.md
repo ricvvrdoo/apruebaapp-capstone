@@ -43,7 +43,7 @@ empresa.
 
 ## Ejecución local
 
-Requisitos: Node.js 22, Git y, para la app, Flutter (Dart 3.3 o superior). No hace
+Requisitos: Node.js 22, Git y, para la app, Flutter 3.33 o superior. No hace
 falta una cuenta de Firebase: por defecto la API usa un almacén en memoria.
 
 ### 1. API
@@ -83,7 +83,10 @@ dart run build_runner build --delete-conflicting-outputs
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:4100/api/v1   # emulador Android
 ```
 
-Detalle de la configuración nativa en [aprueba/aprueba_app/README.md](aprueba/aprueba_app/README.md).
+Para un dispositivo real o la API publicada, usar
+`--dart-define=API_BASE_URL=https://aprueba-api.vercel.app/api/v1`. Detalle en el
+[manual técnico](docs/manual-tecnico.md#11-app-móvil) y en
+[aprueba/aprueba_app/README.md](aprueba/aprueba_app/README.md).
 
 ## Integrantes y roles
 
