@@ -12899,7 +12899,7 @@
         ],
         "operationId": "getMeProgress",
         "summary": "Consultar el progreso por prueba",
-        "description": "Acierto del alumno en cada prueba que eligio, calculado sobre sus ultimas 20 respuestas de esa prueba. `percent` es un entero (0 si no hay respuestas). `hasData` es false mientras haya menos de 5 respuestas recientes: el cliente debe mostrar \"sin datos\" en lugar de un porcentaje poco fiable. `answered` cuenta todas las respuestas historicas y `recent` las usadas en el calculo (maximo 20). Se usa en \"Progreso por prueba\" del inicio.",
+        "description": "Acierto del alumno en cada prueba que eligio, calculado sobre sus ultimas 20 respuestas de esa prueba. `percent` es un entero (0 si no hay respuestas). `hasData` es false mientras haya menos de 5 respuestas recientes: el cliente debe mostrar \"sin datos\" en lugar de un porcentaje poco fiable. `answered` cuenta todas las respuestas historicas y `recent` las usadas en el calculo (maximo 20). Se usa en \"Progreso por prueba\" del inicio. En `meta` informa la actividad reciente: `lastTestId` (prueba de la respuesta mas reciente, o null si no hay o ya no existe), `lastAnsweredAt`, `answeredToday` (respuestas desde la medianoche del alumno en su zona horaria) y `answeredThisWeek` (ultimos 7 dias incluyendo hoy).",
         "security": [
           {
             "bearerAuth": []
@@ -12956,6 +12956,25 @@
                         "timestamp": {
                           "type": "string",
                           "format": "date-time"
+                        },
+                        "lastTestId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "lastAnsweredAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "answeredToday": {
+                          "type": "integer"
+                        },
+                        "answeredThisWeek": {
+                          "type": "integer"
                         }
                       }
                     }
@@ -12991,7 +13010,11 @@
                   "error": null,
                   "meta": {
                     "requestId": "req_05c6540b-607",
-                    "timestamp": "2026-10-02T21:18:54.319Z"
+                    "timestamp": "2026-10-02T21:18:54.319Z",
+                    "lastTestId": "m1",
+                    "lastAnsweredAt": "2026-10-23T14:02:11.000Z",
+                    "answeredToday": 6,
+                    "answeredThisWeek": 41
                   }
                 }
               }

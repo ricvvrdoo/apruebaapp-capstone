@@ -336,12 +336,12 @@ results.push('\n[13] Respuestas: envios simultaneos (doble clic)');
   for (let i = 0; i < 5; i++) {
     const qn = (await call('GET', '/practice/next', { token: premium })).json.data;
     const [a, b] = await Promise.all([
-      call('POST', `/questions/${qn.id}/answer`, { token: premium, body: { selected: 'A' } }),
-      call('POST', `/questions/${qn.id}/answer`, { token: premium, body: { selected: 'A' } }),
+      call('POST', `/questions/${qn.id}/answer`, { token: premium, body: { selected: 'A', sessionId: `dbl${i}` } }),
+      call('POST', `/questions/${qn.id}/answer`, { token: premium, body: { selected: 'A', sessionId: `dbl${i}` } }),
     ]);
     const statuses = [a.status, b.status].sort().join('/');
     if (statuses !== '201/409') bothAccepted++;
-    if ((await q2(C.answers, [['questionId', '==', qn.id], ['userId', '==', 'usr_camila']], (x) => x.sessionId === null)).length !== 1) duplicated++;
+    if ((await q2(C.answers, [['questionId', '==', qn.id], ['userId', '==', 'usr_camila']], (x) => x.sessionId === `dbl${i}`)).length !== 1) duplicated++;
   }
   check('5 dobles envios: siempre uno 201 y el otro 409', bothAccepted === 0, `(${bothAccepted} distintos)`);
   check('5 dobles envios: nunca queda la respuesta duplicada', duplicated === 0, `(${duplicated} duplicadas)`);
@@ -739,6 +739,51 @@ results.push('\n[25] Racha: cuenta practicar, no iniciar sesion');
   await patchU(DB4.users, legacy.id, { streak: 9 }); // cuenta anterior al cambio de regla: sin lastPracticeDay
   const meLegacy = (await call('GET', '/me', { token: legacy.token })).json.data;
   check('rachas anteriores a la regla nueva se reinician (streak 9 sin lastPracticeDay -> 0)', meLegacy.streak === 0 && meLegacy.streakStatus === 'none', JSON.stringify([meLegacy.streak, meLegacy.streakStatus]));
+}
+
+results.push('\n[26] Inicio: ultima prueba y actividad reciente (meta de /me/progress)');
+{
+  const { set: setDoc, query: queryDocs, COL: DB5 } = await import('../data/repo.js');
+  const { dayKey, shiftDay, nextMidnight } = await import('../lib/tz.js');
+  const tz = 'America/Santiago';
+  const metaOf = async (token) => (await call('GET', '/me/progress', { token })).json.meta;
+  const put = async (userId, testId, at, n) => {
+    const q = (await queryDocs(DB5.questions, [['testId', '==', testId]]))[0] || (await queryDocs(DB5.questions, [['testId', '==', 'm1']]))[0];
+    await setDoc(DB5.answers, `ans_t26_${userId}_${testId}_${n}`, {
+      id: `ans_t26_${userId}_${testId}_${n}`, userId, questionId: q.id, testId, selected: 'A', correct: true,
+      elapsedMs: 8000, sessionId: `t26-${testId}-${n}`, createdAt: at.toISOString(),
+    });
+  };
+
+  const nuevo = await registerStudent({ tests: ['m1', 'lectora'] });
+  let m = await metaOf(nuevo.token);
+  check('alumno nuevo: sin ultima prueba ni actividad', m.lastTestId === null && m.lastAnsweredAt === null && m.answeredToday === 0 && m.answeredThisWeek === 0, JSON.stringify(m));
+
+  const now = new Date();
+  const startOfToday = new Date(nextMidnight(tz, now).getTime() - 24 * 3600e3); // 00:00 de hoy en Santiago (dia de 24 h)
+  const alu = await registerStudent({ tests: ['m1', 'lectora'] });
+  await put(alu.id, 'm1', new Date(now.getTime() - 3 * 86400e3), 1);          // hace 3 dias
+  await put(alu.id, 'm1', new Date(now.getTime() - 8 * 86400e3), 2);          // hace 8 dias: fuera de la semana
+  await put(alu.id, 'lectora', new Date(startOfToday.getTime() + 30 * 60e3), 3); // hoy 00:30 locales
+  await put(alu.id, 'lectora', new Date(startOfToday.getTime() - 30 * 60e3), 4); // ayer 23:30 locales
+  m = await metaOf(alu.token);
+  check('ultima prueba = la de la respuesta mas reciente (lectora)', m.lastTestId === 'lectora', JSON.stringify(m));
+  check('lastAnsweredAt es la fecha de esa respuesta', m.lastAnsweredAt === new Date(startOfToday.getTime() + 30 * 60e3).toISOString(), m.lastAnsweredAt);
+  check('hoy cuenta solo desde la medianoche local (1 respuesta)', m.answeredToday === 1, JSON.stringify(m));
+  check('esta semana = ultimos 7 dias incluyendo hoy (3 respuestas; la de hace 8 dias no)', m.answeredThisWeek === 3, JSON.stringify(m));
+
+  const otra = await registerStudent({ tests: ['m1'] });
+  await put(otra.id, 'cien', new Date(now.getTime() - 3600e3), 1); // prueba que no eligio
+  m = await metaOf(otra.token);
+  check('la ultima prueba puede ser una no elegida (existe en el catalogo)', m.lastTestId === 'cien', JSON.stringify(m));
+  await put(otra.id, 'prueba-inexistente', new Date(now.getTime() - 60e3), 2);
+  m = await metaOf(otra.token);
+  // "hace 1 h" y "hace 1 min" cuentan como hoy solo si caen despues de la medianoche local (la prueba puede correr a las 00:10).
+  const esperadasHoy = [3600e3, 60e3].filter((ms) => dayKey(new Date(now.getTime() - ms), tz) === dayKey(now, tz)).length;
+  check('una prueba que ya no existe no se sugiere (lastTestId null) y las respuestas de hoy se cuentan', m.lastTestId === null && m.answeredToday === esperadasHoy, JSON.stringify([m, esperadasHoy]));
+
+  const demo = await metaOf(free);
+  check('usuario demo: tiene ultima prueba y actividad esta semana', typeof demo.lastTestId === 'string' && demo.answeredThisWeek >= 20, JSON.stringify(demo));
 }
 
 console.log(results.join('\n'));

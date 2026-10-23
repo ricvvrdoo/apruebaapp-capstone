@@ -9,7 +9,7 @@ import { COL, get, set, add, patch, del, query, list } from '../data/repo.js';
 import { TIERS, NEXT, walletProgress, award } from '../lib/medals.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt, todayKey } from '../lib/quota.js';
 import { streakView } from '../lib/streak.js';
-import { tzOf, isValidTimeZone } from '../lib/tz.js';
+import { tzOf, isValidTimeZone, dayKey, shiftDay } from '../lib/tz.js';
 import { verifyPhone } from '../lib/jwt.js';
 import { demoMode } from '../lib/demo.js';
 import { findCountry, findGrade } from '../data/catalog.js';
@@ -205,7 +205,28 @@ r.get('/me/progress', wrap(async (req, res) => {
       recent: recent.length,
     };
   });
-  return ok(res, data);
+  // Actividad reciente (meta): alimenta "Continuar practicando" y la tarjeta de actividad de Inicio.
+  // El dia se mide en la zona horaria del alumno; "esta semana" son los ultimos 7 dias incluyendo hoy.
+  const tz = tzOf(u);
+  const today = dayKey(new Date(), tz);
+  const weekStart = shiftDay(today, -6);
+  let last = null;
+  let answeredToday = 0;
+  let answeredThisWeek = 0;
+  for (const a of answers) {
+    if (!a.createdAt) continue;
+    const day = dayKey(new Date(a.createdAt), tz);
+    if (day === today) answeredToday++;
+    if (day >= weekStart && day <= today) answeredThisWeek++;
+    if (!last || a.createdAt > last.createdAt) last = a;
+  }
+  const lastKnown = last && tests.some((t) => t.id === last.testId);
+  return ok(res, data, 200, {
+    lastTestId: lastKnown ? last.testId : null,
+    lastAnsweredAt: last?.createdAt || null,
+    answeredToday,
+    answeredThisWeek,
+  });
 }));
 
 // GET /me/medals
