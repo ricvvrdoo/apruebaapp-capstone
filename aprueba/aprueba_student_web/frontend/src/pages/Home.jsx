@@ -23,6 +23,7 @@ export default function Home() {
       me: me.value.data,
       quota: quota.value.data,
       medals: medals.status === 'fulfilled' ? medals.value.data.wallet : Object.fromEntries(TIERS.map((t) => [t, 0])),
+      medalProgress: medals.status === 'fulfilled' ? medals.value.data.progress || {} : {},
       progress: progress.status === 'fulfilled' ? progress.value.data : [],
     });
   }, [lang]); // las etiquetas de las pruebas vienen traducidas del servidor
@@ -40,10 +41,15 @@ export default function Home() {
       </div>
     );
   }
-  const { me, quota, medals, progress } = state;
+  const { me, quota, medals, medalProgress, progress } = state;
   const free = me.plan === 'free';
-  const prog = TIERS.find((t) => t !== 'platinum' && medals[t] > 0) || 'bronze';
-  const nextT = { bronze: 'silver', silver: 'gold', gold: 'diamond', diamond: 'platinum' }[prog];
+  // Nivel que destaca el servidor: el mas bajo que ya se puede canjear o el mas cercano a poder hacerlo.
+  const [mTier, mInfo] = Object.entries(medalProgress)[0] || ['bronze', { have: 0, needed: 5, next: 'silver', exchangeable: 0, missing: 5 }];
+  const tierName = (t) => L('med_' + t).toLowerCase();
+  const exchangeVars = { n: mInfo.exchangeable || mInfo.missing, tier: tierName(mTier), next: tierName(mInfo.next) };
+  const medalNote = mInfo.exchangeable > 1 ? L('medals_exchange_many', exchangeVars)
+    : mInfo.exchangeable === 1 ? L('medals_exchange_one', exchangeVars)
+    : L(mInfo.missing === 1 ? 'medals_missing_one' : 'medals_missing', exchangeVars);
 
   return (
     <>
@@ -73,8 +79,10 @@ export default function Home() {
             ))}
           </div>
           <div className="divider" />
-          <span className="note"><Coin tier={prog} /> {medals[prog] % 5}/5 {L('next_tier')} <Coin tier={nextT} /></span>
-          <Bar value={(medals[prog] % 5) / 5 * 100} color="var(--bronze)" />
+          <span className="note"><Coin tier={mTier} /> {mInfo.have}/{mInfo.needed} → <Coin tier={mInfo.next} /></span>
+          <Bar value={(mInfo.have / mInfo.needed) * 100} color={`var(--${mTier})`} />
+          <p className="note" style={{ marginTop: 6 }}>{medalNote}</p>
+          {mInfo.exchangeable > 0 && <button className="btn sec" style={{ marginTop: 8, padding: '8px 12px' }} onClick={() => nav('/medallas')}>{L('medals_go_exchange')}</button>}
         </div>
         <div className="card span2" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'linear-gradient(135deg,var(--brand),#264b80)', color: '#fff', border: 'none' }}>
           <div className="h" style={{ color: '#fff', fontSize: 20 }}>{L('continue_h')}</div>
