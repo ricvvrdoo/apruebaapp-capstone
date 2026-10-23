@@ -60,6 +60,27 @@ dev_dependencies:
   drift_dev: ^2.18.0
   build_runner: ^2.4.11
 
+  # Ícono y pantalla de arranque con el isotipo de Aprueba (assets/branding/).
+  # Regenerar con: dart run flutter_launcher_icons && dart run flutter_native_splash:create
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+
+flutter_launcher_icons:
+  android: true
+  # Sin carpeta ios/ todavía (PB-26): activar al configurar iOS.
+  ios: false
+  image_path: assets/branding/icono.png
+  adaptive_icon_background: "#F8FAFC"
+  adaptive_icon_foreground: assets/branding/icono_adaptativo.png
+
+flutter_native_splash:
+  color: "#F8FAFC"
+  image: assets/branding/splash.png
+  android_12:
+    color: "#F8FAFC"
+    image: assets/branding/splash.png
+    icon_background_color: "#F8FAFC"
+
 flutter:
   uses-material-design: true
   assets:
