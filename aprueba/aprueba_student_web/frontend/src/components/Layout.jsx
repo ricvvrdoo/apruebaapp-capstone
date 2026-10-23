@@ -11,6 +11,9 @@ const NAV_MAIN = [
   ['grupos', '\u{1F465}', '/grupos'],
   ['comunidad', '\u{1F4AC}', '/comunidad'],
 ];
+// El buscador solo se muestra donde aporta: en el resto de las pantallas era redundante.
+const SEARCH_ROUTES = new Set(['/', '/grupos']);
+
 const NAV_ACCOUNT = [
   ['plan', '\u{1F4B3}', '/plan'],
   ['ajustes', '⚙️', '/ajustes'],
@@ -54,7 +57,7 @@ export default function Layout() {
         <header className="topbar">
           <button className="hamb" onClick={() => setOpen(true)}>☰</button>
           <div className="page-title">{L('nav_' + titleKey)}</div>
-          <SearchBox />
+          {SEARCH_ROUTES.has(loc.pathname) && <SearchBox />}
           <div className="tb-right">
             <span className="chip">{"\u{1F525}"} {user?.streak || 0}</span>
             <select className="ctl" value={lang} onChange={(e) => setLang(e.target.value)}>
