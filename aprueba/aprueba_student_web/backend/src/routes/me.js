@@ -14,6 +14,7 @@ import { verifyPhone } from '../lib/jwt.js';
 import { demoMode } from '../lib/demo.js';
 import { findCountry, findGrade } from '../data/catalog.js';
 import { langOf, testLabel } from '../lib/lang.js';
+import { exportUserData, eraseUser } from '../lib/account.js';
 
 const r = Router();
 r.use(authRequired);
@@ -77,7 +78,7 @@ r.delete('/me', wrap(async (req, res) => {
       return fail(res, 401, 'AUTH_INVALID_CREDENTIALS', 'La contrasena de confirmacion es incorrecta');
     }
   }
-  await del(COL.users, u.id);
+  await eraseUser(u);
   return noContent(res);
 }));
 
@@ -409,8 +410,9 @@ r.get('/me/invoices', wrap(async (req, res) => {
 }));
 
 // GET /me/data-export
-r.get('/me/data-export', wrap(async (_req, res) => {
-  return ok(res, { exportId: `exp_${Math.random().toString(36).slice(2, 6)}`, status: 'processing' }, 202);
+// Entrega en la misma respuesta todo lo que se guarda del alumno (derecho de acceso y portabilidad).
+r.get('/me/data-export', wrap(async (req, res) => {
+  return ok(res, await exportUserData(req.user));
 }));
 
 export default r;

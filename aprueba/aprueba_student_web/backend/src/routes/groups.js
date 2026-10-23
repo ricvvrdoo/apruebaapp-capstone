@@ -5,6 +5,7 @@ import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { COL, get, set, add, del, query, list, genId } from '../data/repo.js';
 import { langOf, getTests, testLabel } from '../lib/lang.js';
+import { leaveGroup } from '../lib/account.js';
 
 const r = Router();
 r.use(authRequired);
@@ -143,19 +144,7 @@ r.delete('/groups/:id/members/me', wrap(async (req, res) => {
   if (!g) return fail(res, 404, 'NOT_FOUND', 'El grupo no existe');
   const m = await isMember(g.id, req.user.id);
   if (!m) return fail(res, 404, 'NOT_GROUP_MEMBER', 'No perteneces a este grupo');
-  await del(COL.groupMembers, m.id);
-  const remaining = await query(COL.groupMembers, [['groupId', '==', g.id]]);
-  if (!remaining.length) {
-    for (const s of await query(COL.groupShared, [['groupId', '==', g.id]])) await del(COL.groupShared, s.id);
-    for (const i of await query(COL.groupInvitations, [['groupId', '==', g.id]])) await del(COL.groupInvitations, i.id);
-    await del(COL.groups, g.id);
-    return noContent(res);
-  }
-  if (g.ownerId === req.user.id) {
-    const heir = remaining[0];
-    await set(COL.groups, g.id, { ...g, ownerId: heir.userId });
-    await set(COL.groupMembers, heir.id, { ...heir, role: 'owner' });
-  }
+  await leaveGroup(g, m);
   return noContent(res);
 }));
 
@@ -204,7 +193,7 @@ r.post('/groups/:id/shared', wrap(async (req, res) => {
   if (!questionId) return fail(res, 400, 'VALIDATION_ERROR', 'questionId es obligatorio');
   const s = await add(COL.groupShared, {
     groupId: g.id, questionId, answerId: answerId || null, comment: comment || '',
-    sharedBy: req.user.name, result: 'correct', elapsed: '0:18', sharedAt: new Date().toISOString(),
+    sharedBy: req.user.name, sharedById: req.user.id, result: 'correct', elapsed: '0:18', sharedAt: new Date().toISOString(),
   }, 'shr');
   return created(res, { id: s.id, questionId, groupId: g.id });
 }));

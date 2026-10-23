@@ -786,6 +786,101 @@ results.push('\n[26] Inicio: ultima prueba y actividad reciente (meta de /me/pro
   check('usuario demo: tiene ultima prueba y actividad esta semana', typeof demo.lastTestId === 'string' && demo.answeredThisWeek >= 20, JSON.stringify(demo));
 }
 
+results.push('\n[27] Mis datos y privacidad: exportar y eliminar la cuenta');
+{
+  const { add: addDoc, set: setDoc, get: getDoc, query: queryDocs, COL: DB7 } = await import('../data/repo.js');
+  const A = await registerStudent({ tests: ['m1'] });   // la cuenta que se exporta y se elimina
+  const B = await registerStudent({ tests: ['m1'] });   // otro alumno: sus datos no deben tocarse ni exportarse
+  const nameA = (await call('GET', '/me', { token: A.token })).json.data.name;
+  const now = new Date().toISOString();
+
+  // Actividad real de A por la API: respuestas, publicaciones, comentarios, likes, grupo, dispositivo.
+  const q = (await call('GET', '/practice/next', { token: A.token })).json.data;
+  await call('POST', `/questions/${q.id}/answer`, { token: A.token, body: { selected: 'A', elapsedMs: 5000, sessionId: 'priv-a' } });
+  const postA = (await call('POST', '/posts', { token: A.token, body: { text: 'Mi duda de prueba' } })).json.data;
+  const postB = (await call('POST', '/posts', { token: B.token, body: { text: 'Post de B' } })).json.data;
+  await call('POST', `/posts/${postB.id}/comments`, { token: A.token, body: { text: 'Comentario de A en el post de B' } });
+  await call('POST', `/posts/${postA.id}/comments`, { token: A.token, body: { text: 'Comentario de A en su post' } });
+  await call('POST', `/posts/${postB.id}/like`, { token: A.token });
+  await call('POST', `/posts/${postB.id}/repost`, { token: A.token });
+  await call('POST', '/devices', { token: A.token, body: { platform: 'android', pushToken: 'tok-secreto-a', deviceId: 'dev_a' } });
+  const soloGrp = (await call('POST', '/groups', { token: A.token, body: { name: 'Solo A', subjectTestId: 'm1' } })).json.data;
+  const sharedGrp = (await call('POST', '/groups', { token: A.token, body: { name: 'Compartido', subjectTestId: 'm1' } })).json.data;
+  await addDoc(DB7.groupMembers, { groupId: sharedGrp.id, userId: B.id, name: 'Alumno B', email: B.email, role: 'member', score: 0, activeToday: true }, 'gm');
+  await addDoc(DB7.groupShared, { groupId: sharedGrp.id, questionId: q.id, comment: '', sharedBy: nameA, sharedById: A.id, result: 'correct', elapsed: '0:18', sharedAt: now }, 'shr');
+  await addDoc(DB7.groupInvitations, { groupId: sharedGrp.id, email: A.email, status: 'pending', token: 'tok-inv-a', createdAt: now, expiresAt: now }, 'inv');
+  // Filas que solo se crean con plan de pago o desde el lado del tutor: se siembran directo.
+  const sub = await addDoc(DB7.subscriptions, { userId: A.id, plan: 'all', billingCycle: 'monthly', status: 'active', amount: 3, currency: 'USD', createdAt: now }, 'sub');
+  const inv = await addDoc(DB7.invoices, { userId: A.id, amount: 3, currency: 'USD', status: 'paid', paidAt: '2026-10-01', pdfUrl: '#' }, 'in');
+  const rev = await addDoc(DB7.tutorReviews, { tutorId: 'tut_maria', userId: A.id, userName: nameA, userInitials: 'AL', ratings: { clarity: 5 }, overall: 5, comment: 'Muy buena', createdAt: now }, 'rev');
+  const req = await addDoc(DB7.tutorRequests, { tutorId: 'tut_maria', userId: A.id, message: 'Hola', status: 'sent', createdAt: now }, 'trq');
+  const conv = await addDoc(DB7.conversations, { tutorId: 'tut_maria', userId: A.id, userName: nameA, requestId: req.id, lastMessageAt: now, lastMessagePreview: 'Hola' }, 'cnv');
+  await addDoc(DB7.messages, { conversationId: conv.id, senderType: 'user', senderId: A.id, text: 'Hola tutor', createdAt: now }, 'msg');
+  await addDoc(DB7.messages, { conversationId: conv.id, senderType: 'tutor', senderId: 'tut_maria', text: 'Hola alumno', createdAt: now }, 'msg');
+  const cor = await addDoc(DB7.corrections, { userId: A.id, questionId: q.id, reason: 'otro', comment: '', status: 'pending', createdAt: now }, 'cor');
+  const ntfA = await addDoc(DB7.notifications, { userId: A.id, type: 'streak', title: 'Hola', body: 'x', read: false, createdAt: now }, 'ntf');
+  const cuenta = async (col, f, v) => (await queryDocs(col, [[f, '==', v]])).length;
+
+  // ---- Exportar ----
+  await expect('exportar exige sesion', 'GET', '/me/data-export', {}, 401);
+  const ex = await expect('exportar entrega los datos en la misma respuesta', 'GET', '/me/data-export', { token: A.token }, 200,
+    (d) => d.profile?.email === A.email && typeof d.exportedAt === 'string' && d.format === 1);
+  const txt = JSON.stringify(ex);
+  check('el export no incluye la contrasena ni sus hashes', !/passwordHash|clave1234|\$2[aby]\$/.test(txt));
+  check('el export no incluye el token de push', !txt.includes('tok-secreto-a'));
+  check('el export no incluye datos de otros alumnos', !txt.includes(B.email) && !txt.includes(B.id));
+  check('respuestas: incluye la respuesta dada', ex.answers.length === 1 && ex.answers[0].questionId === q.id, JSON.stringify(ex.answers));
+  check('publicaciones y comentarios propios', ex.posts.length === 1 && ex.posts[0].text === 'Mi duda de prueba' && ex.comments.length === 2, `${ex.posts?.length} ${ex.comments?.length}`);
+  check('likes y reposts como ids de publicacion', ex.likes.includes(postB.id) && ex.reposts.includes(postB.id), JSON.stringify([ex.likes, ex.reposts]));
+  check('grupos con su rol (sin lista de miembros)', ex.groups.length === 2 && ex.groups.every((g) => g.role === 'owner') && !('members' in ex.groups[0]), JSON.stringify(ex.groups));
+  check('suscripciones y boletas', ex.subscriptions.length === 1 && ex.invoices.length === 1);
+  check('conversaciones con sus mensajes (los del usuario y los del tutor)', ex.conversations.length === 1 && ex.conversations[0].messages.length === 2, JSON.stringify(ex.conversations));
+  check('resenas, solicitudes a tutores, recorrecciones, notificaciones y medallas', ex.tutorReviews.length === 1 && ex.tutorRequests.length === 1 && ex.corrections.length === 1 && ex.notifications.length >= 1 && Array.isArray(ex.medalLedger), JSON.stringify(Object.keys(ex)));
+  check('dispositivos: plataforma y fecha, sin el token', ex.devices.length === 1 && ex.devices[0].platform === 'android' && !('pushToken' in ex.devices[0]));
+
+  // ---- Eliminar ----
+  await expect('eliminar con contrasena incorrecta', 'DELETE', '/me', { token: A.token, body: { password: 'otra-clave' } }, 401);
+  check('... y no borra nada', !!(await getDoc(DB7.users, A.id)) && (await cuenta(DB7.answers, 'userId', A.id)) === 1);
+  const likesAntes = (await getDoc(DB7.posts, postB.id)).likes;
+  const repostsAntes = (await getDoc(DB7.posts, postB.id)).reposts;
+  const respuestasB = await cuenta(DB7.answers, 'userId', B.id);
+  await expect('eliminar con la contrasena correcta', 'DELETE', '/me', { token: A.token, body: { password: 'clave1234' } }, 204);
+
+  check('la cuenta ya no existe y no puede iniciar sesion', !(await getDoc(DB7.users, A.id)) &&
+    (await call('POST', '/auth/login', { body: { email: A.email, password: 'clave1234' } })).status === 401);
+  const tokenViejo = await call('GET', '/me', { token: A.token });
+  check('el token anterior deja de servir', tokenViejo.status === 401, String(tokenViejo.status));
+  for (const [col, nombre] of [[DB7.answers, 'respuestas'], [DB7.notifications, 'notificaciones'], [DB7.devices, 'dispositivos'],
+    [DB7.medalLedger, 'medallas'], [DB7.corrections, 'recorrecciones'], [DB7.subscriptions, 'suscripciones'],
+    [DB7.tutorRequests, 'solicitudes a tutores'], [DB7.likes, 'likes'], [DB7.reposts, 'reposts'], [DB7.groupMembers, 'membresias']]) {
+    check(`se borran ${nombre}`, (await cuenta(col, 'userId', A.id)) === 0);
+  }
+  check('se borran la conversacion y sus mensajes', !(await getDoc(DB7.conversations, conv.id)) && (await cuenta(DB7.messages, 'conversationId', conv.id)) === 0);
+  check('se borran las invitaciones pendientes a su correo', (await cuenta(DB7.groupInvitations, 'email', A.email)) === 0);
+
+  const pA = await getDoc(DB7.posts, postA.id);
+  check('su publicacion queda anonimizada (texto intacto, sin autor)', pA && pA.authorId === null && pA.authorName === 'Usuario eliminado' && pA.text === 'Mi duda de prueba', JSON.stringify(pA));
+  const comentarios = await queryDocs(DB7.comments, [['postId', '==', postB.id]]);
+  check('su comentario en el post de B queda anonimizado', comentarios.length === 1 && comentarios[0].authorId === null && comentarios[0].authorName === 'Usuario eliminado', JSON.stringify(comentarios));
+  const pB = await getDoc(DB7.posts, postB.id);
+  check('los contadores del post de B descuentan su like y su repost', pB.likes === likesAntes - 1 && pB.reposts === repostsAntes - 1, JSON.stringify([pB.likes, pB.reposts, likesAntes, repostsAntes]));
+  const revDoc = await getDoc(DB7.tutorReviews, rev.id);
+  check('la resena al tutor se conserva sin nombre ni vinculo', revDoc && revDoc.userId === null && revDoc.userName === 'Usuario eliminado' && revDoc.userInitials === '?' && revDoc.comment === 'Muy buena', JSON.stringify(revDoc));
+  const invDoc = await getDoc(DB7.invoices, inv.id);
+  check('la boleta se conserva (obligacion contable) sin vinculo a la persona', invDoc && invDoc.userId === null && invDoc.amount === 3, JSON.stringify(invDoc));
+  const compartidos = await queryDocs(DB7.groupShared, [['groupId', '==', sharedGrp.id]]);
+  check('lo que compartio en el grupo queda anonimizado', compartidos.length === 1 && compartidos[0].sharedBy === 'Usuario eliminado', JSON.stringify(compartidos));
+
+  check('el grupo donde estaba solo se elimina', !(await getDoc(DB7.groups, soloGrp.id)));
+  const g2 = await getDoc(DB7.groups, sharedGrp.id);
+  check('el grupo con mas miembros pasa al otro alumno', g2 && g2.ownerId === B.id, JSON.stringify(g2));
+  const mB = await queryDocs(DB7.groupMembers, [['groupId', '==', sharedGrp.id]]);
+  check('... que queda como dueno', mB.length === 1 && mB[0].userId === B.id && mB[0].role === 'owner', JSON.stringify(mB));
+
+  check('los datos de otro alumno no cambian', (await cuenta(DB7.answers, 'userId', B.id)) === respuestasB && !!(await getDoc(DB7.posts, postB.id)) && !!(await getDoc(DB7.users, B.id)));
+  await expect('eliminar sin contrasena una cuenta con contrasena', 'DELETE', '/me', { token: B.token, body: {} }, 401);
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);
