@@ -123,6 +123,9 @@ export const RESUMENES = {
 const E = (name, where, type, required, desc) => ({ name, in: where, type, required: required ? 'Sí' : 'No', desc });
 
 export const EXTRA = {
+  'GET /me/progress': {
+    descripcion: 'Acierto del alumno en cada prueba que eligio, calculado sobre sus ultimas 20 respuestas de esa prueba. `percent` es un entero (0 si no hay respuestas). `hasData` es false mientras haya menos de 5 respuestas recientes: el cliente debe mostrar "sin datos" en lugar de un porcentaje poco fiable. `answered` cuenta todas las respuestas historicas y `recent` las usadas en el calculo (maximo 20). Se usa en "Progreso por prueba" del inicio.',
+  },
   'GET /search': {
     descripcion: 'Busca sin distinguir tildes ni mayúsculas en los grupos del alumno, las pruebas y las preguntas que ya respondió (nunca en el banco completo, para no saltarse la cuota diaria). No devuelve la respuesta correcta. Límite de 30 búsquedas por minuto por usuario (429 RATE_LIMITED).',
     entradas: [

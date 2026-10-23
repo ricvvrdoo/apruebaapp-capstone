@@ -12859,7 +12859,7 @@
         ],
         "operationId": "getMeProgress",
         "summary": "Consultar el progreso por prueba",
-        "description": "Devuelve el progreso del alumno por prueba (porcentaje de avance), usado en \"Tu progreso\" del inicio.",
+        "description": "Acierto del alumno en cada prueba que eligio, calculado sobre sus ultimas 20 respuestas de esa prueba. `percent` es un entero (0 si no hay respuestas). `hasData` es false mientras haya menos de 5 respuestas recientes: el cliente debe mostrar \"sin datos\" en lugar de un porcentaje poco fiable. `answered` cuenta todas las respuestas historicas y `recent` las usadas en el calculo (maximo 20). Se usa en \"Progreso por prueba\" del inicio.",
         "security": [
           {
             "bearerAuth": []
@@ -12891,6 +12891,15 @@
                           },
                           "percent": {
                             "type": "integer"
+                          },
+                          "hasData": {
+                            "type": "boolean"
+                          },
+                          "answered": {
+                            "type": "integer"
+                          },
+                          "recent": {
+                            "type": "integer"
                           }
                         }
                       }
@@ -12917,12 +12926,26 @@
                     {
                       "testId": "lectora",
                       "label": "Comp. Lectora",
-                      "percent": 68
+                      "percent": 70,
+                      "hasData": true,
+                      "answered": 20,
+                      "recent": 20
                     },
                     {
                       "testId": "m1",
                       "label": "Matematica M1",
-                      "percent": 54
+                      "percent": 55,
+                      "hasData": true,
+                      "answered": 20,
+                      "recent": 20
+                    },
+                    {
+                      "testId": "cien",
+                      "label": "Ciencias",
+                      "percent": 0,
+                      "hasData": false,
+                      "answered": 0,
+                      "recent": 0
                     }
                   ],
                   "error": null,

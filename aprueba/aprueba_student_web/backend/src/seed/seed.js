@@ -76,19 +76,18 @@ const users = {
     phone: '+56912345678',
     passwordHash: hash('demo1234'), plan: 'free', streak: 4, quota: { day: now.slice(0, 10), used: 5 },
     medals: { bronze: 14, silver: 3, gold: 1, diamond: 0, platinum: 0 }, selectedTests: ['lectora', 'm1'],
-    progressSeed: { lectora: 68, m1: 54, m2: 41, cien: 33 },
   }),
   usr_camila: baseUser({
     id: 'usr_camila', name: 'Camila Rojas', email: 'camila@correo.cl', emailLower: 'camila@correo.cl',
     phone: '+56987654321',
     passwordHash: hash('demo1234'), plan: 'all', streak: 7, medals: { bronze: 30, silver: 6, gold: 2, diamond: 0, platinum: 1 },
-    selectedTests: ['lectora', 'm1', 'cien'], progressSeed: { lectora: 81, m1: 72, cien: 60 },
+    selectedTests: ['lectora', 'm1', 'cien'],
   }),
   usr_juan: baseUser({
     id: 'usr_juan', name: 'Juan Lopez', email: 'juan@correo.cl', emailLower: 'juan@correo.cl',
     phone: '+56955555555',
     passwordHash: hash('demo1234'), plan: 'uni', streak: 3, medals: { bronze: 9, silver: 1, gold: 0, diamond: 0, platinum: 0 },
-    selectedTests: ['m1'], progressSeed: { m1: 63 },
+    selectedTests: ['m1'],
   }),
 };
 
@@ -245,11 +244,36 @@ const messages = {
 
 const skills = {}; // el endpoint /questions/:id/skill genera el arbol a partir de la habilidad
 
+// ── Historial de respuestas de los usuarios demo ──
+// Aciertos de las ultimas 20 respuestas por prueba. Es dato real: lo leen /me/progress,
+// el analisis de falencias y la racha. Se reparte en los ultimos ~7 dias.
+const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+const HISTORY = { usr_demo: { lectora: 14, m1: 11 }, usr_camila: { lectora: 16, cien: 12, m1: 14 }, usr_juan: { m1: 13 } };
+const questions = loadQuestions();
+const answers = {};
+for (const [userId, perTest] of Object.entries(HISTORY)) {
+  for (const [testId, correctCount] of Object.entries(perTest)) {
+    const pool = Object.values(questions).filter((q) => q.testId === testId).sort((a, b) => a.id.localeCompare(b.id));
+    if (!pool.length) continue;
+    for (let i = 0; i < 20; i++) {
+      const q = pool[i % pool.length];
+      const correct = (i * 7) % 20 < correctCount; // reparte los aciertos a lo largo del tiempo
+      const wrong = LETTERS.find((_, k) => k !== q.correctIndex && k < q.options.length);
+      const id = `ans_demo_${userId}_${testId}_${i}`;
+      answers[id] = {
+        id, userId, questionId: q.id, testId, selected: correct ? LETTERS[q.correctIndex] : wrong, correct,
+        elapsedMs: 12000 + ((i * 1300) % 9000), sessionId: `demo${i}`,
+        createdAt: new Date(Date.now() - (i + 1) * 8 * 3600e3).toISOString(),
+      };
+    }
+  }
+}
+
 const seedData = {
-  users, tests, questions: loadQuestions(), plans, features, sponsors, benefits,
+  users, tests, questions, plans, features, sponsors, benefits,
   groups, groupMembers, groupInvitations: {}, groupShared: {},
   posts, comments, likes: {}, reposts: {}, notifications, subscriptions, invoices,
-  corrections: {}, answers: {}, devices: {}, medalLedger: {}, skills, practiceSessions: {}, skillMastery: {},
+  corrections: {}, answers, devices: {}, medalLedger: {}, skills, practiceSessions: {}, skillMastery: {},
   tutors, tutorReviews, tutorRequests, conversations, messages,
 };
 

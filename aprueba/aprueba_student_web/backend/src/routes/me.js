@@ -167,21 +167,32 @@ r.post('/me/quota/unlock', wrap(async (req, res) => {
 }));
 
 // GET /me/progress
+// Progreso por prueba = acierto de las ultimas PROGRESS_WINDOW respuestas. Con menos de
+// PROGRESS_MIN_ANSWERS no hay datos suficientes (hasData false): la web muestra "sin datos"
+// en lugar de un porcentaje poco fiable. `percent` sigue siendo un entero (0 sin respuestas)
+// para los clientes que ya lo leen (app Flutter).
+const PROGRESS_WINDOW = 20;
+const PROGRESS_MIN_ANSWERS = 5;
 r.get('/me/progress', wrap(async (req, res) => {
   const u = req.user;
   const answers = await query(COL.answers, [['userId', '==', u.id]]);
   const tests = await list(COL.tests);
   const byTest = {};
-  for (const a of answers) {
-    byTest[a.testId] ||= { total: 0, correct: 0 };
-    byTest[a.testId].total++; if (a.correct) byTest[a.testId].correct++;
-  }
+  for (const a of answers) (byTest[a.testId] ||= []).push(a);
   const selected = u.selectedTests?.length ? u.selectedTests : tests.map((t) => t.id);
   const data = selected.map((id) => {
     const t = tests.find((x) => x.id === id);
-    const s = byTest[id];
-    const percent = s ? Math.round((s.correct / s.total) * 100) : (u.progressSeed?.[id] ?? 0);
-    return { testId: id, label: t ? testLabel(t, langOf(req)) : id, percent };
+    const all = byTest[id] || [];
+    const recent = [...all].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, PROGRESS_WINDOW);
+    const correct = recent.filter((a) => a.correct).length;
+    return {
+      testId: id,
+      label: t ? testLabel(t, langOf(req)) : id,
+      percent: recent.length ? Math.round((correct / recent.length) * 100) : 0,
+      hasData: recent.length >= PROGRESS_MIN_ANSWERS,
+      answered: all.length,
+      recent: recent.length,
+    };
   });
   return ok(res, data);
 }));

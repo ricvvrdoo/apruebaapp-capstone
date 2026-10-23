@@ -341,7 +341,7 @@ results.push('\n[13] Respuestas: envios simultaneos (doble clic)');
     ]);
     const statuses = [a.status, b.status].sort().join('/');
     if (statuses !== '201/409') bothAccepted++;
-    if ((await q2(C.answers, [['questionId', '==', qn.id]])).length !== 1) duplicated++;
+    if ((await q2(C.answers, [['questionId', '==', qn.id], ['userId', '==', 'usr_camila']], (x) => x.sessionId === null)).length !== 1) duplicated++;
   }
   check('5 dobles envios: siempre uno 201 y el otro 409', bothAccepted === 0, `(${bothAccepted} distintos)`);
   check('5 dobles envios: nunca queda la respuesta duplicada', duplicated === 0, `(${duplicated} duplicadas)`);
@@ -511,6 +511,69 @@ results.push('\n[21] Limite del cuerpo JSON');
   check('cuerpo de 200 KB -> 413', r.status === 413, `(${r.status})`);
   r = await call('POST', '/posts', { token: free, body: { text: 'a'.repeat(2000) } });
   check('una publicacion de 2000 caracteres sigue entrando -> 201', r.status === 201, `(${r.status})`);
+}
+
+results.push('\n[22] Inicio: progreso por prueba con datos reales');
+{
+  const { set: setDoc, patch: patchDoc, query: queryDocs, COL: DB } = await import('../data/repo.js');
+  let seq = 0;
+  // Alumno nuevo (registro real con telefono de desarrollo) con las pruebas elegidas.
+  const newStudent = async ({ plan = 'free', tests = ['m1', 'lectora'] } = {}) => {
+    seq++;
+    const phone = `+569${String(90000000 + seq).padStart(8, '0')}`;
+    const v = (await call('POST', '/auth/phone/verify-code', { body: { firebaseIdToken: `dev:${phone}` } })).json.data;
+    const r = (await call('POST', '/auth/register', {
+      body: { name: `Alumno Inicio ${seq}`, email: `inicio${seq}-${Date.now()}@x.cl`, password: 'clave1234', consent: true, phoneToken: v.phoneToken, country: 'CL', language: 'es', gradeId: 'cl-paes' },
+    })).json.data;
+    await call('PUT', '/me/preferences', { token: r.accessToken, body: { selectedTests: tests, country: 'CL', gradeId: 'cl-paes' } });
+    if (plan !== 'free') await patchDoc(DB.users, r.user.id, { plan });
+    return { token: r.accessToken, id: r.user.id };
+  };
+  // Inserta respuestas de una prueba, de la mas antigua a la mas reciente (una por minuto).
+  const addAnswers = async (userId, testId, flags) => {
+    const q = (await queryDocs(DB.questions, [['testId', '==', testId]]))[0];
+    const start = Date.now() - flags.length * 60000;
+    for (let i = 0; i < flags.length; i++) {
+      await setDoc(DB.answers, `ans_t22_${userId}_${testId}_${i}`, {
+        id: `ans_t22_${userId}_${testId}_${i}`, userId, questionId: q.id, testId, selected: 'A', correct: flags[i],
+        elapsedMs: 9000, sessionId: `t22-${i}`, createdAt: new Date(start + i * 60000).toISOString(),
+      });
+    }
+  };
+  const progressOf = async (token) => Object.fromEntries((await call('GET', '/me/progress', { token })).json.data.map((p) => [p.testId, p]));
+
+  const nuevo = await newStudent();
+  let p = await progressOf(nuevo.token);
+  check('alumno nuevo: una entrada por prueba elegida', Object.keys(p).sort().join() === 'lectora,m1', JSON.stringify(Object.keys(p)));
+  check('alumno nuevo: sin datos (hasData false, answered 0, recent 0, percent 0)',
+    Object.values(p).every((x) => x.hasData === false && x.answered === 0 && x.recent === 0 && x.percent === 0), JSON.stringify(p));
+
+  await patchDoc(DB.users, nuevo.id, { progressSeed: { m1: 99 } });
+  p = await progressOf(nuevo.token);
+  check('los porcentajes de ejemplo (progressSeed) ya no cuentan', p.m1.percent === 0 && p.m1.hasData === false, JSON.stringify(p.m1));
+
+  await addAnswers(nuevo.id, 'm1', [true, true, true, true]);
+  p = await progressOf(nuevo.token);
+  check('con 4 respuestas todavia no hay datos suficientes', p.m1.hasData === false && p.m1.answered === 4 && p.m1.recent === 4 && p.m1.percent === 100, JSON.stringify(p.m1));
+  await addAnswers(nuevo.id, 'm1', [true, true, true, true, true]);
+  p = await progressOf(nuevo.token);
+  check('con 5 respuestas ya hay datos', p.m1.hasData === true && p.m1.recent === 5, JSON.stringify(p.m1));
+  check('las respuestas de una prueba no afectan a otra', p.lectora.hasData === false && p.lectora.answered === 0, JSON.stringify(p.lectora));
+
+  const mejoro = await newStudent({ tests: ['m1'] });
+  await addAnswers(mejoro.id, 'm1', [...Array(10).fill(false), ...Array(20).fill(true)]);
+  p = await progressOf(mejoro.token);
+  check('mide solo las ultimas 20: 10 fallos antiguos y 20 aciertos recientes -> 100', p.m1.percent === 100 && p.m1.recent === 20 && p.m1.answered === 30, JSON.stringify(p.m1));
+
+  const empeoro = await newStudent({ tests: ['m1'] });
+  await addAnswers(empeoro.id, 'm1', [...Array(12).fill(true), ...Array(20).fill(false)]);
+  p = await progressOf(empeoro.token);
+  check('12 aciertos antiguos y 20 fallos recientes -> 0', p.m1.percent === 0 && p.m1.recent === 20 && p.m1.answered === 32, JSON.stringify(p.m1));
+  check('percent es un entero', Number.isInteger(p.m1.percent));
+
+  const demo = await progressOf(free);
+  check('usuario demo: historial real en Lectora (14 de 20 = 70)', demo.lectora?.hasData === true && demo.lectora.percent === 70 && demo.lectora.recent === 20, JSON.stringify(demo.lectora));
+  check('usuario demo: historial real en M1 (11 de 20 = 55)', demo.m1?.hasData === true && demo.m1.percent === 55, JSON.stringify(demo.m1));
 }
 
 console.log(results.join('\n'));
