@@ -32,20 +32,28 @@ class SoftCard extends StatelessWidget {
 
 /// Barra de progreso fina.
 class ProgressBar extends StatelessWidget {
-  const ProgressBar({super.key, required this.value, this.color, this.height = 8});
+  const ProgressBar({super.key, required this.value, this.color, this.height = 8, this.label});
   final double value; // 0..1
+  /// Lo que mide la barra, para los lectores de pantalla ("Matemática M1"). Sin él solo se anuncia el valor.
+  final String? label;
   final Color? color;
   final double height;
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: LinearProgressIndicator(
-        value: value.clamp(0.0, 1.0),
-        minHeight: height,
-        backgroundColor: t.line,
-        valueColor: AlwaysStoppedAnimation(color ?? t.brand),
+    final v = value.clamp(0.0, 1.0);
+    return Semantics(
+      label: label,
+      value: '${(v * 100).round()}%',
+      excludeSemantics: true,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: LinearProgressIndicator(
+          value: v,
+          minHeight: height,
+          backgroundColor: t.line,
+          valueColor: AlwaysStoppedAnimation(color ?? t.brand),
+        ),
       ),
     );
   }
