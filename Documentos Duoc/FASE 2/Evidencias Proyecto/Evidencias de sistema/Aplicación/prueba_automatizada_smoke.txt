@@ -1,0 +1,180 @@
+Aprueba API - prueba automatizada (npm run smoke)
+Fecha: 2026-10-23 11:52  |  Commit: 488b9b0  |  Driver: firestore (emulador local)
+
+
+> aprueba-student-backend@1.0.0 smoke
+> node src/seed/smoke.js
+
+[jwt] JWT_SECRET no definido: se usa un secreto de desarrollo. No usar asi en produccion.
+[demo] DEMO_MODE activo: se permiten activar planes sin pago, login social sin verificar y tokens de telefono dev:. Desactivar antes de tener usuarios reales.
+[aprueba-student-api] escuchando en http://localhost:4199/api/v1 (driver: firestore)
+[firebase] Proyecto demo-aprueba (emulador Firestore 127.0.0.1:8080, Auth -)
+[demo] invitacion a Juan@Correo.cl para grupo Grupo seguridad: token=inv_1731f271e9
+[demo] invitacion a juan@correo.cl para grupo Grupo vencido: token=inv_23b2c3d6a7
+
+[1] Verificacion telefonica (Firebase)
+  ok   POST /auth/phone/send-code -> 200 detecta pais/idioma
+  ok   POST /auth/phone/send-code -> 400 rechaza formato
+  ok   POST /auth/phone/send-code -> 422 pais no soportado
+  ok   POST /auth/phone/send-code -> 200 cuenta existente
+  ok   POST /auth/phone/verify-code -> 200 emite phoneToken
+  ok   POST /auth/phone/verify-code rechaza token real invalido
+  ok   POST /auth/phone/verify-code -> 409 phone/mismatch
+
+[2] Registro con telefono verificado
+  ok   POST /auth/register -> 400 exige phoneToken
+  ok   POST /auth/register -> 201 crea cuenta
+  ok   POST /auth/register -> 409 telefono duplicado
+  ok   POST /auth/social -> 200 social pide telefono
+  ok   PATCH /me/phone -> 200 PATCH /me/phone asocia
+  ok   PATCH /me/phone -> 401 phoneToken invalido
+
+[3] Catalogo pais / grado / asignaturas
+  ok   GET /countries -> 200 paises
+  ok   GET /countries/CL/grades -> 200 grados CL
+  ok   GET /countries/UK/grades?lang=en -> 200 grados UK en ingles
+  ok   GET /countries/FR/grades -> 404 pais inexistente
+  ok   GET /tests?gradeId=cl-media-2 -> 200 asignaturas escolares CL
+  ok   GET /tests?gradeId=cl-paes -> 200 asignaturas PAES
+  ok   GET /tests?gradeId=uk-a-levels&lang=en -> 200 asignaturas UK exam en ingles
+  ok   GET /tests?gradeId=zz-999 -> 404 grado inexistente
+
+[4] Preferencias con pais/idioma/grado
+  ok   PUT /me/preferences -> 200 guarda onboarding
+  ok   PUT /me/preferences -> 400 grado invalido
+  ok   PUT /me/preferences -> 422 grado de otro pais
+  ok   GET /me/preferences -> 200 lee preferencias
+  ok   GET /me -> 200 /me expone telefono y grado
+
+[5] Tutores
+  ok   GET /tutors -> 200 listado
+  ok   GET /tutors/featured -> 200 destacados
+  ok   GET /tutors?subject=m1 -> 200 filtro por asignatura
+  ok   GET /tutors?verified=true -> 200 filtro verificados
+  ok   GET /tutors?q=paula -> 200 busqueda por texto
+  ok   GET /tutors?sort=price_asc -> 200 orden por precio
+  ok   GET /tutors?mode=telepatia -> 400 mode invalido
+  ok   GET /tutors/tut_maria -> 200 perfil
+  ok   GET /tutors/tut_nope -> 404 perfil inexistente
+  ok   GET /tutors/tut_maria/reviews -> 200 resenas
+
+[6] Gating premium
+  ok   POST /tutors/tut_maria/contact-requests -> 403 contacto bloqueado en free
+  ok   GET /me/gap-analysis -> 403 analisis bloqueado en free
+  ok   GET /me/gap-analysis -> 200 analisis premium
+  ok   gap-analysis: recomienda tutor para lectora
+
+[7] Solicitud de contacto y chat
+  ok   POST /tutors/tut_rodrigo/contact-requests -> 400 mensaje obligatorio
+  ok   POST /tutors/tut_rodrigo/contact-requests -> 201 crea conversacion
+  ok   POST /tutors/tut_rodrigo/contact-requests -> 200 idempotente
+  ok   GET /me/conversations -> 200 lista conversaciones
+  ok   GET /conversations/cnv_6668668076 -> 200 detalle conversacion
+  ok   GET /conversations/cnv_6668668076/messages -> 200 mensajes
+  ok   POST /conversations/cnv_6668668076/messages -> 201 envia mensaje
+  ok   POST /conversations/cnv_6668668076/messages -> 400 texto vacio
+  ok   GET /conversations/cnv_6668668076/messages -> 404 conversacion ajena
+  ok   POST /conversations/cnv_6668668076/read -> 200 marca leido
+  ok   PATCH /conversations/cnv_6668668076/contact-sharing -> 400 consentimiento no booleano
+  ok   PATCH /conversations/cnv_6668668076/contact-sharing -> 200 consentimiento mutuo revela
+  ok   PATCH /conversations/cnv_6668668076/contact-sharing -> 200 revoca consentimiento
+  ok   GET /me/conversations -> 200 demo tiene conversacion sembrada
+  ok   GET /conversations/cnv_demo/messages -> 200 lectura baja el badge
+  ok   GET /me/conversations -> 200 badge en cero
+
+[8] Resenas de tutores
+  ok   POST /tutors/tut_maria/reviews -> 403 sin contacto no puede resenar
+  ok   POST /tutors/tut_rodrigo/reviews -> 400 ratings invalidos
+  ok   POST /tutors/tut_rodrigo/reviews -> 201 publica resena
+  ok   POST /tutors/tut_rodrigo/reviews -> 409 una resena por alumno
+  ok   GET /tutors/tut_rodrigo -> 200 perfil marca canReview=false
+
+[9] Huecos menores
+  ok   POST /corrections -> 201 crea recorreccion
+  ok   GET /corrections/cor_6bb09dcf0c -> 200 detalle recorreccion
+  ok   GET /corrections/cor_6bb09dcf0c -> 404 recorreccion ajena
+  ok   GET /feed -> 200 feed con reposts
+  ok   POST /posts/pst_1/repost -> 200 repost
+  ok   POST /posts/pst_1/repost -> 200 repost toggle
+  ok   DELETE /posts/pst_1 -> 403 no borra post ajeno
+  ok   POST /posts -> 201 crea post
+  ok   POST /posts/pst_c92959552e/comments -> 201 comenta
+  ok   DELETE /posts/pst_c92959552e/comments/cmt_aafa206612 -> 204 borra comentario
+  ok   DELETE /posts/pst_c92959552e -> 204 borra post propio
+  ok   POST /me/notifications/read-all -> 200 marca todo leido
+  ok   GET /benefits/ben_platzi -> 200 detalle beneficio
+  ok   GET /benefits/ben_nope -> 404 beneficio inexistente
+  ok   GET /groups -> 200 grupos
+  ok   DELETE /groups/grp_lectura/members/me -> 204 sale del grupo
+  ok   DELETE /groups/grp_lectura/members/me -> 404 no puede salir dos veces
+
+[10] Correcciones de la revision de codigo
+  ok   POST /webhooks/stripe sigue siendo publico
+  ok   GET /feed?cursor[a]=1 -> 200 cursor invalido no rompe el feed
+  ok   GET /feed?limit=-5 -> 200 limit negativo se acota
+  ok   POST /conversations/cnv_demo/messages -> 403 enviar mensaje exige plan de pago
+  ok   PATCH /conversations/cnv_demo/contact-sharing -> 403 compartir contacto exige plan de pago
+  ok   POST /auth/phone/send-code -> 200 telefono enmascarado
+  ok   POST /posts -> 400 post demasiado largo
+  ok   aggregateRatings ignora historico sin valores
+  ok   aggregateRatings soporta historico parcial
+
+[11] Regresion de rutas existentes
+  ok   GET /practice/next -> 200 practice/next
+  ok   GET /plans -> 200 plans publico
+  ok   GET /me/medals -> 200 me/medals
+  ok   GET /me/progress -> 200 me/progress
+  ok   GET /tutors -> 401 sin token
+
+[12] Seguridad (rama sec/cierre-hallazgos-acotado)
+  ok   GET /groups/grp_648e358f62/invitations -> 403 no miembro NO ve correos invitados
+  ok   GET /groups/grp_648e358f62/invitations -> 200 miembro ve invitaciones
+  ok   invitacion creada con vencimiento
+  ok   POST /invitations/inv_1731f271e9/accept -> 403 otro correo NO acepta la invitacion
+  ok   POST /invitations/inv_1731f271e9/accept -> 200 el invitado acepta (sin importar mayusculas)
+  ok   POST /invitations/inv_23b2c3d6a7/accept -> 400 invitacion vencida se rechaza
+  ok   POST /me/subscription/change -> 400 plan inexistente
+  ok   POST /me/subscription/change -> 400 plan free no se asigna asi
+  ok   POST /me/subscription/change -> 400 ciclo inexistente
+  ok   POST /me/subscription/change -> 200 cambio valido en demo
+  ok   POST /auth/social -> 409 token social NO suplanta cuenta con contrasena
+  ok   POST /webhooks/stripe -> 503 webhook de Stripe deshabilitado
+  ok   POST /auth/social -> 503 sin demo: login social cerrado
+  ok   POST /checkout/sessions -> 503 sin demo: checkout cerrado
+  ok   POST /checkout/sessions/cs_x/confirm -> 503 sin demo: confirmar pago cerrado
+  ok   POST /me/subscription/change -> 503 sin demo: cambio de plan cerrado
+  ok   produccion sin demo: token dev: de telefono rechazado
+  ok   produccion con demo: token dev: aceptado
+  ok   produccion sin JWT_SECRET: no arranca
+  ok   produccion con JWT_SECRET de ejemplo: no arranca
+  ok   produccion con JWT_SECRET corto: no arranca
+  ok   produccion con JWT_SECRET valido: arranca
+  ok   helmet: X-Content-Type-Options nosniff
+  ok   helmet: sin X-Powered-By
+
+[13] Respuestas: envios simultaneos (doble clic)
+  ok   5 dobles envios: siempre uno 201 y el otro 409
+  ok   5 dobles envios: nunca queda la respuesta duplicada
+
+[14] Acceso a la documentacion de la API (API_DOCS)
+  ok   public: especificacion y Swagger UI responden 200
+  ok   public: no se indexa (X-Robots-Tag)
+  ok   off: responde 404, como si no existiera
+  ok   produccion sin API_DOCS: cerrada por defecto (404)
+  ok   protected sin credenciales configuradas: falla cerrado (404)
+  ok   protected sin credenciales: 401 y pide Basic
+  ok   protected con clave incorrecta: 401
+  ok   protected con usuario incorrecto: 401
+  ok   protected con credenciales correctas: 200
+
+[15] CORS (API y frontend en dominios distintos)
+  ok   origen del frontend permitido
+  ok   preview del frontend permitido por patron
+  ok   origen ajeno rechazado
+  ok   patron anclado: dominio que lo contiene rechazado
+  ok   patron anclado: prefijo malicioso rechazado
+  ok   preflight: 204 con metodos y cabeceras permitidas
+  ok   sin credenciales de navegador (Allow-Credentials ausente)
+  ok   produccion sin configuracion: ningun origen permitido
+
+135 ok / 0 fallos

@@ -1,0 +1,371 @@
+{
+ "proyecto": "aprueba-app-ad401",
+ "fecha": "2026-10-23T14:54:40.088Z",
+ "colecciones": [
+  {
+   "nombre": "answers",
+   "documentos": 6,
+   "campos": [
+    "correct",
+    "createdAt",
+    "elapsedMs",
+    "id",
+    "questionId",
+    "selected",
+    "sessionId",
+    "testId",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "benefits",
+   "documentos": 3,
+   "campos": [
+    "costPlatinum",
+    "description",
+    "id",
+    "name",
+    "sponsor",
+    "stock"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "comments",
+   "documentos": 2,
+   "campos": [
+    "authorId",
+    "authorName",
+    "createdAt",
+    "id",
+    "postId",
+    "text"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "conversations",
+   "documentos": 1,
+   "campos": [
+    "contactSharing",
+    "createdAt",
+    "id",
+    "lastMessageAt",
+    "lastMessagePreview",
+    "lessonsTaken",
+    "requestId",
+    "tutorColor",
+    "tutorId",
+    "tutorInitials",
+    "tutorName",
+    "unreadForTutor",
+    "unreadForUser",
+    "userId",
+    "userName"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "features",
+   "documentos": 6,
+   "campos": [
+    "ic",
+    "id",
+    "name_en",
+    "name_es"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "groupMembers",
+   "documentos": 7,
+   "campos": [
+    "activeToday",
+    "groupId",
+    "id",
+    "name",
+    "role",
+    "score",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "groups",
+   "documentos": 3,
+   "campos": [
+    "createdAt",
+    "id",
+    "name",
+    "ownerId",
+    "subject",
+    "subjectTestId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "invoices",
+   "documentos": 2,
+   "campos": [
+    "amount",
+    "currency",
+    "id",
+    "paidAt",
+    "pdfUrl",
+    "status",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "likes",
+   "documentos": 3,
+   "campos": [
+    "id",
+    "postId",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "medalLedger",
+   "documentos": 23,
+   "campos": [
+    "amount",
+    "createdAt",
+    "id",
+    "reason",
+    "tier",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "messages",
+   "documentos": 4,
+   "campos": [
+    "conversationId",
+    "createdAt",
+    "id",
+    "readByTutor",
+    "readByUser",
+    "senderId",
+    "senderType",
+    "text"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "notifications",
+   "documentos": 2,
+   "campos": [
+    "body",
+    "createdAt",
+    "id",
+    "read",
+    "title",
+    "type",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "plans",
+   "documentos": 3,
+   "campos": [
+    "color",
+    "features",
+    "featuresText",
+    "id",
+    "limits",
+    "name",
+    "popular",
+    "price"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "posts",
+   "documentos": 3,
+   "campos": [
+    "authorId",
+    "authorName",
+    "comments",
+    "createdAt",
+    "id",
+    "likes",
+    "questionAxis",
+    "questionId",
+    "text"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "questions",
+   "documentos": 1365,
+   "campos": [
+    "axis",
+    "correctIndex",
+    "createdAt",
+    "difficulty",
+    "explanation",
+    "habilidad",
+    "id",
+    "options",
+    "published",
+    "rand",
+    "shortExplanation",
+    "source",
+    "sourceIndex",
+    "statement",
+    "testId",
+    "testLabel"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "sponsors",
+   "documentos": 3,
+   "campos": [
+    "id",
+    "name",
+    "status",
+    "tier"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "subscriptions",
+   "documentos": 2,
+   "campos": [
+    "billingCycle",
+    "cancelAtPeriodEnd",
+    "createdAt",
+    "currentPeriodEnd",
+    "id",
+    "paymentMethod",
+    "plan",
+    "status",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "tests",
+   "documentos": 5,
+   "campos": [
+    "color",
+    "id",
+    "label",
+    "order"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "tutorRequests",
+   "documentos": 1,
+   "campos": [
+    "conversationId",
+    "createdAt",
+    "id",
+    "message",
+    "sharedProfile",
+    "status",
+    "tutorId",
+    "userId"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "tutorReviews",
+   "documentos": 2,
+   "campos": [
+    "comment",
+    "createdAt",
+    "id",
+    "lessonsTaken",
+    "overall",
+    "ratings",
+    "tutorId",
+    "userId",
+    "userInitials",
+    "userName"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "tutors",
+   "documentos": 4,
+   "campos": [
+    "avatarColor",
+    "bio",
+    "contact",
+    "contactSharingDefault",
+    "country",
+    "createdAt",
+    "currency",
+    "featured",
+    "id",
+    "initials",
+    "languages",
+    "modes",
+    "modesLabel",
+    "name",
+    "online",
+    "pricePerHour",
+    "rating",
+    "ratingSeed",
+    "reviewCount",
+    "reviewCountSeed",
+    "status",
+    "subjects",
+    "subjectsLabel",
+    "textColor",
+    "verified",
+    "yearsExperience"
+   ],
+   "subcolecciones": []
+  },
+  {
+   "nombre": "users",
+   "documentos": 3,
+   "campos": [
+    "authProvider",
+    "bonuses",
+    "country",
+    "createdAt",
+    "dailyReminder",
+    "difficulty",
+    "email",
+    "emailLower",
+    "format",
+    "gradeId",
+    "id",
+    "language",
+    "lastLoginRewardDay",
+    "locale",
+    "medals",
+    "name",
+    "onboarded",
+    "passwordHash",
+    "phone",
+    "phoneVerified",
+    "plan",
+    "progressSeed",
+    "quota",
+    "selectedTests",
+    "state",
+    "streak",
+    "theme"
+   ],
+   "subcolecciones": []
+  }
+ ],
+ "subcolecciones": [],
+ "preguntasPorPrueba": {
+  "lectora": 559,
+  "m1": 683,
+  "cien": 123
+ }
+}
