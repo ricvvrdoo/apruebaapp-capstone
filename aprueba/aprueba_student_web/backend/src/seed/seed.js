@@ -266,7 +266,8 @@ for (const [userId, perTest] of Object.entries(HISTORY)) {
       answers[id] = {
         id, userId, questionId: q.id, testId, selected: correct ? LETTERS[q.correctIndex] : wrong, correct,
         elapsedMs: 12000 + ((i * 1300) % 9000), sessionId: `demo${i}`,
-        createdAt: new Date(Date.now() - (i + 1) * 8 * 3600e3).toISOString(),
+        // La primera prueba de cada usuario es la mas reciente: es la "ultima prueba" que usara Inicio.
+        createdAt: new Date(Date.now() - (i + 1) * 8 * 3600e3 - Object.keys(perTest).indexOf(testId) * 3600e3).toISOString(),
       };
     }
   }
