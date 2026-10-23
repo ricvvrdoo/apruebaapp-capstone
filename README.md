@@ -1,8 +1,56 @@
-# Aprueba — Proyecto APT (Capstone PTY4614)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-blanco.png">
+    <img src="docs/assets/logo.png" alt="Aprueba" width="180">
+  </picture>
+</p>
 
-Plataforma móvil y web de preparación para la **PAES**, desarrollada como proyecto
-de título para la empresa **Alloxentric**. Ingeniería en Informática, Duoc UC —
-Sede San Joaquín, semestre 2026-2.
+<h1 align="center">Aprueba — Proyecto APT (Capstone PTY4614)</h1>
+
+<p align="center">
+  Plataforma móvil y web de preparación para la <b>PAES</b>, desarrollada como proyecto de
+  título para la empresa <b>Alloxentric</b>.<br>
+  Ingeniería en Informática, Duoc UC — Sede San Joaquín, semestre 2026-2.
+</p>
+
+<p align="center">
+  <img alt="Node.js 22" src="https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white">
+  <img alt="Express 4" src="https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white">
+  <img alt="React 18" src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black">
+  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-3.33%2B-02569B?logo=flutter&logoColor=white">
+  <img alt="Cloud Firestore" src="https://img.shields.io/badge/Cloud_Firestore-FFCA28?logo=firebase&logoColor=black">
+  <img alt="Vercel" src="https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white">
+  <img alt="OpenAPI 3.1" src="https://img.shields.io/badge/OpenAPI-3.1-6BA539?logo=openapiinitiative&logoColor=white">
+</p>
+
+<p align="center">
+  <a href="https://aprueba-student-web.vercel.app">Sitio web</a> ·
+  <a href="https://aprueba-api.vercel.app/health">API</a> ·
+  <a href="docs/manual-tecnico.md">Manual técnico</a> ·
+  <a href="docs/scrum">Scrum</a>
+</p>
+
+## Vistas
+
+<p align="center">
+  <img src="docs/assets/web-inicio.png" alt="Inicio del sitio web: continuar practicando, racha, cuota diaria, medallas y progreso por prueba"><br>
+  <sub><b>Sitio web</b> — Inicio: continuar practicando, racha, cuota diaria, medallas y progreso.</sub>
+</p>
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="72%">
+      <img src="docs/assets/web-practica.gif" alt="Flujo de práctica: elegir una alternativa, ver el resultado y la explicación paso a paso"><br>
+      <sub><b>Práctica</b> — elegir una alternativa, ver el resultado y la explicación paso a paso.</sub>
+    </td>
+    <td align="center" valign="top" width="28%">
+      <img src="docs/assets/app-inicio.png" alt="Inicio de la app móvil en Android" width="210"><br>
+      <sub><b>App móvil</b> — Inicio en Android.</sub>
+    </td>
+  </tr>
+</table>
+
+<sub>Capturas del entorno local con datos de demostración.</sub>
 
 ## Descripción
 
