@@ -3,6 +3,19 @@ import { api, setTokens, clearTokens, hasSession, setAuthFailHandler } from '../
 import { makeL } from '../i18n.js';
 
 const Ctx = createContext(null);
+
+// El dia del alumno (cuota diaria, racha, regalos) se mide en su zona horaria. Si la del navegador
+// difiere de la que tiene el servidor, se la comunicamos y devolvemos el perfil ya actualizado.
+async function syncTimezone(me) {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz && me?.timezone && tz !== me.timezone) {
+      await api.patch('/me/settings', { timezone: tz });
+      return (await api.get('/me')).data;
+    }
+  } catch { /* se sigue con la zona anterior */ }
+  return me;
+}
 export const useAuth = () => useContext(Ctx);
 
 export function AuthProvider({ children }) {
@@ -25,7 +38,7 @@ export function AuthProvider({ children }) {
   const loadMe = useCallback(async () => {
     if (!hasSession()) { setLoading(false); return; }
     try {
-      const { data } = await api.get('/me');
+      const data = await syncTimezone((await api.get('/me')).data);
       setUser(data);
       // sincroniza preferencias de presentacion
       try { const s = (await api.get('/me/settings')).data; if (s.locale) setLang(s.locale); if (s.theme) setDark(s.theme === 'dark'); data.onboarded = (s.selectedTests || []).length > 0; setUser({ ...data }); } catch {}
@@ -39,7 +52,7 @@ export function AuthProvider({ children }) {
     setTokens(payload.accessToken, payload.refreshToken);
     let onboarded = false;
     try { const s = (await api.get('/me/settings')).data; onboarded = (s.selectedTests || []).length > 0; if (s.locale) setLang(s.locale); if (s.theme) setDark(s.theme === 'dark'); } catch {}
-    const me = (await api.get('/me')).data;
+    const me = await syncTimezone((await api.get('/me')).data);
     setUser({ ...me, onboarded });
     return { ...me, onboarded };
   }, []);
