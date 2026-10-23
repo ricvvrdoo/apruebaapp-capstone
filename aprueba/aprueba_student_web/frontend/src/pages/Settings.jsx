@@ -35,7 +35,6 @@ export default function Settings() {
     setSelected(next);
     try { await api.put('/me/preferences', { selectedTests: next, format: 'random', difficulty: user?.difficulty || 'd2' }); flash(L('set_saved')); } catch (e) { flash(e.message); }
   };
-  const exportData = async () => { try { await api.get('/me/data-export'); flash('✓'); } catch (e) { notify(e.message); } };
   const deleteAccount = async () => {
     try { await api.del('/me', user.authProvider === 'password' ? { password: pwd } : {}); await logout(); nav('/login'); }
     catch (e) { flash(e.message); }
@@ -59,7 +58,7 @@ export default function Settings() {
         </div>
         <div className="flex between" style={{ padding: '12px 0', cursor: 'pointer' }} onClick={() => nav('/plan')}><b style={{ fontSize: 13 }}>{L('set_plan')}</b><span className="note">{user?.plan === 'free' ? L('plan_free') : (user?.plan === 'uni' ? L('plan_uni_short') : L('plan_all_short'))} ›</span></div>
       </div>
-      <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={exportData}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_privacy')}</b><span className="note">›</span></div></div>
+      <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={() => nav('/privacidad')}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_privacy')}</b><span className="note">›</span></div></div>
       <div className="card" style={{ marginTop: 14, cursor: 'pointer' }} onClick={logout}><div className="flex between"><b style={{ fontSize: 13 }}>{L('set_logout')}</b><span className="note">›</span></div></div>
       <div className="card" style={{ marginTop: 14, borderColor: 'var(--danger)', background: 'rgba(239,68,68,.05)' }}>
         <b style={{ fontSize: 13, color: 'var(--danger)' }}>{L('set_danger')}</b><p className="note">{L('set_danger_p')}</p>
