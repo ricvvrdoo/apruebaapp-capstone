@@ -9524,7 +9524,7 @@
         ],
         "operationId": "deleteMe",
         "summary": "Eliminar la cuenta",
-        "description": "Elimina la cuenta del alumno y todos sus datos y medallas, de forma permanente (botón \"Eliminar cuenta\" en Ajustes). Operación irreversible; requiere confirmación de contraseña.",
+        "description": "Elimina la cuenta del alumno de forma permanente (botón \"Eliminar cuenta\" en Ajustes); requiere confirmación de contraseña si la cuenta la tiene (`401 AUTH_INVALID_CREDENTIALS` si es incorrecta, sin borrar nada).\n\nSe borran: respuestas, medallas, notificaciones, dispositivos, recorrecciones, suscripciones, canjes, solicitudes y conversaciones con tutores, likes, reposts e invitaciones pendientes a su correo. Se sale de todos los grupos: si quedan otros miembros la propiedad pasa al más antiguo y, si no, el grupo se elimina.\n\nSe anonimiza (autor `Usuario eliminado`, sin vínculo a la cuenta): publicaciones y comentarios, reseñas a tutores y lo que compartió en grupos. Las boletas se conservan sin vínculo a la persona por obligación contable.",
         "security": [
           {
             "bearerAuth": []
@@ -9850,15 +9850,15 @@
         ],
         "operationId": "getMeDataExport",
         "summary": "Exportar los datos del alumno",
-        "description": "Inicia la exportación de los datos personales del alumno (opción \"Mis datos y privacidad\"). Genera un archivo descargable de forma asíncrona y notifica cuando está listo.",
+        "description": "Entrega en la misma respuesta todo lo que se guarda del alumno (opción \"Mis datos y privacidad\"): perfil, respuestas, medallas, notificaciones, publicaciones, grupos, conversaciones con tutores, suscripciones y boletas. No incluye contraseñas, tokens de push ni datos de otras personas (de los grupos solo el nombre y el rol del alumno). La app guarda la respuesta como archivo `.json`.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
         "responses": {
-          "202": {
-            "description": "Aceptado: se procesa en segundo plano.",
+          "200": {
+            "description": "Datos del alumno.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9871,12 +9871,150 @@
                   "properties": {
                     "data": {
                       "type": "object",
+                      "required": [
+                        "format",
+                        "exportedAt",
+                        "profile"
+                      ],
                       "properties": {
-                        "exportId": {
-                          "type": "string"
+                        "format": {
+                          "type": "integer",
+                          "description": "Versión del formato del archivo.",
+                          "example": 1
                         },
-                        "status": {
-                          "type": "string"
+                        "exportedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "profile": {
+                          "type": "object",
+                          "description": "Documento del usuario sin `passwordHash`, `resetToken` ni `emailLower`."
+                        },
+                        "answers": {
+                          "type": "array",
+                          "description": "Respuestas dadas.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "skillMastery": {
+                          "type": "array",
+                          "description": "Dominio por habilidad.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "notifications": {
+                          "type": "array",
+                          "description": "Notificaciones.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "medalLedger": {
+                          "type": "array",
+                          "description": "Historial de medallas.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "practiceSessions": {
+                          "type": "array",
+                          "description": "Sesiones de práctica.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "corrections": {
+                          "type": "array",
+                          "description": "Recorrecciones solicitadas.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "subscriptions": {
+                          "type": "array",
+                          "description": "Suscripciones.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "invoices": {
+                          "type": "array",
+                          "description": "Boletas.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "benefitRedemptions": {
+                          "type": "array",
+                          "description": "Canjes de beneficios.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "tutorRequests": {
+                          "type": "array",
+                          "description": "Solicitudes a tutores.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "tutorReviews": {
+                          "type": "array",
+                          "description": "Reseñas escritas a tutores.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "devices": {
+                          "type": "array",
+                          "description": "Dispositivos registrados (plataforma y fecha, sin el token de push).",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "likes": {
+                          "type": "array",
+                          "description": "Ids de las publicaciones a las que dio like.",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "reposts": {
+                          "type": "array",
+                          "description": "Ids de las publicaciones que republicó.",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "posts": {
+                          "type": "array",
+                          "description": "Publicaciones propias.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "comments": {
+                          "type": "array",
+                          "description": "Comentarios propios.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "groups": {
+                          "type": "array",
+                          "description": "Grupos a los que pertenece: `id`, `name`, `subject`, `role`, `score`.",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "conversations": {
+                          "type": "array",
+                          "description": "Conversaciones con tutores, cada una con su arreglo `messages` ordenado por fecha.",
+                          "items": {
+                            "type": "object"
+                          }
                         }
                       }
                     },
@@ -9895,17 +10033,6 @@
                         }
                       }
                     }
-                  }
-                },
-                "example": {
-                  "data": {
-                    "exportId": "exp_tbnf",
-                    "status": "processing"
-                  },
-                  "error": null,
-                  "meta": {
-                    "requestId": "req_23a84c12-643",
-                    "timestamp": "2026-10-02T21:18:55.632Z"
                   }
                 }
               }
