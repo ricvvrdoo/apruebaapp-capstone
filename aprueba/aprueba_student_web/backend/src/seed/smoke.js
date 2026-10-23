@@ -449,12 +449,12 @@ results.push('\n[17] Idioma: grupos, pruebas y busqueda en ingles');
   await expect('en ingles tambien encuentra escribiendo en espanol', 'GET', '/search?q=matematica&types=topics', { token: free }, 200,
     (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Maths M1'));
   await expect('?lang=es manda sobre el ajuste del alumno', 'GET', '/search?q=maths&types=topics&lang=es', { token: free }, 200,
-    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matematica M1'));
+    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matemática M1'));
   await expect('pregunta de practica: eje en ingles', 'GET', '/practice/next?testId=m1', { token: free }, 200, (d) => d.axis === 'Numbers & Algebra');
   await setLocale('es');
-  await expect('de vuelta en espanol: grupos', 'GET', '/groups', { token: free }, 200, (d) => mates(d)?.subject === 'Matematica M1');
+  await expect('de vuelta en espanol: grupos', 'GET', '/groups', { token: free }, 200, (d) => mates(d)?.subject === 'Matemática M1');
   await expect('de vuelta en espanol: buscar "maths" sigue encontrando', 'GET', '/search?q=maths&types=topics', { token: free }, 200,
-    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matematica M1'));
+    (d) => d.topics.some((t) => t.testId === 'm1' && t.label === 'Matemática M1'));
 }
 
 results.push('\n[18] Regalos de medallas: monto, destinatarios y saldo');

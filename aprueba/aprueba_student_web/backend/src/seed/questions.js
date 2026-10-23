@@ -17,8 +17,8 @@ import { createHash } from 'crypto';
 // Catalogo de pruebas (alineado al doc de API).
 export const TESTS = {
   lectora: { id: 'lectora', label: 'Comp. Lectora', color: '#1A365D', order: 1 },
-  m1: { id: 'm1', label: 'Matematica M1', color: '#10B981', order: 2 },
-  m2: { id: 'm2', label: 'Matematica M2', color: '#6366F1', order: 3 },
+  m1: { id: 'm1', label: 'Matemática M1', color: '#10B981', order: 2 },
+  m2: { id: 'm2', label: 'Matemática M2', color: '#6366F1', order: 3 },
   cien: { id: 'cien', label: 'Ciencias', color: '#F5B041', order: 4 },
   hist: { id: 'hist', label: 'Historia y C. Soc.', color: '#EF4444', order: 5 },
 };

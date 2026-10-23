@@ -96,7 +96,7 @@ const users = {
 
 // ── Grupos + miembros ──
 const groups = {
-  grp_mates: { id: 'grp_mates', name: 'Mates PAES 2025', subjectTestId: 'm1', subject: 'Matematica M1', ownerId: 'usr_demo', createdAt: now,
+  grp_mates: { id: 'grp_mates', name: 'Mates PAES 2025', subjectTestId: 'm1', subject: 'Matemática M1', ownerId: 'usr_demo', createdAt: now,
     statsBest: [{ area: 'Algebra', avg: 78 }, { area: 'Geometria', avg: 70 }], statsWeak: [{ area: 'Probabilidad', avg: 45 }, { area: 'Funciones', avg: 56 }] },
   grp_lectura: { id: 'grp_lectura', name: 'Lectura critica', subjectTestId: 'lectora', subject: 'Comp. Lectora', ownerId: 'usr_camila', createdAt: now,
     statsBest: [{ area: 'Vocabulario', avg: 82 }, { area: 'Inferencia', avg: 71 }], statsWeak: [{ area: 'Argumentacion', avg: 48 }] },
@@ -141,7 +141,7 @@ const invoices = {
 const tutors = {
   tut_maria: {
     id: 'tut_maria', name: 'Maria Valdes', initials: 'MV', avatarColor: '#1A365D', textColor: '#FFFFFF',
-    subjects: ['m1', 'm2'], subjectsLabel: { es: 'Matematica M1·M2', en: 'Math M1·M2' },
+    subjects: ['m1', 'm2'], subjectsLabel: { es: 'Matemática M1·M2', en: 'Math M1·M2' },
     modes: ['online', 'in_person'], modesLabel: { es: 'Online · Presencial', en: 'Online · In-person' },
     pricePerHour: 12000, currency: 'CLP', country: 'CL', languages: ['es'],
     verified: true, featured: true, online: true, yearsExperience: 5,
