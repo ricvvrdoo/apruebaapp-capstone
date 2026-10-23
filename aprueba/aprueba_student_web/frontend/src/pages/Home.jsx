@@ -89,9 +89,14 @@ export default function Home() {
         </div>
         <div className="card span3">
           <div className="flex between"><b>{L('progress')}</b></div>
+          <p className="note" style={{ marginTop: 4 }}>{L('progress_hint')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 18, marginTop: 12 }}>
             {progress.map((t) => (
-              <div key={t.testId}><div className="flex between"><span style={{ fontSize: 13 }}>{t.label}</span><span className="note">{t.percent}%</span></div><Bar value={t.percent} /></div>
+              <div key={t.testId}>
+                <div className="flex between"><span style={{ fontSize: 13 }}>{t.label}</span><span className="note">{t.hasData ? `${t.percent}%` : L('progress_no_data')}</span></div>
+                <Bar value={t.hasData ? t.percent : 0} />
+                {!t.hasData && <p className="note" style={{ marginTop: 4 }}>{L('progress_need_more', { n: 5 - t.recent })}</p>}
+              </div>
             ))}
           </div>
         </div>
