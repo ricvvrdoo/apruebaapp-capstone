@@ -14,9 +14,9 @@ class PracticeRepository {
   final ApiClient _api;
   final AppDatabase _db;
 
-  Future<({Question question, int quotaUsed, int quotaMax})> next() async {
+  Future<({Question question, int quotaUsed, int quotaMax})> next({String? testId}) async {
     int used = 0, max = 0;
-    final res = await _api.get<Question>(Endpoints.practiceNext, parse: (d) {
+    final res = await _api.get<Question>(Endpoints.practiceNext, query: {if (testId != null) 'testId': testId}, parse: (d) {
       return Question.fromJson((d as Map).cast<String, dynamic>());
     });
     final quota = (res.meta?['quota'] as Map?)?.cast<String, dynamic>();

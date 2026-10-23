@@ -13,6 +13,7 @@ class PracticeSessionState {
     this.elapsedMs = 0,
     this.loading = false,
     this.error,
+    this.testId,
   });
 
   final Question? question;
@@ -21,6 +22,8 @@ class PracticeSessionState {
   final int elapsedMs;
   final bool loading;
   final String? error;
+  /// Prueba elegida para la sesión (null = la que el servidor decida por las preferencias).
+  final String? testId;
 
   PracticeSessionState copyWith({
     Question? question,
@@ -31,6 +34,8 @@ class PracticeSessionState {
     String? error,
     bool clearResult = false,
     bool clearSelection = false,
+    String? testId,
+    bool clearTest = false,
   }) =>
       PracticeSessionState(
         question: question ?? this.question,
@@ -39,6 +44,7 @@ class PracticeSessionState {
         elapsedMs: elapsedMs ?? this.elapsedMs,
         loading: loading ?? this.loading,
         error: error,
+        testId: clearTest ? null : (testId ?? this.testId),
       );
 
   /// Letra (A..E) de la alternativa seleccionada.
@@ -50,11 +56,19 @@ class PracticeSession extends Notifier<PracticeSessionState> {
   @override
   PracticeSessionState build() => const PracticeSessionState();
 
+  /// Empieza una práctica en [testId] (o en la que decida el servidor si es null).
+  Future<void> start({String? testId}) {
+    state = state.copyWith(testId: testId, clearTest: testId == null);
+    return loadNext();
+  }
+
+  /// Siguiente pregunta, en la misma prueba que la sesión en curso.
   Future<void> loadNext() async {
+    final testId = state.testId;
     state = state.copyWith(loading: true, error: null, clearResult: true, clearSelection: true);
     try {
-      final res = await ref.read(practiceRepositoryProvider).next();
-      state = PracticeSessionState(question: res.question);
+      final res = await ref.read(practiceRepositoryProvider).next(testId: testId);
+      state = PracticeSessionState(question: res.question, testId: testId);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());
       rethrow;
@@ -77,6 +91,8 @@ class PracticeSession extends Notifier<PracticeSessionState> {
     state = state.copyWith(result: result, loading: false);
     // Refresca cuota/perfil tras responder.
     ref.invalidate(quotaProvider);
+    ref.invalidate(progressSummaryProvider);
+    ref.invalidate(meProvider); // la racha cambia al practicar
     return result;
   }
 }
