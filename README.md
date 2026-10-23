@@ -25,7 +25,8 @@
 
 <p align="center">
   <a href="https://aprueba-student-web.vercel.app">Sitio web</a> ·
-  <a href="https://aprueba-api.vercel.app/health">API</a> ·
+  <a href="docs/documentacion-api.md">Documentación de la API</a> ·
+  <a href="docs/uml">Diagramas</a> ·
   <a href="docs/manual-tecnico.md">Manual técnico</a> ·
   <a href="docs/scrum">Scrum</a>
 </p>
