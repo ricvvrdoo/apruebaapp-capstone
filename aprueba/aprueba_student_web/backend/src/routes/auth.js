@@ -8,6 +8,7 @@ import { signAccess, signRefresh, signPhone, verifyPhone, verify, accessTtl, pho
 import { COL, get, set, add, del, queryOne, genId } from '../data/repo.js';
 import { emptyWallet, award } from '../lib/medals.js';
 import { todayKey } from '../lib/quota.js';
+import { streakView } from '../lib/streak.js';
 import { normalizePhone, detectLocale, maskPhone } from '../lib/phone.js';
 import { verifyPhoneIdToken, PhoneVerificationError } from '../lib/firebasePhone.js';
 import { findCountry } from '../data/catalog.js';
@@ -15,7 +16,7 @@ import { demoMode } from '../lib/demo.js';
 
 const r = Router();
 const publicUser = (u) => ({
-  id: u.id, name: u.name, email: u.email, plan: u.plan, streak: u.streak || 0,
+  id: u.id, name: u.name, email: u.email, plan: u.plan, streak: streakView(u).streak, streakStatus: streakView(u).status,
   quota: { used: u.quota?.used || 0, max: u.plan !== 'free' ? 999999 : 10 },
   medals: u.medals, authProvider: u.authProvider,
   phone: u.phone || null, phoneVerified: !!u.phoneVerified,
@@ -37,12 +38,11 @@ function consumePhoneToken(phoneToken) {
 }
 
 async function dailyLoginReward(user) {
-  const today = todayKey();
+  const today = todayKey(user);
   if (user.lastLoginRewardDay === today) return null;
   user.medals = user.medals || emptyWallet();
   award(user.medals, 'bronze', 1);
   user.lastLoginRewardDay = today;
-  user.streak = (user.streak || 0) + 1;
   await set(COL.users, user.id, user);
   await add(COL.medalLedger, { userId: user.id, tier: 'bronze', amount: 1, reason: 'daily_login', createdAt: new Date().toISOString() }, 'mdl');
   return { tier: 'bronze', amount: 1 };
@@ -141,7 +141,7 @@ r.post('/auth/register', wrap(async (req, res) => {
     firebaseUid: verifiedPhone?.firebaseUid || null,
     country: resolvedCountry, language: resolvedLanguage, gradeId: gradeId || null,
     plan: 'free', state: 'active', locale: resolvedLanguage, theme: 'light', dailyReminder: true,
-    streak: 0, quota: { day: todayKey(), used: 0 }, bonuses: { school: false, address: false },
+    streak: 0, quota: { day: todayKey({ country: resolvedCountry }), used: 0 }, bonuses: { school: false, address: false },
     medals: emptyWallet(), selectedTests: [], format: 'random', difficulty: 'd2',
     onboarded: false, createdAt: new Date().toISOString(),
   };
@@ -204,7 +204,7 @@ r.post('/auth/social', wrap(async (req, res) => {
       phone: verifiedPhone?.phone || null, phoneVerified: !!verifiedPhone,
       firebaseUid: verifiedPhone?.firebaseUid || null,
       country: (verifiedPhone?.country || 'CL'), language, gradeId: null,
-      dailyReminder: true, streak: 0, quota: { day: todayKey(), used: 0 },
+      dailyReminder: true, streak: 0, quota: { day: todayKey({ country: verifiedPhone?.country || 'CL' }), used: 0 },
       bonuses: { school: false, address: false }, medals: emptyWallet(),
       selectedTests: [], format: 'random', difficulty: 'd2', onboarded: false, createdAt: new Date().toISOString(),
     };

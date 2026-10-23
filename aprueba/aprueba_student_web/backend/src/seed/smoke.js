@@ -616,6 +616,131 @@ results.push('\n[23] Inicio: progreso de canje de medallas');
   check('5 diamantes: canje a platino', tier === 'diamond' && p.exchangeable === 1 && p.next === 'platinum', JSON.stringify([tier, p]));
 }
 
+// Registra un alumno nuevo (telefono de desarrollo) y devuelve su token y su id.
+let studentSeq = 0;
+async function registerStudent({ tests = ['m1'] } = {}) {
+  studentSeq++;
+  const phone = `+569${String(92000000 + studentSeq).padStart(8, '0')}`;
+  const v = (await call('POST', '/auth/phone/verify-code', { body: { firebaseIdToken: `dev:${phone}` } })).json.data;
+  const r = (await call('POST', '/auth/register', {
+    body: { name: `Alumno Dia ${studentSeq}`, email: `dia${studentSeq}-${Date.now()}@x.cl`, password: 'clave1234', consent: true, phoneToken: v.phoneToken, country: 'CL', language: 'es', gradeId: 'cl-paes' },
+  })).json.data;
+  await call('PUT', '/me/preferences', { token: r.accessToken, body: { selectedTests: tests, country: 'CL', gradeId: 'cl-paes' } });
+  return { token: r.accessToken, id: r.user.id, email: r.user.email };
+}
+
+results.push('\n[24] Zona horaria: el dia del alumno');
+{
+  const { dayKey, nextMidnight, tzOf, isValidTimeZone, shiftDay } = await import('../lib/tz.js');
+  const { get: getDoc, COL: DB3 } = await import('../data/repo.js');
+  const at = new Date('2026-10-23T02:30:00Z'); // 23:30 del 22 en Santiago
+
+  check('02:30 UTC del 23 es el dia 22 en Santiago', dayKey(at, 'America/Santiago') === '2026-10-22', dayKey(at, 'America/Santiago'));
+  check('... el 23 en UTC', dayKey(at, 'UTC') === '2026-10-23');
+  check('... el 23 en Londres', dayKey(at, 'Europe/London') === '2026-10-23');
+  check('la proxima medianoche de Santiago es 03:00 UTC', nextMidnight('America/Santiago', at).toISOString() === '2026-10-23T03:00:00.000Z', nextMidnight('America/Santiago', at).toISOString());
+  check('la proxima medianoche en UTC es 00:00 del dia siguiente', nextMidnight('UTC', at).toISOString() === '2026-10-24T00:00:00.000Z');
+  // En Santiago el 4 de abril de 2026 el reloj retrocede: ese dia dura 25 horas.
+  check('dia de cambio de hora (25 h): la medianoche sigue siendo la del dia siguiente',
+    nextMidnight('America/Santiago', new Date('2026-04-04T12:00:00Z')).toISOString() === '2026-04-05T04:00:00.000Z', nextMidnight('America/Santiago', new Date('2026-04-04T12:00:00Z')).toISOString());
+  check('shiftDay cruza fin de mes y de ano', shiftDay('2026-03-01', -1) === '2026-02-28' && shiftDay('2026-12-31', 1) === '2027-01-01');
+
+  check('isValidTimeZone acepta una zona IANA', isValidTimeZone('America/Santiago') === true);
+  check('isValidTimeZone rechaza zonas inexistentes y valores vacios', isValidTimeZone('Mars/Base') === false && isValidTimeZone('') === false && isValidTimeZone(undefined) === false);
+  check('tzOf usa la zona del alumno', tzOf({ timezone: 'Europe/London' }) === 'Europe/London');
+  check('tzOf ignora una zona invalida y usa el pais', tzOf({ timezone: 'Mars/Base', country: 'UK' }) === 'Europe/London');
+  check('tzOf por pais Chile y sin datos = Santiago', tzOf({ country: 'CL' }) === 'America/Santiago' && tzOf({}) === 'America/Santiago');
+
+  const s = await registerStudent();
+  const me0 = (await call('GET', '/me', { token: s.token })).json.data;
+  check('GET /me informa la zona horaria efectiva (Santiago por pais)', me0.timezone === 'America/Santiago', JSON.stringify(me0.timezone));
+  let r = await call('PATCH', '/me/settings', { token: s.token, body: { timezone: 'Mars/Base' } });
+  check('PATCH /me/settings rechaza una zona invalida -> 400', r.status === 400, `(${r.status})`);
+  r = await call('PATCH', '/me/settings', { token: s.token, body: { timezone: 'Europe/London' } });
+  check('PATCH /me/settings acepta Europe/London', r.status === 200 && r.json.data.timezone === 'Europe/London', JSON.stringify(r.json));
+  check('GET /me/settings devuelve la zona', (await call('GET', '/me/settings', { token: s.token })).json.data.timezone === 'Europe/London');
+  check('GET /me devuelve la zona', (await call('GET', '/me', { token: s.token })).json.data.timezone === 'Europe/London');
+
+  // La cuota se reinicia a la medianoche de la zona del alumno.
+  const now = new Date();
+  for (const tz of ['Europe/London', 'America/Santiago']) {
+    await call('PATCH', '/me/settings', { token: s.token, body: { timezone: tz } });
+    const q = (await call('GET', '/me/quota', { token: s.token })).json.data;
+    const reset = new Date(q.resetsAt);
+    check(`cuota (${tz}): resetsAt es futuro y cae en el dia siguiente de esa zona`, reset > now && dayKey(reset, tz) === shiftDay(dayKey(now, tz), 1), q.resetsAt);
+    check(`cuota (${tz}): un milisegundo antes todavia es hoy`, dayKey(new Date(reset.getTime() - 1), tz) === dayKey(now, tz));
+    check(`cuota (${tz}): el dia guardado es el de esa zona`, (await getDoc(DB3.users, s.id)).quota.day === dayKey(now, tz));
+  }
+}
+
+results.push('\n[25] Racha: cuenta practicar, no iniciar sesion');
+{
+  const { streakView, recordPractice } = await import('../lib/streak.js');
+  const { dayKey, shiftDay, tzOf } = await import('../lib/tz.js');
+  const { patch: patchU, COL: DB4 } = await import('../data/repo.js');
+  const d = (iso) => new Date(iso);
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  // Logica pura con fechas fijas.
+  const u = { country: 'CL' };
+  check('sin practica: racha 0 y estado none', same(streakView(u, d('2026-10-23T15:00:00Z')), { streak: 0, status: 'none' }));
+  check('primera practica: racha 1', recordPractice(u, d('2026-10-23T15:00:00Z')) === true && u.streak === 1 && u.lastPracticeDay === '2026-10-23');
+  check('otra practica el mismo dia no cambia la racha', recordPractice(u, d('2026-10-23T20:00:00Z')) === false && u.streak === 1);
+  check('hecho hoy: estado done_today', same(streakView(u, d('2026-10-23T23:00:00Z')), { streak: 1, status: 'done_today' }));
+  check('al dia siguiente, antes de practicar: la racha sigue pero esta en riesgo', same(streakView(u, d('2026-10-24T12:00:00Z')), { streak: 1, status: 'at_risk' }));
+  check('practicar el dia siguiente suma: racha 2', recordPractice(u, d('2026-10-24T12:00:00Z')) === true && u.streak === 2);
+  check('saltar un dia reinicia a 1 al volver a practicar', recordPractice(u, d('2026-10-26T12:00:00Z')) === true && u.streak === 1);
+  const v = { country: 'CL', streak: 4, lastPracticeDay: '2026-10-24' };
+  check('dos dias sin practicar: la racha vencio (0, none)', same(streakView(v, d('2026-10-27T12:00:00Z')), { streak: 0, status: 'none' }));
+  const w = { country: 'CL', streak: 3, lastPracticeDay: '2026-10-25' };
+  check('con un dia futuro (cambio de zona) se considera hecho hoy y no se toca', same(streakView(w, d('2026-10-24T12:00:00Z')), { streak: 3, status: 'done_today' }) && recordPractice(w, d('2026-10-24T12:00:00Z')) === false && w.streak === 3);
+
+  // La zona horaria decide cual es "el dia": 23:30 y 02:00 locales son dos dias seguidos en Santiago,
+  // pero el mismo dia en UTC.
+  const cl = { country: 'CL' }; const utc = { timezone: 'UTC' };
+  recordPractice(cl, d('2026-10-23T02:30:00Z')); recordPractice(cl, d('2026-10-23T05:00:00Z'));
+  recordPractice(utc, d('2026-10-23T02:30:00Z')); recordPractice(utc, d('2026-10-23T05:00:00Z'));
+  check('Santiago: practicar a las 23:30 y a las 02:00 locales son dos dias seguidos (racha 2)', cl.streak === 2, JSON.stringify(cl));
+  check('UTC: esos mismos instantes son el mismo dia (racha 1)', utc.streak === 1, JSON.stringify(utc));
+
+  // Contra la API.
+  const s = await registerStudent();
+  const meOf = async () => (await call('GET', '/me', { token: s.token })).json.data;
+  const answerOne = async (n) => {
+    const q = (await call('GET', '/practice/next?testId=m1', { token: s.token })).json.data;
+    return call('POST', `/questions/${q.id}/answer`, { token: s.token, body: { selected: 'A', elapsedMs: 5000, sessionId: `racha${studentSeq}-${n}` } });
+  };
+  let me = await meOf();
+  check('alumno nuevo: racha 0 (registrarse no cuenta)', me.streak === 0 && me.streakStatus === 'none', JSON.stringify([me.streak, me.streakStatus]));
+  await call('POST', '/auth/login', { body: { email: s.email, password: 'clave1234' } });
+  me = await meOf();
+  check('iniciar sesion no suma racha', me.streak === 0 && me.streakStatus === 'none', JSON.stringify([me.streak, me.streakStatus]));
+  await answerOne(1);
+  me = await meOf();
+  check('responder una pregunta: racha 1 y hecho hoy', me.streak === 1 && me.streakStatus === 'done_today', JSON.stringify([me.streak, me.streakStatus]));
+  await answerOne(2);
+  check('responder otra el mismo dia no cambia la racha', (await meOf()).streak === 1);
+
+  const tz = tzOf({ country: 'CL' }); const today = dayKey(new Date(), tz);
+  await patchU(DB4.users, s.id, { streak: 5, lastPracticeDay: shiftDay(today, -1) });
+  me = await meOf();
+  check('practico ayer (racha 5): sigue 5 pero en riesgo', me.streak === 5 && me.streakStatus === 'at_risk', JSON.stringify([me.streak, me.streakStatus]));
+  await answerOne(3);
+  me = await meOf();
+  check('al practicar hoy sube a 6', me.streak === 6 && me.streakStatus === 'done_today', JSON.stringify([me.streak, me.streakStatus]));
+
+  await patchU(DB4.users, s.id, { streak: 5, lastPracticeDay: shiftDay(today, -2) });
+  me = await meOf();
+  check('hace dos dias sin practicar: la racha vencio', me.streak === 0 && me.streakStatus === 'none', JSON.stringify([me.streak, me.streakStatus]));
+  await answerOne(4);
+  check('y al volver a practicar empieza en 1', (await meOf()).streak === 1);
+
+  const legacy = await registerStudent();
+  await patchU(DB4.users, legacy.id, { streak: 9 }); // cuenta anterior al cambio de regla: sin lastPracticeDay
+  const meLegacy = (await call('GET', '/me', { token: legacy.token })).json.data;
+  check('rachas anteriores a la regla nueva se reinician (streak 9 sin lastPracticeDay -> 0)', meLegacy.streak === 0 && meLegacy.streakStatus === 'none', JSON.stringify([meLegacy.streak, meLegacy.streakStatus]));
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);

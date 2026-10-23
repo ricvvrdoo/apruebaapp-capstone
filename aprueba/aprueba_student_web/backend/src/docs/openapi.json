@@ -192,6 +192,15 @@
                             },
                             "onboarded": {
                               "type": "boolean"
+                            },
+                            "streakStatus": {
+                              "type": "string",
+                              "enum": [
+                                "done_today",
+                                "at_risk",
+                                "none"
+                              ],
+                              "description": "done_today: ya practico hoy; at_risk: la racha sigue viva pero hoy aun no practico; none: sin racha."
                             }
                           }
                         },
@@ -1868,6 +1877,15 @@
                             },
                             "onboarded": {
                               "type": "boolean"
+                            },
+                            "streakStatus": {
+                              "type": "string",
+                              "enum": [
+                                "done_today",
+                                "at_risk",
+                                "none"
+                              ],
+                              "description": "done_today: ya practico hoy; at_risk: la racha sigue viva pero hoy aun no practico; none: sin racha."
                             }
                           }
                         },
@@ -9039,7 +9057,7 @@
         ],
         "operationId": "getMe",
         "summary": "Obtener el perfil del alumno",
-        "description": "Devuelve el perfil completo del alumno autenticado, incluyendo plan, racha, cuota y resumen de medallas. Es la llamada que el cliente hace al arrancar.",
+        "description": "Devuelve el perfil completo del alumno autenticado, incluyendo plan, racha, cuota y resumen de medallas. Es la llamada que el cliente hace al arrancar. `streak` cuenta dias consecutivos en que el alumno respondio al menos una pregunta (iniciar sesion no cuenta); `streakStatus` indica si ya practico hoy, si la racha esta en riesgo o si no hay racha.",
         "security": [
           {
             "bearerAuth": []
@@ -9136,6 +9154,19 @@
                         },
                         "onboarded": {
                           "type": "boolean"
+                        },
+                        "streakStatus": {
+                          "type": "string",
+                          "enum": [
+                            "done_today",
+                            "at_risk",
+                            "none"
+                          ],
+                          "description": "done_today: ya practico hoy; at_risk: la racha sigue viva pero hoy aun no practico; none: sin racha."
+                        },
+                        "timezone": {
+                          "type": "string",
+                          "description": "Zona horaria efectiva (nombre IANA, por ejemplo America/Santiago). Define cuando empieza el dia para la cuota diaria, la racha y los regalos."
                         }
                       }
                     },
@@ -9183,7 +9214,9 @@
                     "country": "CL",
                     "language": "es",
                     "gradeId": "cl-paes",
-                    "onboarded": true
+                    "onboarded": true,
+                    "streakStatus": "done_today",
+                    "timezone": "America/Santiago"
                   },
                   "error": null,
                   "meta": {
@@ -13049,7 +13082,7 @@
         ],
         "operationId": "getMeQuota",
         "summary": "Consultar la cuota diaria",
-        "description": "Devuelve el estado de la cuota diaria de preguntas. La cuota base es 10; declarar colegio suma +5 y declarar dirección/región suma +5, hasta un máximo de 20. Los planes de pago la dejan ilimitada.",
+        "description": "Devuelve el estado de la cuota diaria de preguntas. La cuota base es 10; declarar colegio suma +5 y declarar dirección/región suma +5, hasta un máximo de 20. Los planes de pago la dejan ilimitada. `resetsAt` es la proxima medianoche en la zona horaria del alumno.",
         "security": [
           {
             "bearerAuth": []
@@ -13545,6 +13578,10 @@
                         },
                         "difficulty": {
                           "type": "string"
+                        },
+                        "timezone": {
+                          "type": "string",
+                          "description": "Zona horaria efectiva (nombre IANA, por ejemplo America/Santiago). Define cuando empieza el dia para la cuota diaria, la racha y los regalos."
                         }
                       }
                     },
@@ -13576,7 +13613,8 @@
                       "cien"
                     ],
                     "format": "random",
-                    "difficulty": "d2"
+                    "difficulty": "d2",
+                    "timezone": "America/Santiago"
                   },
                   "error": null,
                   "meta": {
@@ -13694,6 +13732,10 @@
                   "dailyReminder": {
                     "type": "boolean",
                     "description": "Activa el recordatorio diario."
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "description": "Nombre IANA de la zona horaria (America/Santiago, Europe/London...). Un valor invalido responde 400 VALIDATION_ERROR."
                   }
                 }
               },
@@ -13728,6 +13770,10 @@
                         },
                         "dailyReminder": {
                           "type": "boolean"
+                        },
+                        "timezone": {
+                          "type": "string",
+                          "description": "Zona horaria efectiva (nombre IANA, por ejemplo America/Santiago). Define cuando empieza el dia para la cuota diaria, la racha y los regalos."
                         }
                       }
                     },
@@ -13752,7 +13798,8 @@
                   "data": {
                     "locale": "es",
                     "theme": "light",
-                    "dailyReminder": true
+                    "dailyReminder": true,
+                    "timezone": "America/Santiago"
                   },
                   "error": null,
                   "meta": {

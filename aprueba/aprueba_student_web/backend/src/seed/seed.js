@@ -8,6 +8,7 @@
 import 'dotenv/config';
 import bcrypt from '../lib/password.js';
 import { reset, driverName } from '../data/repo.js';
+import { dayKey, shiftDay } from '../lib/tz.js';
 import { TESTS, loadQuestionBank, printReport } from './questions.js';
 
 if (driverName === 'firestore') {
@@ -63,30 +64,32 @@ const benefits = {
 
 // ── Usuarios demo ──
 const now = new Date().toISOString();
+const todaySeed = dayKey(new Date(), 'America/Santiago');
+const yesterdaySeed = shiftDay(todaySeed, -1);
 const baseUser = (over) => ({
   authProvider: 'password', state: 'active', locale: 'es', theme: 'light', dailyReminder: true,
   country: 'CL', language: 'es', gradeId: 'cl-paes', phoneVerified: true,
   bonuses: { school: false, address: false }, format: 'random', difficulty: 'd2', onboarded: true,
-  quota: { day: now.slice(0, 10), used: 0 }, createdAt: now,
+  quota: { day: todaySeed, used: 0 }, createdAt: now,
   medals: { bronze: 0, silver: 0, gold: 0, diamond: 0, platinum: 0 }, ...over,
 });
 const users = {
   usr_demo: baseUser({
     id: 'usr_demo', name: 'Estudiante Demo', email: 'demo@aprueba.cl', emailLower: 'demo@aprueba.cl',
     phone: '+56912345678',
-    passwordHash: hash('demo1234'), plan: 'free', streak: 4, quota: { day: now.slice(0, 10), used: 5 },
+    passwordHash: hash('demo1234'), plan: 'free', streak: 4, lastPracticeDay: yesterdaySeed, quota: { day: todaySeed, used: 5 },
     medals: { bronze: 14, silver: 3, gold: 1, diamond: 0, platinum: 0 }, selectedTests: ['lectora', 'm1'],
   }),
   usr_camila: baseUser({
     id: 'usr_camila', name: 'Camila Rojas', email: 'camila@correo.cl', emailLower: 'camila@correo.cl',
     phone: '+56987654321',
-    passwordHash: hash('demo1234'), plan: 'all', streak: 7, medals: { bronze: 30, silver: 6, gold: 2, diamond: 0, platinum: 1 },
+    passwordHash: hash('demo1234'), plan: 'all', streak: 7, lastPracticeDay: todaySeed, medals: { bronze: 30, silver: 6, gold: 2, diamond: 0, platinum: 1 },
     selectedTests: ['lectora', 'm1', 'cien'],
   }),
   usr_juan: baseUser({
     id: 'usr_juan', name: 'Juan Lopez', email: 'juan@correo.cl', emailLower: 'juan@correo.cl',
     phone: '+56955555555',
-    passwordHash: hash('demo1234'), plan: 'uni', streak: 3, medals: { bronze: 9, silver: 1, gold: 0, diamond: 0, platinum: 0 },
+    passwordHash: hash('demo1234'), plan: 'uni', streak: 3, lastPracticeDay: todaySeed, medals: { bronze: 9, silver: 1, gold: 0, diamond: 0, platinum: 0 },
     selectedTests: ['m1'],
   }),
 };

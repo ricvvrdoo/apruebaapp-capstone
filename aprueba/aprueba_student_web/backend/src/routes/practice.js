@@ -7,6 +7,7 @@ import { createHash } from 'crypto';
 import { COL, get, set, add, create, query, list } from '../data/repo.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA } from '../lib/quota.js';
 import { award } from '../lib/medals.js';
+import { recordPractice } from '../lib/streak.js';
 import { langOf, testLabel, axisLabel } from '../lib/lang.js';
 
 const r = Router();
@@ -90,6 +91,7 @@ r.post('/questions/:id/answer', wrap(async (req, res) => {
   });
   if (!answer) return fail(res, 409, 'ALREADY_ANSWERED', 'La pregunta ya fue respondida en esta sesion');
   u.quota.used += 1;
+  recordPractice(u); // la racha cuenta practicar (cualquier respuesta), no iniciar sesion
   let medalAwarded = null;
   if (correct) { award(u.medals, 'bronze', 1); medalAwarded = { tier: 'bronze', amount: 1 }; }
   await save(u);

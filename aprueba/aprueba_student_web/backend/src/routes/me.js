@@ -7,7 +7,9 @@ import { wrap } from '../middleware/error.js';
 import { authRequired } from '../middleware/auth.js';
 import { COL, get, set, add, patch, del, query, list } from '../data/repo.js';
 import { TIERS, NEXT, walletProgress, award } from '../lib/medals.js';
-import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt } from '../lib/quota.js';
+import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt, todayKey } from '../lib/quota.js';
+import { streakView } from '../lib/streak.js';
+import { tzOf, isValidTimeZone } from '../lib/tz.js';
 import { verifyPhone } from '../lib/jwt.js';
 import { demoMode } from '../lib/demo.js';
 import { findCountry, findGrade } from '../data/catalog.js';
@@ -21,8 +23,12 @@ const save = (u) => set(COL.users, u.id, u);
 r.get('/me', wrap(async (req, res) => {
   const u = req.user; ensureQuotaDay(u); await save(u);
   return ok(res, {
-    id: u.id, name: u.name, email: u.email, plan: u.plan, streak: u.streak || 0,
+    id: u.id, name: u.name, email: u.email, plan: u.plan,
+    // La racha cuenta practicar (no iniciar sesion); ver lib/streak.js.
+    streak: streakView(u).streak, streakStatus: streakView(u).status,
     quota: { used: u.quota.used, max: quotaMax(u) }, medals: u.medals,
+    // Zona horaria efectiva: define cuando empieza el dia (cuota, racha, regalos).
+    timezone: tzOf(u),
     school: u.school || null, age: u.age || null, region: u.region || null,
     // El cliente lo usa para decidir si pide contrasena al borrar la cuenta.
     authProvider: u.authProvider || 'password',
@@ -81,20 +87,25 @@ r.get('/me/settings', wrap(async (req, res) => {
   return ok(res, {
     locale: u.locale || 'es', theme: u.theme || 'light', dailyReminder: u.dailyReminder !== false,
     selectedTests: u.selectedTests || [], format: u.format || 'random', difficulty: u.difficulty || 'd2',
+    timezone: tzOf(u),
   });
 }));
 
 // PATCH /me/settings
 r.patch('/me/settings', wrap(async (req, res) => {
-  const { locale, theme, dailyReminder } = req.body || {};
+  const { locale, theme, dailyReminder, timezone } = req.body || {};
   const u = req.user;
   if (locale && !['es', 'en'].includes(locale)) return fail(res, 400, 'VALIDATION_ERROR', 'locale invalido');
   if (theme && !['light', 'dark'].includes(theme)) return fail(res, 400, 'VALIDATION_ERROR', 'theme invalido');
+  if (timezone !== undefined && !isValidTimeZone(timezone)) {
+    return fail(res, 400, 'VALIDATION_ERROR', 'timezone invalida: usa un nombre IANA, por ejemplo America/Santiago', { field: 'timezone' });
+  }
   if (locale) u.locale = locale;
   if (theme) u.theme = theme;
+  if (timezone) u.timezone = timezone;
   if (dailyReminder != null) u.dailyReminder = !!dailyReminder;
   await save(u);
-  return ok(res, { locale: u.locale, theme: u.theme, dailyReminder: u.dailyReminder });
+  return ok(res, { locale: u.locale, theme: u.theme, dailyReminder: u.dailyReminder, timezone: tzOf(u) });
 }));
 
 const prefsOf = (u) => ({
@@ -146,7 +157,7 @@ r.get('/me/quota', wrap(async (req, res) => {
   const u = req.user; ensureQuotaDay(u); await save(u);
   return ok(res, {
     used: u.quota.used, max: quotaMax(u), base: BASE_QUOTA,
-    bonuses: u.bonuses || { school: false, address: false }, unlimited: isUnlimited(u), resetsAt: resetsAt(),
+    bonuses: u.bonuses || { school: false, address: false }, unlimited: isUnlimited(u), resetsAt: resetsAt(u),
   });
 }));
 
@@ -220,7 +231,7 @@ r.post('/me/medals/exchange', wrap(async (req, res) => {
 // GET /me/gifts
 r.get('/me/gifts', wrap(async (req, res) => {
   const u = req.user;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKey(u);
   const used = u.giftDay === today ? (u.giftUsed || 0) : 0;
   // amigos: miembros de grupos compartidos
   const myGroups = (await query(COL.groupMembers, [['userId', '==', u.id]])).map((m) => m.groupId);
@@ -251,7 +262,7 @@ r.post('/me/gifts', wrap(async (req, res) => {
     if (seen.has(rcp.userId)) return fail(res, 400, 'VALIDATION_ERROR', 'Hay destinatarios repetidos', { field: 'recipients' });
     seen.add(rcp.userId);
   }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKey(u);
   if (u.giftDay !== today) { u.giftDay = today; u.giftUsed = 0; }
   const total = recipients.reduce((s, x) => s + x.amount, 0);
   if (u.giftUsed + total > 10) return fail(res, 422, 'DAILY_GIFT_LIMIT', 'Se supero el limite de 10 regalos diarios');
