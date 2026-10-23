@@ -123,6 +123,9 @@ export const RESUMENES = {
 const E = (name, where, type, required, desc) => ({ name, in: where, type, required: required ? 'Sí' : 'No', desc });
 
 export const EXTRA = {
+  'GET /me/medals': {
+    descripcion: 'Devuelve el saldo de medallas por nivel y `progress`, con UN solo nivel destacado: el mas bajo que ya se puede canjear (5 medallas = 1 del nivel siguiente) o, si ninguno, el mas cercano a poder canjear. Cada entrada trae `have` (medallas hacia el canje, maximo 5), `needed` (5), `next` (nivel destino), `exchangeable` (canjes que ya se pueden hacer) y `missing` (medallas que faltan para el primer canje; 0 si ya se puede). Platino no se canjea.',
+  },
   'GET /me/progress': {
     descripcion: 'Acierto del alumno en cada prueba que eligio, calculado sobre sus ultimas 20 respuestas de esa prueba. `percent` es un entero (0 si no hay respuestas). `hasData` es false mientras haya menos de 5 respuestas recientes: el cliente debe mostrar "sin datos" en lugar de un porcentaje poco fiable. `answered` cuenta todas las respuestas historicas y `recent` las usadas en el calculo (maximo 20). Se usa en "Progreso por prueba" del inicio.',
   },

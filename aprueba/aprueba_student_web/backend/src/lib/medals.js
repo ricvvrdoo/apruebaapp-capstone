@@ -12,13 +12,27 @@ export function award(wallet, tier, amount) {
   return wallet;
 }
 
-// Progreso hacia el siguiente nivel del primer nivel con saldo.
+// Que mostrar en la tarjeta de canje de Inicio. Devuelve un solo nivel:
+//   { [nivel]: { have, needed, next, exchangeable, missing } }
+// - have: medallas hacia el siguiente canje (maximo needed)
+// - exchangeable: canjes que ya se pueden hacer con ese saldo
+// - missing: medallas que faltan para el primer canje (0 si ya se puede)
+// Nivel elegido: el mas bajo que ya se puede canjear; si ninguno, el mas cercano a poder
+// canjear (en empate, el mas bajo). Platino no se canjea.
+export const EXCHANGE_COST = 5;
 export function walletProgress(wallet) {
-  for (const t of TIERS) {
-    if (NEXT[t]) {
-      const have = (wallet[t] || 0) % 5;
-      return { [t]: { have, needed: 5, next: NEXT[t] } };
-    }
-  }
-  return {};
+  const tiers = TIERS.filter((t) => NEXT[t]);
+  const info = (t) => {
+    const balance = wallet[t] || 0;
+    return {
+      have: Math.min(balance, EXCHANGE_COST),
+      needed: EXCHANGE_COST,
+      next: NEXT[t],
+      exchangeable: Math.floor(balance / EXCHANGE_COST),
+      missing: Math.max(0, EXCHANGE_COST - balance),
+    };
+  };
+  const ready = tiers.find((t) => info(t).exchangeable > 0);
+  const chosen = ready ?? tiers.reduce((best, t) => (info(t).have > info(best).have ? t : best), tiers[0]);
+  return { [chosen]: info(chosen) };
 }

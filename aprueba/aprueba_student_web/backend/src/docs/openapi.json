@@ -10904,7 +10904,7 @@
         ],
         "operationId": "getMeMedals",
         "summary": "Consultar la billetera de medallas",
-        "description": "Devuelve el saldo de medallas por nivel y el progreso hacia el siguiente nivel de cada uno.",
+        "description": "Devuelve el saldo de medallas por nivel y `progress`, con UN solo nivel destacado: el mas bajo que ya se puede canjear (5 medallas = 1 del nivel siguiente) o, si ninguno, el mas cercano a poder canjear. Cada entrada trae `have` (medallas hacia el canje, maximo 5), `needed` (5), `next` (nivel destino), `exchangeable` (canjes que ya se pueden hacer) y `missing` (medallas que faltan para el primer canje; 0 si ya se puede). Platino no se canjea.",
         "security": [
           {
             "bearerAuth": []
@@ -10948,19 +10948,24 @@
                         },
                         "progress": {
                           "type": "object",
-                          "properties": {
-                            "bronze": {
-                              "type": "object",
-                              "properties": {
-                                "have": {
-                                  "type": "integer"
-                                },
-                                "needed": {
-                                  "type": "integer"
-                                },
-                                "next": {
-                                  "type": "string"
-                                }
+                          "description": "Un solo nivel destacado (clave = nivel).",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "have": {
+                                "type": "integer"
+                              },
+                              "needed": {
+                                "type": "integer"
+                              },
+                              "next": {
+                                "type": "string"
+                              },
+                              "exchangeable": {
+                                "type": "integer"
+                              },
+                              "missing": {
+                                "type": "integer"
                               }
                             }
                           }
@@ -10995,9 +11000,11 @@
                     },
                     "progress": {
                       "bronze": {
-                        "have": 0,
+                        "have": 5,
                         "needed": 5,
-                        "next": "silver"
+                        "next": "silver",
+                        "exchangeable": 3,
+                        "missing": 0
                       }
                     }
                   },

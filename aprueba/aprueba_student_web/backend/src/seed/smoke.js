@@ -576,6 +576,46 @@ results.push('\n[22] Inicio: progreso por prueba con datos reales');
   check('usuario demo: historial real en M1 (11 de 20 = 55)', demo.m1?.hasData === true && demo.m1.percent === 55, JSON.stringify(demo.m1));
 }
 
+results.push('\n[23] Inicio: progreso de canje de medallas');
+{
+  const { patch: patchDoc2, COL: DB2 } = await import('../data/repo.js');
+  let seq2 = 0;
+  const zero = { bronze: 0, silver: 0, gold: 0, diamond: 0, platinum: 0 };
+  // Alumno nuevo con un monedero a medida; devuelve lo que informa GET /me/medals.
+  const progressFor = async (wallet) => {
+    seq2++;
+    const phone = `+569${String(91000000 + seq2).padStart(8, '0')}`;
+    const v = (await call('POST', '/auth/phone/verify-code', { body: { firebaseIdToken: `dev:${phone}` } })).json.data;
+    const r = (await call('POST', '/auth/register', {
+      body: { name: `Alumno Medallas ${seq2}`, email: `medallas${seq2}-${Date.now()}@x.cl`, password: 'clave1234', consent: true, phoneToken: v.phoneToken, country: 'CL', language: 'es', gradeId: 'cl-paes' },
+    })).json.data;
+    await patchDoc2(DB2.users, r.user.id, { medals: { ...zero, ...wallet } });
+    return (await call('GET', '/me/medals', { token: r.accessToken })).json.data.progress;
+  };
+  const only = (p) => { const k = Object.keys(p); return k.length === 1 ? [k[0], p[k[0]]] : [null, null]; };
+
+  let [tier, p] = only(await progressFor({ bronze: 15 }));
+  check('15 bronces: se destaca bronce, ya se puede canjear 3 veces', tier === 'bronze' && p.exchangeable === 3 && p.missing === 0 && p.have === 5 && p.needed === 5 && p.next === 'silver', JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ bronze: 2 }));
+  check('2 bronces: faltan 3 y no se puede canjear', tier === 'bronze' && p.exchangeable === 0 && p.missing === 3 && p.have === 2, JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ bronze: 5 }));
+  check('5 bronces: exactamente un canje', p.exchangeable === 1 && p.missing === 0 && p.have === 5, JSON.stringify(p));
+  [tier, p] = only(await progressFor({ bronze: 7, silver: 6 }));
+  check('si varios niveles se pueden canjear, se destaca el mas bajo', tier === 'bronze' && p.exchangeable === 1, JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ bronze: 3, silver: 6 }));
+  check('bronce aun no alcanza y plata si: se destaca plata', tier === 'silver' && p.exchangeable === 1 && p.next === 'gold', JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ bronze: 2, silver: 4 }));
+  check('sin canjes disponibles: se destaca el nivel mas cercano (plata, faltan 1)', tier === 'silver' && p.exchangeable === 0 && p.missing === 1 && p.have === 4 && p.next === 'gold', JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ bronze: 2, silver: 2 }));
+  check('empate de cercania: gana el nivel mas bajo', tier === 'bronze', JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({}));
+  check('sin medallas: bronce, faltan 5', tier === 'bronze' && p.have === 0 && p.missing === 5 && p.exchangeable === 0, JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ platinum: 3 }));
+  check('solo platino (no se canjea): se muestra bronce con 0', tier === 'bronze' && p.have === 0 && p.exchangeable === 0, JSON.stringify([tier, p]));
+  [tier, p] = only(await progressFor({ diamond: 5 }));
+  check('5 diamantes: canje a platino', tier === 'diamond' && p.exchangeable === 1 && p.next === 'platinum', JSON.stringify([tier, p]));
+}
+
 console.log(results.join('\n'));
 console.log(`\n${pass} ok / ${failCount} fallos`);
 process.exit(failCount ? 1 : 0);
