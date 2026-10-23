@@ -81,6 +81,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           SoftCard(
+            onTap: () => context.push('/privacy'),
             child: Row(children: [
               Expanded(child: Text(context.s('set_privacy'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
               const Icon(Icons.chevron_right),
