@@ -6,6 +6,13 @@ import { Coin, Bar, Spinner } from '../components/ui.jsx';
 
 const TIERS = ['bronze', 'silver', 'gold', 'diamond', 'platinum'];
 
+// "5 h 12 min" hasta el reinicio de la cuota (la medianoche del alumno la calcula el servidor).
+function untilReset(iso) {
+  const mins = Math.max(0, Math.ceil((Date.parse(iso) - Date.now()) / 60000));
+  const h = Math.floor(mins / 60);
+  return h ? `${h} h ${mins % 60} min` : `${mins} min`;
+}
+
 export default function Home() {
   const { L, user, lang } = useAuth();
   const nav = useNavigate();
@@ -61,12 +68,21 @@ export default function Home() {
         <div className="card">
           <div className="flex between"><b>{L('quota')}</b><span className="note">{quota.unlimited ? L('unlimited') : `${quota.used} ${L('of')} ${quota.max} ${L('used')}`}</span></div>
           <Bar value={quota.unlimited ? 100 : (quota.used / quota.max) * 100} />
-          <p className="note" style={{ marginTop: 8 }}>{quota.unlimited ? '∞' : L('quota_note')}</p>
+          {quota.unlimited ? <p className="note" style={{ marginTop: 8 }}>∞</p> : (
+            <>
+              <p className="note" style={{ marginTop: 8 }}>
+                {quota.max - quota.used > 0 ? L('quota_left', { n: quota.max - quota.used }) : L('quota_empty')} · {L('quota_resets', { t: untilReset(quota.resetsAt) })}
+              </p>
+              <p className="note" style={{ marginTop: 2 }}>
+                {quota.bonuses?.school && quota.bonuses?.address ? L('quota_bonus_all') : L('quota_bonus_more', { n: (quota.bonuses?.school ? 0 : 5) + (quota.bonuses?.address ? 0 : 5) })}
+              </p>
+            </>
+          )}
         </div>
         <div className="card stat">
           <span className="lbl">{L('streak')} {"\u{1F525}"}</span>
-          <span className="big">{me.streak} <span style={{ fontSize: 15, color: 'var(--muted)' }}>{L('days')}</span></span>
-          <p className="note">{L('keep_streak')}</p>
+          <span className="big">{me.streak} <span style={{ fontSize: 15, color: 'var(--muted)' }}>{L(me.streak === 1 ? 'day' : 'days')}</span></span>
+          <p className="note">{L(me.streakStatus === 'at_risk' && me.streak === 1 ? 'streak_at_risk_one' : `streak_${me.streakStatus || 'none'}`, { n: me.streak })}</p>
         </div>
         <div className="card">
           <div className="flex between" style={{ marginBottom: 10 }}><b>{L('medals_title')}</b>
