@@ -2,21 +2,22 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Logo, ToastHost, initials } from './ui.jsx';
+import { CreditCard, House, Medal, MessageSquare, Pencil, Settings, Users } from 'lucide-react';
 import SearchBox from './SearchBox.jsx';
 
 const NAV_MAIN = [
-  ['inicio', '\u{1F3E0}', '/'],
-  ['practicar', '✏️', '/practicar'],
-  ['medallas', '\u{1F3C5}', '/medallas'],
-  ['grupos', '\u{1F465}', '/grupos'],
-  ['comunidad', '\u{1F4AC}', '/comunidad'],
+  ['inicio', House, '/'],
+  ['practicar', Pencil, '/practicar'],
+  ['medallas', Medal, '/medallas'],
+  ['grupos', Users, '/grupos'],
+  ['comunidad', MessageSquare, '/comunidad'],
 ];
 // El buscador solo se muestra donde aporta: en el resto de las pantallas era redundante.
 const SEARCH_ROUTES = new Set(['/', '/grupos']);
 
 const NAV_ACCOUNT = [
-  ['plan', '\u{1F4B3}', '/plan'],
-  ['ajustes', '⚙️', '/ajustes'],
+  ['plan', CreditCard, '/plan'],
+  ['ajustes', Settings, '/ajustes'],
 ];
 
 export default function Layout() {
@@ -28,9 +29,9 @@ export default function Layout() {
 
   const titleKey = ([...NAV_MAIN, ...NAV_ACCOUNT].find(([, , path]) => path === loc.pathname)?.[0]) || 'inicio';
 
-  const Item = ([id, ic, path]) => (
+  const Item = ([id, Icon, path]) => (
     <NavLink key={id} to={path} end={path === '/'} className={({ isActive }) => `nav-item ${isActive ? 'act' : ''}`} onClick={() => setOpen(false)}>
-      <span className="ico">{ic}</span>{L('nav_' + id)}
+      <span className="ico"><Icon size={18} aria-hidden="true" /></span>{L('nav_' + id)}
       {id === 'plan' && free ? <span className="badge">PRO</span> : null}
     </NavLink>
   );
