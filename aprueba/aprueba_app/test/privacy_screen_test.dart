@@ -3,7 +3,10 @@ import 'dart:convert';
 
 import 'package:aprueba_app/core/network/api_exception.dart';
 import 'package:aprueba_app/core/theme/app_theme.dart';
+import 'package:aprueba_app/data/models/models.dart';
 import 'package:aprueba_app/data/repositories/profile_repository.dart';
+import 'package:aprueba_app/providers/catalog_providers.dart';
+import 'package:aprueba_app/providers/data_providers.dart';
 import 'package:aprueba_app/features/settings/privacy_screen.dart';
 import 'package:aprueba_app/providers/app_providers.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +52,18 @@ Future<FakeProfile> pumpPrivacy(WidgetTester tester, {bool fails = false, Locale
     GoRoute(path: '/settings', builder: (_, __) { visited.add('/settings'); return const Scaffold(body: Text('ajustes')); }),
   ]);
   await tester.pumpWidget(ProviderScope(
-    overrides: [profileRepositoryProvider.overrideWithValue(repo)],
+    overrides: [
+      profileRepositoryProvider.overrideWithValue(repo),
+      meProvider.overrideWith((ref) async => User.fromJson({
+            'id': 'u1', 'name': 'Ana Pérez', 'email': 'ana@correo.cl', 'plan': 'free', 'phone': '+56911112222',
+            'phoneVerified': true, 'country': 'CL', 'gradeId': 'cl-paes', 'school': 'Liceo Uno', 'age': 17,
+            'language': 'es', 'timezone': 'America/Santiago',
+          })),
+      countriesProvider.overrideWith((ref) async => [const Country(code: 'CL', name: 'Chile', dialCode: '+56')]),
+      gradesProvider.overrideWith((ref, code) async => [
+            const GradeGroup(key: 'exam', label: 'Exámenes', items: [GradeOption(id: 'cl-paes', label: 'PAES', kind: 'exam')]),
+          ]),
+    ],
     child: MaterialApp.router(
       locale: locale,
       supportedLocales: const [Locale('es'), Locale('en')],
@@ -63,10 +77,25 @@ Future<FakeProfile> pumpPrivacy(WidgetTester tester, {bool fails = false, Locale
 }
 
 void main() {
-  testWidgets('explica qué se guarda y qué pasa al eliminar la cuenta', (tester) async {
+  testWidgets('muestra los datos reales del alumno', (tester) async {
     await pumpPrivacy(tester);
-    expect(find.text('What we store'), findsOneWidget);
-    expect(find.textContaining('Your profile: name, email'), findsOneWidget);
+    expect(find.text('Your data'), findsOneWidget);
+    for (final fila in [
+      ['Name', 'Ana Pérez'], ['Email', 'ana@correo.cl'], ['Phone', '+56911112222 (verified)'],
+      ['Country', 'Chile'], ['Grade', 'PAES'], ['School', 'Liceo Uno'], ['Age', '17'],
+      ['Region', 'Not provided'], ['Language', 'Español'], ['Time zone', 'America/Santiago'], ['Plan', 'Free'],
+    ]) {
+      final etiqueta = find.text(fila[0]);
+      expect(etiqueta, findsOneWidget, reason: fila[0]);
+      // El valor está en la misma fila que su etiqueta.
+      final row = find.ancestor(of: etiqueta, matching: find.byType(Row)).first;
+      expect(find.descendant(of: row, matching: find.text(fila[1])), findsOneWidget, reason: '${fila[0]}: ${fila[1]}');
+    }
+    expect(find.text('What we store'), findsNothing);
+  });
+
+  testWidgets('explica qué pasa al eliminar la cuenta', (tester) async {
+    await pumpPrivacy(tester);
     expect(find.text('If you delete your account'), findsOneWidget);
     expect(find.textContaining('Invoices are kept without being linked to you'), findsOneWidget);
   });
@@ -99,7 +128,7 @@ void main() {
 
   testWidgets('en español usa los textos en español', (tester) async {
     await pumpPrivacy(tester, locale: const Locale('es'));
-    expect(find.text('Qué guardamos'), findsOneWidget);
+    expect(find.text('Tus datos'), findsOneWidget);
     expect(find.text('Copiar mis datos'), findsOneWidget);
   });
 }
