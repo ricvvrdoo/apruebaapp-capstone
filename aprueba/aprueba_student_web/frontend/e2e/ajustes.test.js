@@ -1,5 +1,5 @@
 // Pruebas de navegador de Ajustes: secciones que se abren y cierran en la misma vista
-// ("Mis pruebas", "Mis datos y privacidad") y eliminar la cuenta.
+// ("Ajustes", "Mis datos y privacidad") y eliminar la cuenta.
 // Requisitos y forma de correrlas: ver el encabezado de home.test.js.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -95,21 +95,23 @@ test('Mis datos y privacidad se abre y se cierra en la misma vista, mostrando lo
   assert.deepEqual(errors, []);
 });
 
-test('Mis pruebas se abre y se cierra y muestra las elegidas aun cerrada', async () => {
+test('Ajustes agrupa tema, idioma, recordatorio, pruebas y plan, y se abre y se cierra igual que la otra sección', async () => {
   const { page, errors } = await open(await newStudent());
-  const header = section(page, 'Mis pruebas');
-  assert.equal(await header.getAttribute('aria-expanded'), 'false');
-  await page.getByRole('button', { name: /Mis pruebas.*Matemática M1/ }).waitFor(); // las pruebas llegan con el catálogo
-  assert.match(await header.innerText(), /Matemática M1/, 'cerrada: resume las pruebas elegidas');
-  await header.click();
-  assert.equal(await header.getAttribute('aria-expanded'), 'true');
-  const panel = page.locator(`#${await header.getAttribute('aria-controls')}`);
+  const header = section(page, 'Ajustes');
+  assert.equal(await header.getAttribute('aria-expanded'), 'true', 'Ajustes arranca abierta');
+  const panel = page.locator('#' + await header.getAttribute('aria-controls'));
+  const text = await panel.innerText();
+  for (const t of ['Modo oscuro', 'Idioma', 'Recordatorio diario', 'Mis pruebas', 'Mi plan']) assert.ok(text.includes(t), t + ' en ' + text);
   await panel.getByText('Comp. Lectora').waitFor();
   await panel.getByText('Comp. Lectora').click();
   await page.getByText('Cambios guardados').waitFor();
   await header.click();
-  assert.equal(await panel.count(), 0);
-  assert.match(await header.innerText(), /Matemática M1, Comp\. Lectora/, 'el resumen se actualiza al elegir');
+  assert.equal(await header.getAttribute('aria-expanded'), 'false');
+  assert.equal(await page.getByText('Modo oscuro').count(), 0, 'cerrada: el contenido se quita');
+  assert.equal(page.url(), WEB + '/ajustes');
+  await header.click();
+  assert.equal(await header.getAttribute('aria-expanded'), 'true');
+  await page.getByText('Modo oscuro').waitFor();
   assert.deepEqual(errors, []);
 });
 
