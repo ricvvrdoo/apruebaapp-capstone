@@ -84,7 +84,7 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <Bar value={(quota.used / quota.max) * 100} />
+              <Bar value={(quota.used / quota.max) * 100} label={L('quota')} />
               <p className="note" style={{ marginTop: 8 }}>
                 {quota.max - quota.used > 0 ? L('quota_left', { n: quota.max - quota.used }) : L('quota_empty')} · {L('quota_resets', { t: untilReset(quota.resetsAt) })}
               </p>
@@ -111,7 +111,7 @@ export default function Home() {
           </div>
           <div className="divider" />
           <span className="note"><Coin tier={mTier} /> {mInfo.have}/{mInfo.needed} → <Coin tier={mInfo.next} /></span>
-          <Bar value={(mInfo.have / mInfo.needed) * 100} color={`var(--${mTier})`} />
+          <Bar value={(mInfo.have / mInfo.needed) * 100} color={`var(--${mTier})`} label={L('medals_title')} />
           <p className="note" style={{ marginTop: 6 }}>{medalNote}</p>
           {mInfo.exchangeable > 0 && <button className="btn sec" style={{ marginTop: 8, padding: '8px 12px' }} onClick={() => nav('/medallas')}>{L('medals_go_exchange')}</button>}
         </div>
@@ -133,7 +133,7 @@ export default function Home() {
             {progress.map((t) => (
               <div key={t.testId}>
                 <div className="flex between"><span style={{ fontSize: 13 }}>{t.label}</span><span className="note">{t.hasData ? `${t.percent}%` : L('progress_no_data')}</span></div>
-                <Bar value={t.hasData ? t.percent : 0} />
+                <Bar value={t.hasData ? t.percent : 0} label={t.label} />
                 {!t.hasData && <p className="note" style={{ marginTop: 4 }}>{L('progress_need_more', { n: 5 - t.recent })}</p>}
               </div>
             ))}

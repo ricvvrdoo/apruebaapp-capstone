@@ -7,8 +7,14 @@ export function Coin({ tier, size = 'sm' }) {
   return <span className={`medal-coin ${tier} ${SIZE[size] || 'm-sm'}`}>{EMOJI[tier] || '\u{1F3C5}'}</span>;
 }
 
-export function Bar({ value, color }) {
-  return <div className="bar"><i style={{ width: `${Math.max(0, Math.min(100, value))}%`, ...(color ? { background: color } : {}) }} /></div>;
+// Barra de progreso. `label` es el nombre que anuncia un lector de pantalla ("Cuota diaria, 50 %").
+export function Bar({ value, color, label }) {
+  const v = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
+  return (
+    <div className="bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} aria-label={label}>
+      <i style={{ width: `${v}%`, ...(color ? { background: color } : {}) }} />
+    </div>
+  );
 }
 
 export function Spinner() { return <div className="center"><div className="spin" /></div>; }

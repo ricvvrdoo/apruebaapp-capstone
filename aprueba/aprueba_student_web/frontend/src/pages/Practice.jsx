@@ -95,7 +95,7 @@ export default function Practice() {
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
         <div className="flex between"><span className="note">{L('q_of')} {progress?.current} {L('of')} {progress?.total}</span>
           <span className="flex" style={{ gap: 6, fontSize: 13 }}>⏱️ <span className="timer">{fmt(elapsed)}</span></span></div>
-        <Bar value={(progress?.current / progress?.total) * 100} />
+        <Bar value={(progress?.current / progress?.total) * 100} label={L('q_of')} />
         <span className="tag" style={{ marginTop: 14, display: 'inline-block' }}>{q.testId?.toUpperCase()} · {q.axis}</span>
         <div className="card" style={{ marginTop: 12 }}>
           <div className="h" style={{ fontSize: 19 }}>{q.statement}</div>
@@ -158,7 +158,7 @@ export default function Practice() {
         <div className="card">
           <div className="section-label" style={{ margin: '0 0 4px' }}>{'\u{1F9E0}'} {L('skill_h')}</div>
           <p className="note">{skill?.skill?.name}</p>
-          {skill && <><div className="flex between" style={{ marginTop: 8 }}><span className="note">{L('mastery')}</span><b>{skill.mastery.percent}%</b></div><Bar value={skill.mastery.percent} /></>}
+          {skill && <><div className="flex between" style={{ marginTop: 8 }}><span className="note">{L('mastery')}</span><b>{skill.mastery.percent}%</b></div><Bar value={skill.mastery.percent} label={L('mastery')} /></>}
           {(skill?.prerequisites || []).map((p, i) => (
             <div key={i} className={`skill-node ${p.status === 'done' ? 'done' : p.status === 'active' ? 'active' : 'locked'}`}>
               <span>{p.status === 'done' ? '✅' : p.status === 'active' ? '\u{1F3AF}' : '\u{1F512}'}</span> {p.name}

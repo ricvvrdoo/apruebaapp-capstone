@@ -103,7 +103,7 @@ function GroupDetail({ id, onBack, L, user, flash }) {
       </div>
       <div className="dash" style={{ gridTemplateColumns: 'repeat(2,1fr)', marginTop: 16 }}>
         <div className="card"><b>{L('grp_stats')}</b>
-          <div className="flex between" style={{ marginTop: 10 }}><span className="note">{L('grp_avg')}</span><b>{stats?.avgScore}%</b></div><Bar value={stats?.avgScore || 0} />
+          <div className="flex between" style={{ marginTop: 10 }}><span className="note">{L('grp_avg')}</span><b>{stats?.avgScore}%</b></div><Bar value={stats?.avgScore || 0} label={L('grp_avg')} />
           <div className="section-label" style={{ margin: '14px 0 4px' }}>{L('grp_best')}</div>
           {(stats?.best || []).map((b, i) => <div key={i} className="flex between" style={{ fontSize: 13, marginTop: 4 }}><span>{b.area}</span><span className="tag g">{b.avg}%</span></div>)}
           <div className="section-label" style={{ margin: '14px 0 4px' }}>{L('grp_weak')}</div>
