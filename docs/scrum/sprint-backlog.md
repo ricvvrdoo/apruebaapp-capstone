@@ -22,10 +22,11 @@ avanzar la integración de los clientes con la API.
 | PB-12 | Pruebas unitarias de reglas críticas | Elías | 8 | En curso | Iniciadas con pruebas de navegador para Inicio y de modelos de la app (en `develop`) |
 | PB-16 | Exportar datos y eliminar la cuenta | Elías | 5 | En revisión | En la rama `develop`, pendiente de Pull Request a `main` |
 | PB-18 | Artefactos Scrum | Ricardo | 3 | En revisión | Pull Request `docs/readme-scrum-fase2` |
+| PB-19 | Documentación técnica | Ricardo | 5 | En revisión | Adelantado del Sprint 5; mismo Pull Request |
 | PB-23 | Mejoras del sitio web | Elías | 5 | En curso | Búsqueda global y formularios en `main` (22-10); Inicio con datos reales en `develop` |
 | PB-25 | App Flutter integrada con la API | Elías | 8 | En curso | Inicio, práctica y ajustes en `develop`; continúa en el Sprint 4 |
 
-**Comprometido:** 42 puntos.
+**Comprometido:** 47 puntos.
 
 **Notas del sprint:**
 - El sprint comenzó con retraso: entre el 08-10 y el 21-10 no se registraron cambios en
@@ -93,5 +94,5 @@ sprints 2 y 5.
 | Sprint | Elementos planificados |
 |---|---|
 | Sprint 4 (02-11 al 14-11) | PB-13, PB-14, PB-15, PB-25 (continuación) |
-| Sprint 5 (16-11 al 28-11) | PB-19, PB-21, PB-26 |
+| Sprint 5 (16-11 al 28-11) | PB-21, PB-26 |
 | Cierre (30-11 al 12-12) | PB-27 |

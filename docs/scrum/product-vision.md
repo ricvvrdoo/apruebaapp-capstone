@@ -30,10 +30,30 @@ pruebas automatizadas.
 | Alloxentric (empresa mandante) | Un backend desplegable, seguro, documentado y mantenible por otro equipo |
 | Docente guía (Duoc UC) | Evidencia del proceso y del cumplimiento de las competencias del perfil de egreso |
 
-## Objetivo del producto en el proyecto
+## Objetivos del proyecto
 
-Dejar en condiciones de despliegue productivo el backend de Aprueba, junto con su
-sitio web y su app móvil del estudiante, antes del término del semestre académico.
+**Objetivo general.** Implementar las mejoras de seguridad, persistencia y calidad
+necesarias para dejar el backend de la plataforma Aprueba, junto con su aplicación
+móvil y su sitio web del estudiante, en condiciones de despliegue productivo antes del
+término del semestre académico.
+
+**Objetivos específicos.**
+
+1. Migrar la capa de persistencia desde el almacenamiento local en archivo hacia Cloud
+   Firestore, con índices compuestos y reglas de seguridad.
+2. Corregir las vulnerabilidades identificadas en el backend recibido, priorizando el
+   acceso mediante proveedores externos y el cambio de plan de suscripción.
+3. Desplegar el backend con publicación continua en Vercel durante el desarrollo y en
+   contenedores Docker como entregable final.
+4. Construir una batería de pruebas automatizadas sobre las reglas de negocio
+   críticas: autenticación, autorización, cuota diaria y gamificación.
+5. Completar los flujos funcionales sin cierre, en particular las recorrecciones de
+   preguntas, y corregir los defectos de consistencia de datos.
+6. Documentar el contrato de la API con una especificación OpenAPI versionada.
+7. Integrar y adecuar los clientes: sitio web y app Flutter validada en Android, con
+   iOS configurado sin compilar.
+
+Los objetivos 3, 5 y 7 incluyen los ajustes acordados en la Fase 2.
 
 ## Alcance
 

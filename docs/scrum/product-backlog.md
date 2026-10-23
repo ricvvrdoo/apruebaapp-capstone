@@ -37,7 +37,7 @@ los implementaron; sus puntos se estimaron al crear este backlog.
 | **Contrato y documentación** |||||||
 | PB-17 | Especificación OpenAPI 3.1 verificada y protegida | M | 5 | 1 | Ricardo | Terminado (PR #9, #10) |
 | PB-18 | Artefactos Scrum | M | 3 | 3 | Ricardo | En revisión |
-| PB-19 | Documentación técnica: modelo de datos, requisitos no funcionales, diagramas UML e innovación | S | 5 | 5 | Ricardo | Pendiente |
+| PB-19 | Documentación técnica: manual técnico, modelo de datos, requisitos no funcionales, diagramas UML e innovación | S | 5 | 3 | Ricardo | En revisión |
 | **Despliegue** |||||||
 | PB-20 | API y sitio web en Vercel como proyectos independientes | M | 5 | 1 | Ricardo | Terminado (PR #5, #7, #11, #12) |
 | PB-21 | Entorno completo con Docker Compose | M | 8 | 5 | Elías | Pendiente |
@@ -150,8 +150,8 @@ los sprints y las retrospectivas.
 
 **PB-19 · Documentación técnica.** Como empresa, quiero que otro equipo pueda entender
 y mantener el sistema.
-- `docs/` incluye modelo de datos, requisitos no funcionales, diagramas UML y la
-  propuesta de innovación.
+- `docs/` incluye manual técnico, modelo de datos, requisitos no funcionales,
+  diagramas UML y la propuesta de innovación.
 
 ### Despliegue
 

@@ -150,6 +150,7 @@ aprueba/
   aprueba_app/        App móvil (Flutter)
 docs/                 Documentación técnica del proyecto
   scrum/              Artefactos Scrum
+  uml/                Diagramas UML
 Documentos Duoc/      Evidencias de la asignatura, por fase
 ```
 
@@ -166,6 +167,11 @@ organizan en una carpeta por integrante.
 
 ## Documentación
 
+- [Manual técnico](docs/manual-tecnico.md)
+- [Diagramas UML](docs/uml): casos de uso, clases, secuencia, componentes y despliegue
+- [Modelo de datos](docs/modelo-datos.md)
+- [Requisitos no funcionales](docs/requisitos-no-funcionales.md)
+- [Innovación](docs/innovacion.md)
 - [Despliegue en Vercel](docs/despliegue-vercel.md)
 - [Documentación de la API (OpenAPI)](docs/documentacion-api.md)
 - [Seguridad: estado y pendientes](docs/seguridad-pendiente.md)
