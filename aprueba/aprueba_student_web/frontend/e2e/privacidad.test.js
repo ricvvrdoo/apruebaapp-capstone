@@ -1,8 +1,7 @@
-// Pruebas de navegador de "Mis datos y privacidad" (descargar los datos y eliminar la cuenta).
+// Pruebas de navegador de "Mis datos y privacidad" (ver los datos y eliminar la cuenta).
 // Requisitos y forma de correrlas: ver el encabezado de home.test.js.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
 const WEB = process.env.E2E_WEB || 'http://localhost:5174';
@@ -36,7 +35,7 @@ async function newStudent() {
 }
 
 async function open({ email, password, routes }) {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: 'America/Santiago', acceptDownloads: true });
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: 'America/Santiago', });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -83,42 +82,11 @@ test('muestra los datos reales del alumno, la descarga y lo que pasa al eliminar
   fila('Idioma', 'Español');
   fila('Plan', 'Gratis');
   const todo = await page.locator('body').innerText();
-  assert.match(todo, /Descargar mis datos/);
+  assert.doesNotMatch(todo, /Descargar/);
   assert.match(todo, /Si eliminas tu cuenta/);
   assert.match(todo, /Las boletas se conservan sin vincularse a ti/);
   assert.doesNotMatch(todo, /Qué guardamos/);
   assert.deepEqual(errors, []);
-});
-
-test('descargar entrega un .json con los datos del alumno y sin su contraseña', async () => {
-  const s = await newStudent();
-  const { page, errors } = await open(s);
-  await page.goto(`${WEB}/privacidad`);
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    page.getByRole('button', { name: /Descargar archivo/ }).click(),
-  ]);
-  assert.match(download.suggestedFilename(), /^aprueba-mis-datos-\d{4}-\d{2}-\d{2}\.json$/);
-  const raw = fs.readFileSync(await download.path(), 'utf8');
-  const data = JSON.parse(raw);
-  assert.equal(data.profile.email, s.email);
-  assert.equal(data.answers.length, 1);
-  assert.equal(data.posts[0].text, 'Publicación de prueba');
-  assert.doesNotMatch(raw, /passwordHash|clave1234/);
-  await page.getByText('Archivo descargado').waitFor();
-  assert.equal(await page.getByRole('button', { name: /Descargar archivo/ }).isEnabled(), true);
-  assert.deepEqual(errors, []);
-});
-
-test('si el servidor falla avisa y el botón vuelve a quedar disponible', async () => {
-  const { page } = await open({
-    ...(await newStudent()),
-    routes: (p) => p.route('**/me/data-export', (r) => r.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ data: null, error: { code: 'INTERNAL', message: 'No se pudo preparar el archivo', details: [], field: null }, meta: {} }) })),
-  });
-  await page.goto(`${WEB}/privacidad`);
-  await page.getByRole('button', { name: /Descargar archivo/ }).click();
-  await page.getByText('No se pudo preparar el archivo').waitFor();
-  assert.equal(await page.getByRole('button', { name: /Descargar archivo/ }).isEnabled(), true);
 });
 
 test('eliminar la cuenta desde la pantalla: pide la contraseña y la cuenta deja de existir', async () => {
@@ -142,7 +110,7 @@ test('en inglés la pantalla también está traducida', async () => {
   await call('PATCH', '/me/settings', s.token, { locale: 'en' });
   const { page } = await open(s);
   await page.goto(`${WEB}/privacidad`);
-  await page.getByText('Download my data').first().waitFor();
+  await page.getByText('Your data').first().waitFor();
   await page.getByText('Chile').first().waitFor();
   const text = await page.locator('body').innerText();
   assert.match(text, /Your data/);

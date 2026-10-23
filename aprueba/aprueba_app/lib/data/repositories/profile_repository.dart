@@ -32,12 +32,6 @@ class ProfileRepository {
     return me(forceRefresh: true);
   }
 
-  /// Todo lo que la API guarda del alumno (GET /me/data-export). No se guarda en la cache offline.
-  Future<Map<String, dynamic>> exportData() async {
-    final res = await _api.get(Endpoints.meDataExport, parse: (d) => (d as Map).cast<String, dynamic>());
-    return res.data;
-  }
-
   Future<void> deleteAccount(String password) =>
       _api.delete(Endpoints.me, body: {'password': password});
 

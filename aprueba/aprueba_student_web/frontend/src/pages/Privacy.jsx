@@ -1,18 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Trash2, UserRound } from 'lucide-react';
+import { Trash2, UserRound } from 'lucide-react';
 import { api } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Skeleton, notify } from '../components/ui.jsx';
-
-// Descarga `data` como un archivo .json (sin pasar por el servidor: la API ya lo entrego completo).
-function saveJson(data, filename) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
+import { Skeleton } from '../components/ui.jsx';
 
 function Section({ icon: Icon, title, children }) {
   return (
@@ -29,7 +20,6 @@ const gradeLabel = (groups, id) => groups.flatMap((g) => g.items || []).find((i)
 export default function Privacy() {
   const { L } = useAuth();
   const nav = useNavigate();
-  const [busy, setBusy] = useState(false);
   const [me, setMe] = useState(null);
   const [country, setCountry] = useState(null);
   const [grade, setGrade] = useState(null);
@@ -51,16 +41,6 @@ export default function Privacy() {
     })();
     return () => { cancelled = true; };
   }, []);
-
-  const download = async () => {
-    setBusy(true);
-    try {
-      const { data } = await api.get('/me/data-export');
-      saveJson(data, `aprueba-mis-datos-${new Date().toISOString().slice(0, 10)}.json`);
-      notify(L('priv_downloaded'));
-    } catch (e) { notify(e.message); }
-    finally { setBusy(false); }
-  };
 
   const empty = L('priv_f_empty');
   const planName = { free: L('plan_free'), uni: L('plan_uni_short'), all: L('plan_all_short') };
@@ -96,13 +76,6 @@ export default function Privacy() {
               ))}
             </dl>
           )}
-      </Section>
-
-      <Section icon={Download} title={L('priv_download_h')}>
-        <p className="note" style={{ margin: '8px 0 12px' }}>{L('priv_download_p')}</p>
-        <button className="btn" onClick={download} disabled={busy} aria-busy={busy}>
-          <Download size={16} aria-hidden="true" /> {busy ? L('priv_downloading') : L('priv_download_btn')}
-        </button>
       </Section>
 
       <Section icon={Trash2} title={L('priv_delete_h')}>

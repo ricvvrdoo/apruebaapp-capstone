@@ -1,48 +1,18 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/l10n/app_strings.dart';
-import '../../core/network/api_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/async_value_view.dart';
 import '../../core/widgets/common_widgets.dart';
 import '../../data/models/models.dart';
-import '../../providers/app_providers.dart';
 import '../../providers/catalog_providers.dart';
 import '../../providers/data_providers.dart';
 
-/// "Mis datos y privacidad": los datos del alumno, una copia completa para llevarse y qué pasa al eliminar la cuenta.
-class PrivacyScreen extends ConsumerStatefulWidget {
+/// "Mis datos y privacidad": los datos del alumno y qué pasa al eliminar la cuenta.
+class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
-  @override
-  ConsumerState<PrivacyScreen> createState() => _PrivacyScreenState();
-}
-
-class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
-  bool _busy = false;
-
-  Future<void> _copy() async {
-    final messenger = ScaffoldMessenger.of(context);
-    // Los textos se resuelven antes del await para no usar el contexto después.
-    final doneMsg = context.s('priv_copied');
-    final failMsg = context.s('error_generic');
-    setState(() => _busy = true);
-    try {
-      final data = await ref.read(profileRepositoryProvider).exportData();
-      await Clipboard.setData(ClipboardData(text: const JsonEncoder.withIndent('  ').convert(data)));
-      messenger.showSnackBar(SnackBar(content: Text(doneMsg)));
-    } on ApiException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.message)));
-    } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(failMsg)));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,20 +43,6 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
           Text(context.s('priv_intro'), style: TextStyle(fontSize: 12, color: t.muted)),
           const SizedBox(height: 12),
           const _DataCard(),
-          const SizedBox(height: 10),
-          SoftCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              title(Icons.copy_all_outlined, 'priv_download_h'),
-              const SizedBox(height: 6),
-              Text(context.s('priv_copy_p'), style: TextStyle(fontSize: 12, color: t.muted)),
-              const SizedBox(height: 12),
-              PrimaryButton(
-                label: _busy ? context.s('priv_downloading') : context.s('priv_copy_btn'),
-                icon: Icons.copy_all_outlined,
-                onPressed: _busy ? null : _copy,
-              ),
-            ]),
-          ),
           const SizedBox(height: 10),
           SoftCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
