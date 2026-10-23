@@ -22,8 +22,8 @@ export default function Home() {
     setState(null);
     // /me y /me/quota son imprescindibles; medallas y progreso degradan a vacio
     // para que un fallo parcial no deje el dashboard entero en blanco.
-    const [me, quota, medals, progress] = await Promise.allSettled([
-      api.get('/me'), api.get('/me/quota'), api.get('/me/medals'), api.get('/me/progress'),
+    const [me, quota, medals, progress, plans] = await Promise.allSettled([
+      api.get('/me'), api.get('/me/quota'), api.get('/me/medals'), api.get('/me/progress'), api.get('/plans'),
     ]);
     if (me.status === 'rejected' || quota.status === 'rejected') { setState({ error: true }); return; }
     setState({
@@ -32,6 +32,10 @@ export default function Home() {
       medals: medals.status === 'fulfilled' ? medals.value.data.wallet : Object.fromEntries(TIERS.map((t) => [t, 0])),
       medalProgress: medals.status === 'fulfilled' ? medals.value.data.progress || {} : {},
       progress: progress.status === 'fulfilled' ? progress.value.data : [],
+      // lastTestId, answeredToday y answeredThisWeek (ver GET /me/progress)
+      progressMeta: progress.status === 'fulfilled' ? progress.value.meta || {} : {},
+      // precio mensual mas bajo de los planes, para el banner (null si no se pudo leer)
+      minPrice: plans.status === 'fulfilled' && plans.value.data.length ? Math.min(...plans.value.data.map((p) => p.price.monthly)) : null,
     });
   }, [lang]); // las etiquetas de las pruebas vienen traducidas del servidor
 
@@ -48,8 +52,13 @@ export default function Home() {
       </div>
     );
   }
-  const { me, quota, medals, medalProgress, progress } = state;
+  const { me, quota, medals, medalProgress, progress, progressMeta, minPrice } = state;
   const free = me.plan === 'free';
+  // Retomar: la ultima prueba que uso el alumno (null si aun no ha respondido nada).
+  const lastTestId = progressMeta.lastTestId || null;
+  const lastLabel = lastTestId ? (progress.find((p) => p.testId === lastTestId)?.label || lastTestId) : null;
+  const left = quota.max - quota.used;
+  const continueNote = quota.unlimited ? L('continue_p') : left > 0 ? L('continue_left', { n: left }) : L('continue_out');
   // Nivel que destaca el servidor: el mas bajo que ya se puede canjear o el mas cercano a poder hacerlo.
   const [mTier, mInfo] = Object.entries(medalProgress)[0] || ['bronze', { have: 0, needed: 5, next: 'silver', exchangeable: 0, missing: 5 }];
   const tierName = (t) => L('med_' + t).toLowerCase();
@@ -66,10 +75,16 @@ export default function Home() {
       </div>
       <div className="dash" style={{ marginTop: 16 }}>
         <div className="card">
-          <div className="flex between"><b>{L('quota')}</b><span className="note">{quota.unlimited ? L('unlimited') : `${quota.used} ${L('of')} ${quota.max} ${L('used')}`}</span></div>
-          <Bar value={quota.unlimited ? 100 : (quota.used / quota.max) * 100} />
-          {quota.unlimited ? <p className="note" style={{ marginTop: 8 }}>∞</p> : (
+          <div className="flex between"><b>{quota.unlimited ? L('activity_h') : L('quota')}</b><span className="note">{quota.unlimited ? L('unlimited') : `${quota.used} ${L('of')} ${quota.max} ${L('used')}`}</span></div>
+          {quota.unlimited ? (
+            <div className="flex" style={{ gap: 28, marginTop: 14 }}>
+              {[['answeredToday', 'activity_today'], ['answeredThisWeek', 'activity_week']].map(([k, label]) => (
+                <div key={k}><div style={{ fontSize: 26, fontWeight: 800, fontFamily: "'Montserrat',sans-serif", color: 'var(--brand)' }}>{progressMeta[k] ?? 0}</div><span className="note">{L(label)}</span></div>
+              ))}
+            </div>
+          ) : (
             <>
+              <Bar value={(quota.used / quota.max) * 100} />
               <p className="note" style={{ marginTop: 8 }}>
                 {quota.max - quota.used > 0 ? L('quota_left', { n: quota.max - quota.used }) : L('quota_empty')} · {L('quota_resets', { t: untilReset(quota.resetsAt) })}
               </p>
@@ -101,9 +116,9 @@ export default function Home() {
           {mInfo.exchangeable > 0 && <button className="btn sec" style={{ marginTop: 8, padding: '8px 12px' }} onClick={() => nav('/medallas')}>{L('medals_go_exchange')}</button>}
         </div>
         <div className="card span2" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'linear-gradient(135deg,var(--brand),#264b80)', color: '#fff', border: 'none' }}>
-          <div className="h" style={{ color: '#fff', fontSize: 20 }}>{L('continue_h')}</div>
-          <p className="note" style={{ color: 'rgba(255,255,255,.8)' }}>{L('continue_p')}</p>
-          <button className="btn" style={{ marginTop: 14, alignSelf: 'flex-start' }} onClick={() => nav('/practicar')}>{L('start_practice')}</button>
+          <div className="h" style={{ color: '#fff', fontSize: 20 }}>{lastLabel ? L('continue_h') : L('continue_new_h')}</div>
+          <p className="note" style={{ color: 'rgba(255,255,255,.8)' }}>{lastLabel ? continueNote : L('continue_new_p')}</p>
+          <button className="btn" style={{ marginTop: 14, alignSelf: 'flex-start' }} onClick={() => nav(lastTestId ? `/practicar?testId=${encodeURIComponent(lastTestId)}` : '/practicar')}>{lastLabel ? L('continue_btn', { test: lastLabel }) : L('start_practice')}</button>
         </div>
         <div className="card">
           <div className="section-label" style={{ margin: '0 0 8px' }}>{L('quick')}</div>
@@ -127,7 +142,7 @@ export default function Home() {
         {free && (
           <div className="card span3 upgrade">
             <div className="flex between" style={{ flexWrap: 'wrap', gap: 12 }}>
-              <div className="flex" style={{ gap: 14 }}><span style={{ fontSize: 32 }}>{'\u{1F680}'}</span><div><div className="h">{L('upgrade_h')}</div><p className="note">{L('upgrade_p')}</p></div></div>
+              <div className="flex" style={{ gap: 14 }}><span style={{ fontSize: 32 }}>{'\u{1F680}'}</span><div><div className="h">{L('upgrade_h')}</div><p className="note">{minPrice != null ? L('upgrade_p', { price: `US$${minPrice}` }) : L('upgrade_p_generic')}</p></div></div>
               <button className="btn" onClick={() => nav('/plan')}>{L('upgrade_cta')}</button>
             </div>
           </div>
