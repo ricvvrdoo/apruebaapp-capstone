@@ -6,6 +6,200 @@ especificación de la empresa (`Aprueba_Modelo_Datos_Firestore.docx`), con los a
 descritos más abajo. El diagrama de clases del dominio está en
 [uml/clases.md](uml/clases.md).
 
+## Diagrama entidad-relación
+
+Colecciones principales de Firestore y sus referencias. Cada relación es un campo con el
+identificador del documento padre (por ejemplo, `answers.userId`); Firestore no impone
+claves foráneas, y la integridad la mantiene la API. `quota` y `medals` no son
+colecciones: son objetos embebidos en el documento del usuario.
+
+```mermaid
+erDiagram
+    users ||--o{ answers : "responde"
+    tests ||--o{ questions : "agrupa"
+    questions ||--o{ answers : "recibe"
+    users ||--o{ medalLedger : "registra"
+    sponsors ||--o{ benefits : "financia"
+    users ||--o{ groups : "crea"
+    groups ||--|{ groupMembers : "tiene"
+    users ||--o{ groupMembers : "participa"
+    tests |o--o{ groups : "asignatura"
+    users ||--o{ posts : "publica"
+    questions |o--o{ posts : "se comparte en"
+    posts ||--o{ comments : "tiene"
+    posts ||--o{ likes : "recibe"
+    users ||--o{ comments : "escribe"
+    users ||--o{ likes : "marca"
+    tutors ||--o{ tutorReviews : "recibe"
+    users ||--o{ tutorReviews : "escribe"
+    users ||--o{ tutorRequests : "solicita"
+    tutors ||--o{ tutorRequests : "recibe"
+    tutorRequests ||--o| conversations : "abre"
+    conversations ||--o{ messages : "contiene"
+    users ||--o{ subscriptions : "contrata"
+    plans ||--o{ subscriptions : "define"
+    users ||--o{ invoices : "paga"
+    users ||--o{ notifications : "recibe"
+
+    users {
+        string id PK
+        string name
+        string email
+        string authProvider "password, google o apple"
+        string plan "free, uni o all"
+        string state "active o suspended"
+        array selectedTests
+        number streak
+        map quota "embebido: day, used"
+        map medals "embebido: bronze a platinum"
+    }
+    tests {
+        string id PK "lectora, m1, m2, cien, hist"
+        string label
+        number order
+    }
+    questions {
+        string id PK "determinista"
+        string testId FK
+        string axis
+        string difficulty
+        string statement
+        array options
+        number correctIndex
+        string explanation
+        boolean published
+        number rand "eleccion al azar con indice"
+    }
+    answers {
+        string id PK "alumno, pregunta y sesion"
+        string userId FK
+        string questionId FK
+        string testId FK
+        number selected
+        boolean correct
+        number elapsedMs
+        string sessionId
+    }
+    medalLedger {
+        string id PK
+        string userId FK
+        string tier
+        number amount
+        string reason
+    }
+    sponsors {
+        string id PK
+        string name
+        string tier
+    }
+    benefits {
+        string id PK
+        string sponsor FK
+        string name
+        number costPlatinum
+        number stock
+    }
+    groups {
+        string id PK
+        string ownerId FK
+        string subjectTestId FK
+        string name
+    }
+    groupMembers {
+        string id PK
+        string groupId FK
+        string userId FK
+        string role "owner o member"
+        number score
+    }
+    posts {
+        string id PK
+        string authorId FK
+        string questionId FK "opcional"
+        string authorName "desnormalizado"
+        string text
+        number likes
+        number comments
+    }
+    comments {
+        string id PK
+        string postId FK
+        string authorId FK
+        string text
+    }
+    likes {
+        string id PK
+        string postId FK
+        string userId FK
+    }
+    tutors {
+        string id PK
+        string name
+        array subjects
+        number pricePerHour
+        number rating
+        boolean verified
+    }
+    tutorReviews {
+        string id PK
+        string tutorId FK
+        string userId FK
+        number overall
+        map ratings
+    }
+    tutorRequests {
+        string id PK
+        string tutorId FK
+        string userId FK
+        string conversationId FK
+        string status
+        string message
+    }
+    conversations {
+        string id PK
+        string userId FK
+        string tutorId FK
+        string requestId FK
+        string lastMessageAt
+    }
+    messages {
+        string id PK
+        string conversationId FK
+        string senderType "user o tutor"
+        string senderId "alumno o tutor"
+        string text
+    }
+    plans {
+        string id PK "free, uni o all"
+        number price
+        map limits
+    }
+    subscriptions {
+        string id PK
+        string userId FK
+        string plan FK
+        string billingCycle
+        string status
+        number amount
+    }
+    invoices {
+        string id PK
+        string userId FK
+        number amount
+        string status
+        string paidAt
+    }
+    notifications {
+        string id PK
+        string userId FK
+        string type
+        string title
+        boolean read
+    }
+```
+
+La colección `features` (características que se muestran en los planes) no tiene
+referencias a otras colecciones, por lo que no aparece en el diagrama.
 
 ## Decisiones de diseño
 
