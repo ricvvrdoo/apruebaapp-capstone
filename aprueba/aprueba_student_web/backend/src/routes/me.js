@@ -10,6 +10,7 @@ import { TIERS, NEXT, walletProgress, award } from '../lib/medals.js';
 import { quotaMax, ensureQuotaDay, isUnlimited, BASE_QUOTA, MAX_QUOTA, resetsAt, todayKey } from '../lib/quota.js';
 import { streakView } from '../lib/streak.js';
 import { tzOf, isValidTimeZone, dayKey, shiftDay } from '../lib/tz.js';
+import { LIMITS, hit } from '../lib/rateLimit.js';
 import { verifyPhone } from '../lib/jwt.js';
 import { demoMode } from '../lib/demo.js';
 import { findCountry, findGrade } from '../data/catalog.js';
@@ -411,7 +412,13 @@ r.get('/me/invoices', wrap(async (req, res) => {
 
 // GET /me/data-export
 // Entrega en la misma respuesta todo lo que se guarda del alumno (derecho de acceso y portabilidad).
+// Hasta 5 exportaciones por hora: cada una lee todas las colecciones del alumno.
 r.get('/me/data-export', wrap(async (req, res) => {
+  const { retryAfter } = await hit(LIMITS.dataExport, req.user.id);
+  if (retryAfter) {
+    res.set('Retry-After', String(retryAfter));
+    return fail(res, 429, 'EXPORT_RATE_LIMITED', 'Alcanzaste el maximo de exportaciones por hora; intenta mas tarde');
+  }
   return ok(res, await exportUserData(req.user));
 }));
 

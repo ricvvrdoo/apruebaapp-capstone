@@ -13,6 +13,7 @@ import { normalizePhone, detectLocale, maskPhone } from '../lib/phone.js';
 import { verifyPhoneIdToken, PhoneVerificationError } from '../lib/firebasePhone.js';
 import { findCountry } from '../data/catalog.js';
 import { demoMode } from '../lib/demo.js';
+import { LIMITS, blockedFor, hit, clear, clientIp } from '../lib/rateLimit.js';
 
 const r = Router();
 const publicUser = (u) => ({
@@ -156,10 +157,20 @@ r.post('/auth/register', wrap(async (req, res) => {
 r.post('/auth/login', wrap(async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) return fail(res, 400, 'VALIDATION_ERROR', 'email y password son obligatorios');
+  // Limite de intentos: 5 fallos por correo o 20 por IP en 15 minutos. Mientras
+  // dure el bloqueo se rechaza incluso la contrasena correcta.
+  const ip = clientIp(req);
+  const wait = Math.max(await blockedFor(LIMITS.loginEmail, email), await blockedFor(LIMITS.loginIp, ip));
+  if (wait) {
+    res.set('Retry-After', String(wait));
+    return fail(res, 429, 'TOO_MANY_ATTEMPTS', 'Demasiados intentos fallidos; vuelve a intentarlo mas tarde');
+  }
   const user = await queryOne(COL.users, [['emailLower', '==', String(email).toLowerCase()]]);
   if (!user || !bcrypt.compareSync(password, user.passwordHash || '')) {
+    await Promise.all([hit(LIMITS.loginEmail, email), hit(LIMITS.loginIp, ip)]);
     return fail(res, 401, 'AUTH_INVALID_CREDENTIALS', 'El correo o la contrasena son incorrectos');
   }
+  await clear(LIMITS.loginEmail, email);
   if (user.state === 'suspended') return fail(res, 403, 'ACCOUNT_SUSPENDED', 'La cuenta esta suspendida');
   const reward = await dailyLoginReward(user);
   return ok(res, {
@@ -246,6 +257,13 @@ r.post('/auth/logout', authRequired, wrap(async (_req, res) => noContent(res)));
 r.post('/auth/password/forgot', wrap(async (req, res) => {
   const { email } = req.body || {};
   if (!email) return fail(res, 400, 'VALIDATION_ERROR', 'email es obligatorio');
+  // Cuenta por correo exista o no la cuenta, para no revelar cuales existen.
+  const [porCorreo, porIp] = await Promise.all([hit(LIMITS.forgotEmail, email), hit(LIMITS.forgotIp, clientIp(req))]);
+  const wait = Math.max(porCorreo.retryAfter, porIp.retryAfter);
+  if (wait) {
+    res.set('Retry-After', String(wait));
+    return fail(res, 429, 'RATE_LIMITED', 'Demasiadas solicitudes de recuperacion; espera un momento');
+  }
   const user = await queryOne(COL.users, [['emailLower', '==', String(email).toLowerCase()]]);
   if (user) {
     const token = genId('rst');

@@ -21,6 +21,11 @@ import conversationsRoutes from './routes/conversations.js';
 import searchRoutes from './routes/search.js';
 
 const app = express();
+// Detras de un proxy (Vercel), la IP del cliente llega en X-Forwarded-For. Solo se
+// confia en esa cabecera si TRUST_PROXY lo indica o si corre en Vercel, que la
+// sobrescribe; si no, cualquiera podria inventarla y evadir el limite por IP.
+const trustProxy = process.env.TRUST_PROXY || (process.env.VERCEL ? '1' : '');
+if (trustProxy) app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
 app.use(helmet());
 
 // CORS: la API y el frontend web viven en dominios distintos. Solo se aceptan
