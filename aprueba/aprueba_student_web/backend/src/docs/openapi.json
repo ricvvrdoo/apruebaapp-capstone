@@ -77,7 +77,7 @@
         ],
         "operationId": "postAuthLogin",
         "summary": "Iniciar sesión con correo y contraseña",
-        "description": "Inicia sesión con correo y contraseña. Devuelve los tokens y, como efecto secundario, registra el inicio de sesión diario que otorga 1 medalla de bronce (una vez al día).",
+        "description": "Inicia sesión con correo y contraseña. Devuelve los tokens y, como efecto secundario, registra el inicio de sesión diario que otorga 1 medalla de bronce (una vez al día).\n\n**Límite de intentos:** tras 5 fallos por correo o 20 por IP en 15 minutos responde 429 TOO_MANY_ATTEMPTS con la cabecera Retry-After (segundos), incluso si la contraseña es correcta. Un acceso correcto reinicia el contador del correo.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -371,7 +371,7 @@
             }
           },
           "429": {
-            "description": "`TOO_MANY_ATTEMPTS`: Demasiados intentos fallidos; reintente más tarde. (Definido en Aprueba_API_Backend.docx; la implementación actual no lo usa.)",
+            "description": "`TOO_MANY_ATTEMPTS`: Demasiados intentos fallidos; vuelve a intentarlo mas tarde",
             "content": {
               "application/json": {
                 "schema": {
@@ -384,7 +384,7 @@
                       "data": null,
                       "error": {
                         "code": "TOO_MANY_ATTEMPTS",
-                        "message": "Demasiados intentos fallidos; reintente más tarde. (Definido en Aprueba_API_Backend.docx; la implementación actual no lo usa.)",
+                        "message": "Demasiados intentos fallidos; vuelve a intentarlo mas tarde",
                         "details": [],
                         "field": null
                       },
@@ -522,7 +522,7 @@
         ],
         "operationId": "postAuthPasswordForgot",
         "summary": "Solicitar recuperación de contraseña",
-        "description": "Solicita el envío de un correo con un enlace para restablecer la contraseña. Por seguridad responde 200 aunque el correo no exista.",
+        "description": "Solicita el envío de un correo con un enlace para restablecer la contraseña. Por seguridad responde 200 aunque el correo no exista.\n\n**Límite:** 5 solicitudes por correo (exista o no la cuenta) o 20 por IP en 15 minutos; después responde 429 RATE_LIMITED con Retry-After.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -626,7 +626,7 @@
             }
           },
           "429": {
-            "description": "`RATE_LIMITED`: Demasiadas solicitudes de recuperación. (Definido en Aprueba_API_Backend.docx; la implementación actual no lo usa.)",
+            "description": "`RATE_LIMITED`: Demasiadas solicitudes de recuperacion; espera un momento",
             "content": {
               "application/json": {
                 "schema": {
@@ -639,7 +639,7 @@
                       "data": null,
                       "error": {
                         "code": "RATE_LIMITED",
-                        "message": "Demasiadas solicitudes de recuperación. (Definido en Aprueba_API_Backend.docx; la implementación actual no lo usa.)",
+                        "message": "Demasiadas solicitudes de recuperacion; espera un momento",
                         "details": [],
                         "field": null
                       },
@@ -9850,7 +9850,7 @@
         ],
         "operationId": "getMeDataExport",
         "summary": "Exportar los datos del alumno",
-        "description": "Entrega en la misma respuesta todo lo que se guarda del alumno (opción \"Mis datos y privacidad\"): perfil, respuestas, medallas, notificaciones, publicaciones, grupos, conversaciones con tutores, suscripciones y boletas. No incluye contraseñas, tokens de push ni datos de otras personas (de los grupos solo el nombre y el rol del alumno). La app guarda la respuesta como archivo `.json`.",
+        "description": "Entrega en la misma respuesta todo lo que se guarda del alumno (opción \"Mis datos y privacidad\"): perfil, respuestas, medallas, notificaciones, publicaciones, grupos, conversaciones con tutores, suscripciones y boletas. No incluye contraseñas, tokens de push ni datos de otras personas (de los grupos solo el nombre y el rol del alumno). La app guarda la respuesta como archivo `.json`.\n\n**Límite:** 5 exportaciones por alumno por hora; después responde 429 EXPORT_RATE_LIMITED con Retry-After.",
         "security": [
           {
             "bearerAuth": []
@@ -10111,7 +10111,7 @@
             }
           },
           "429": {
-            "description": "`EXPORT_RATE_LIMITED`: Ya hay una exportación reciente en curso. (Definido en Aprueba_API_Backend.docx; la implementación actual no lo usa.)",
+            "description": "`EXPORT_RATE_LIMITED`: Alcanzaste el maximo de exportaciones por hora; intenta mas tarde",
             "content": {
               "application/json": {
                 "schema": {
@@ -10124,7 +10124,7 @@
                       "data": null,
                       "error": {
                         "code": "EXPORT_RATE_LIMITED",
-                        "message": "Ya hay una exportación reciente en curso. (Definido en Aprueba_API_Backend.docx; la implementación actual no lo usa.)",
+                        "message": "Alcanzaste el maximo de exportaciones por hora; intenta mas tarde",
                         "details": [],
                         "field": null
                       },
