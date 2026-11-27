@@ -34,6 +34,20 @@ export const firestoreDriver = {
     }
     return { ...data, id };
   },
+  // Lee y reescribe un documento dentro de una transaccion: dos solicitudes
+  // simultaneas no se pisan. fn recibe el documento (o null) y devuelve el nuevo
+  // contenido, o null para borrarlo.
+  async transact(name, id, fn) {
+    const d = await ready();
+    const ref = d.collection(name).doc(id);
+    return d.runTransaction(async (tx) => {
+      const s = await tx.get(ref);
+      const next = fn(s.exists ? withId(s) : null);
+      if (next === null) { if (s.exists) tx.delete(ref); return null; }
+      tx.set(ref, { ...next, id });
+      return { ...next, id };
+    });
+  },
   // Escritura masiva en lotes (Firestore admite hasta 500 operaciones por lote).
   // Cada documento se reemplaza completo, como set().
   async bulkSet(name, docs) {
