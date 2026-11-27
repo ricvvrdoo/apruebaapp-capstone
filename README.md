@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-<h1 align="center">Aprueba — Proyecto APT (Capstone PTY4614)</h1>
+# Aprueba — Proyecto APT (Capstone PTY4614)
 
 <p align="center">
   Plataforma móvil y web de preparación para la <b>PAES</b>, desarrollada como proyecto de
@@ -25,6 +25,7 @@
 
 <p align="center">
   <a href="https://aprueba-student-web.vercel.app">Sitio web</a> ·
+  <a href="docs/acta-de-inicio.md">Acta de inicio</a> ·
   <a href="docs/documentacion-api.md">Documentación de la API</a> ·
   <a href="docs/uml">Diagramas</a> ·
   <a href="docs/manual-tecnico.md">Manual técnico</a> ·
@@ -219,6 +220,7 @@ organizan en una carpeta por integrante.
 
 ## Documentación
 
+- [Acta de inicio del proyecto](docs/acta-de-inicio.md): objetivos, alcance, metodología y cronograma
 - [Manual técnico](docs/manual-tecnico.md)
 - [Diagramas UML](docs/uml): casos de uso, clases, secuencia, componentes y despliegue
 - [Modelo de datos](docs/modelo-datos.md)

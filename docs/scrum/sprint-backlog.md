@@ -7,6 +7,22 @@ corresponden al [Product Backlog](product-backlog.md).
 > repositorio (commits y Pull Requests). Desde el Sprint 3, este documento se
 > actualiza en cada Sprint Planning y Sprint Review.
 
+## Cierre — en curso
+
+**Semanas 16 y 17 · 27-11 al 05-12-2026**
+
+**Objetivo:** corregir lo observado en la revisión de evidencias de la sede, cerrar el
+límite de intentos y la rotación de tokens, y preparar la presentación final. Plan de
+tareas acordado el 27-11 (T-xx).
+
+| Tarea | ID | Elemento | Responsable | Estado | Observación |
+|---|---|---|---|---|---|
+| T-10 | PB-19 | README con título Markdown reconocible | Ricardo | Terminado 27-11 | Rama `docs/correcciones-excel` |
+| T-11 | PB-19 | Diagrama entidad-relación en el modelo de datos | Ricardo | Terminado 27-11 | Mermaid `erDiagram` en `docs/modelo-datos.md` |
+| T-12 | PB-19 | Objetivos visibles en el documento de inicio | Ricardo | Terminado 27-11 | `docs/acta-de-inicio.md`, Guía 1.5 e Informe 1.4 de la Fase 1 |
+| T-13 | PB-07 | Límite de intentos | Ricardo | Pendiente | Contador compartido en Firestore |
+| T-14 | PB-08 | Rotación y revocación del token de renovación | Ricardo | Pendiente | |
+
 ## Sprint 3 — en curso
 
 **Semanas 11 y 12 · 19-10 al 31-10-2026**
