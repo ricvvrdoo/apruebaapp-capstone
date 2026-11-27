@@ -45,6 +45,8 @@ export const COL = {
   conversations: 'conversations',
   messages: 'messages',
   reposts: 'reposts',
+  // Contadores del limite de intentos (lib/rateLimit.js). La clave es un hash.
+  rateLimits: 'rateLimits',
 };
 
 export const genId = (prefix) => `${prefix}_${randomUUID().replace(/-/g, '').slice(0, 10)}`;
@@ -57,6 +59,8 @@ export const del = (col, id) => driver.del(col, id);
 // Crea solo si el id no existe; devuelve null si ya existia. En Firestore es
 // atomico: sirve para evitar duplicados cuando llegan peticiones simultaneas.
 export const create = (col, id, data) => driver.create(col, id, data);
+// Lectura y escritura atomica de un documento: fn(actual|null) -> nuevo|null (borra).
+export const transact = (col, id, fn) => driver.transact(col, id, fn);
 export const reset = (seedData) => driver.reset(seedData);
 // Escritura masiva: cada doc debe traer `id`. En Firestore va en lotes.
 export const bulkSet = (col, docs) => driver.bulkSet(col, docs);

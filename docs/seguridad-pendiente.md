@@ -19,6 +19,30 @@ preexistentes").
 
 Todas las correcciones tienen pruebas en `npm run smoke`, sección `[12]`.
 
+## Límite de intentos (`sec/limite-intentos`, PB-07)
+
+Contador compartido en Firestore (colección `rateLimits`), actualizado con una
+transacción: en Vercel cada instancia tiene su propia memoria, así que un contador
+en memoria no frena a quien reparte sus intentos entre instancias. Ventana fija;
+el id de cada contador es un hash SHA-256 de la clave, para no guardar correos ni
+IP en claro. El campo `expiresAt` permite activar una política TTL de Firestore
+que borre los contadores vencidos.
+
+| Endpoint | Límite | Respuesta |
+|---|---|---|
+| `POST /auth/login` | 5 fallos por correo o 20 por IP en 15 minutos. Mientras dure el bloqueo se rechaza incluso la contraseña correcta; un acceso correcto reinicia el contador del correo | `429 TOO_MANY_ATTEMPTS` con `Retry-After` |
+| `POST /auth/password/forgot` | 5 solicitudes por correo (exista o no la cuenta) o 20 por IP en 15 minutos | `429 RATE_LIMITED` con `Retry-After` |
+| `GET /me/data-export` | 5 exportaciones por alumno por hora | `429 EXPORT_RATE_LIMITED` con `Retry-After` |
+
+La IP se toma de `X-Forwarded-For` solo detrás de un proxy de confianza: en Vercel
+(que sobrescribe la cabecera) o con `TRUST_PROXY`. Sin eso, cualquiera podría
+inventarla para evadir el límite por IP. Pruebas en `npm run smoke`, secciones
+`[27]` y `[28]`.
+
+El límite de `GET /search` (30 por minuto por alumno) sigue en memoria: frena
+ráfagas por instancia, que es suficiente para una búsqueda que solo lee datos del
+propio alumno.
+
 ## `DEMO_MODE`
 
 Mientras no haya usuarios reales, los atajos de prueba quedan detrás de
@@ -38,7 +62,6 @@ reales**.
 
 | Pendiente | Qué implica | Por qué se posterga | Depende de |
 |---|---|---|---|
-| Rate limit robusto (sobre todo en `/auth/*`) | Contadores en un almacén compartido (Redis, o Firestore) | En serverless, un límite en memoria se reinicia en cada instancia. | Elegir el almacén |
 | Refresh token en cookie `httpOnly` en web | Cambiar backend y frontend web; CORS con credenciales | Lo exige `Aprueba_API_Backend.docx`. Toca el frontend y el login que se está probando. | — |
 | Rotación y revocación de refresh tokens | Registrar los tokens emitidos en Firestore; invalidar al renovar y en el logout | Hoy duran 30 días y el logout no los revoca. Suma lecturas y escrituras por renovación. | — |
 | Verificar los idToken de Google y Apple en `/auth/social` | Clientes OAuth en Google Cloud y Apple Developer | Apple Developer cuesta US$99 al año. | **Empresa**: ¿login social en el MVP? |

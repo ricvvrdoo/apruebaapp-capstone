@@ -137,6 +137,15 @@ export const EXTRA = {
       E('limit', 'query', 'integer', false, 'Resultados por tipo, de 1 a 10. Por defecto 5.'),
     ],
   },
+  'POST /auth/login': {
+    nota: '**Límite de intentos:** tras 5 fallos por correo o 20 por IP en 15 minutos responde 429 TOO_MANY_ATTEMPTS con la cabecera Retry-After (segundos), incluso si la contraseña es correcta. Un acceso correcto reinicia el contador del correo.',
+  },
+  'POST /auth/password/forgot': {
+    nota: '**Límite:** 5 solicitudes por correo (exista o no la cuenta) o 20 por IP en 15 minutos; después responde 429 RATE_LIMITED con Retry-After.',
+  },
+  'GET /me/data-export': {
+    nota: '**Límite:** 5 exportaciones por alumno por hora; después responde 429 EXPORT_RATE_LIMITED con Retry-After.',
+  },
   'GET /health': { descripcion: 'Indica si el servicio responde y qué driver de datos usa.' },
   // Diferencia conocida con el documento: se aclara en vez de documentar algo que no ocurre.
   'POST /auth/logout': {

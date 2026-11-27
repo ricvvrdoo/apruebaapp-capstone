@@ -22,7 +22,7 @@ los implementaron; sus puntos se estimaron al crear este backlog.
 | PB-04 | Impedir la suplantación de cuentas en el acceso social | M | 5 | 1 | Ricardo | Terminado (PR #4) |
 | PB-05 | Impedir activar planes de pago sin pagar | M | 3 | 1 | Ricardo | Terminado (PR #4) |
 | PB-06 | Secreto JWT obligatorio, invitaciones seguras, CORS y cabeceras | M | 5 | 1 | Ricardo | Terminado (PR #4, #10, #11) |
-| PB-07 | Límite de intentos en el inicio de sesión | M | 5 | 3 | Ricardo | Pendiente |
+| PB-07 | Límite de intentos en el inicio de sesión | M | 5 | 3 | Ricardo | Terminado (rama `sec/limite-intentos`) |
 | PB-08 | Rotación y revocación de los tokens de renovación | M | 5 | 3 | Ricardo | Pendiente |
 | PB-09 | Endurecimiento de la API: algoritmo JWT fijo, cuentas suspendidas, tamaño máximo de solicitud y regalo de medallas | S | 3 | 3 | Elías | En revisión |
 | **Calidad** |||||||
@@ -50,7 +50,7 @@ los implementaron; sus puntos se estimaron al crear este backlog.
 | **Cierre** |||||||
 | PB-27 | Presentación final y demostración | M | 3 | Cierre | Elías | Pendiente |
 
-**Avance:** 13 de 27 elementos terminados (58 de 125 puntos).
+**Avance:** 14 de 27 elementos terminados (63 de 125 puntos).
 
 ## Historias y criterios de aceptación
 
@@ -92,8 +92,12 @@ configuración insegura y que solo acepte orígenes conocidos.
 
 **PB-07 · Límite de intentos.** Como estudiante, quiero que mi cuenta esté protegida
 contra intentos masivos de contraseña.
-- Tras N intentos fallidos, `POST /auth/login` responde `429` durante un período.
-- El contador vive en un almacén compartido, no en memoria de la instancia.
+- Tras 5 intentos fallidos por correo (o 20 por IP) en 15 minutos, `POST /auth/login`
+  responde `429 TOO_MANY_ATTEMPTS` con `Retry-After`. Cumplido.
+- El contador vive en un almacén compartido (colección `rateLimits` de Firestore), no
+  en memoria de la instancia. Cumplido.
+- También se limitan `POST /auth/password/forgot` (`429 RATE_LIMITED`) y
+  `GET /me/data-export` (`429 EXPORT_RATE_LIMITED`). Cumplido.
 
 **PB-08 · Rotación de tokens.** Como estudiante, quiero que cerrar sesión invalide mis
 tokens.

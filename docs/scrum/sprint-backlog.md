@@ -20,7 +20,7 @@ tareas acordado el 27-11 (T-xx).
 | T-10 | PB-19 | README con título Markdown reconocible | Ricardo | Terminado 27-11 | Rama `docs/correcciones-excel` |
 | T-11 | PB-19 | Diagrama entidad-relación en el modelo de datos | Ricardo | Terminado 27-11 | Mermaid `erDiagram` en `docs/modelo-datos.md` |
 | T-12 | PB-19 | Objetivos visibles en el documento de inicio | Ricardo | Terminado 27-11 | `docs/acta-de-inicio.md`, Guía 1.5 e Informe 1.4 de la Fase 1 |
-| T-13 | PB-07 | Límite de intentos | Ricardo | Pendiente | Contador compartido en Firestore |
+| T-13 | PB-07 | Límite de intentos | Ricardo | Terminado 27-11 | Rama `sec/limite-intentos`: login, recuperación y exportación con contador compartido en Firestore (`rateLimits`); smoke `[27]` y `[28]` |
 | T-14 | PB-08 | Rotación y revocación del token de renovación | Ricardo | Pendiente | |
 
 ## Sprint 3 — en curso

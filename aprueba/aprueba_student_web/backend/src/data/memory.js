@@ -87,6 +87,15 @@ export const memoryDriver = {
     persist();
     return clone(colObj(name)[id]);
   },
+  // Sin await entre la lectura y la escritura: en un solo proceso es atomico.
+  async transact(name, id, fn) {
+    const cur = colObj(name)[id];
+    const next = fn(cur ? clone(cur) : null);
+    if (next === null) { delete colObj(name)[id]; persist(); return null; }
+    colObj(name)[id] = { ...clone(next), id };
+    persist();
+    return clone(colObj(name)[id]);
+  },
   async bulkSet(name, docs) {
     for (const doc of docs) colObj(name)[doc.id] = clone(doc);
     persist();

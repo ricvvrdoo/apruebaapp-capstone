@@ -12,6 +12,9 @@ process.env.PHONE_VERIFICATION_REQUIRED = 'true';
 // seccion [12] lo apaga temporalmente para probar el comportamiento sin el.
 process.env.DEMO_MODE = 'true';
 process.env.PORT = process.env.SMOKE_PORT || '4199';
+// La seccion [28] simula clientes con IP distinta mediante X-Forwarded-For, como
+// llega detras del proxy de Vercel.
+process.env.TRUST_PROXY = '1';
 await import('../index.js');
 const BASE = `http://127.0.0.1:${process.env.PORT}/api/v1`;
 await new Promise((r) => setTimeout(r, 400));
@@ -19,10 +22,11 @@ await new Promise((r) => setTimeout(r, 400));
 let pass = 0, failCount = 0;
 const results = [];
 
-async function call(method, path, { token, body } = {}) {
+async function call(method, path, { token, body, headers = {} } = {}) {
   const res = await fetch(BASE + path, {
     method,
     headers: {
+      ...headers,
       ...(body ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
@@ -31,7 +35,7 @@ async function call(method, path, { token, body } = {}) {
   let json = null;
   const text = await res.text();
   try { json = text ? JSON.parse(text) : null; } catch { json = { raw: text }; }
-  return { status: res.status, json };
+  return { status: res.status, json, retryAfter: res.headers.get('retry-after') };
 }
 
 function check(label, cond, extra = '') {
@@ -829,6 +833,18 @@ results.push('\n[27] Mis datos y privacidad: exportar y eliminar la cuenta');
   check('el export no incluye la contrasena ni sus hashes', !/passwordHash|clave1234|\$2[aby]\$/.test(txt));
   check('el export no incluye el token de push', !txt.includes('tok-secreto-a'));
   check('el export no incluye datos de otros alumnos', !txt.includes(B.email) && !txt.includes(B.id));
+  {
+    // Limite: 5 exportaciones por hora por alumno (ya hizo 1).
+    const estados = [];
+    for (let i = 0; i < 5; i++) estados.push(await call('GET', '/me/data-export', { token: A.token }));
+    check('exportar: hasta 5 por hora responden 200', estados.slice(0, 4).every((x) => x.status === 200), estados.map((x) => x.status).join(','));
+    const sexta = estados[4];
+    check('exportar: la sexta en la hora -> 429 EXPORT_RATE_LIMITED con Retry-After',
+      sexta.status === 429 && sexta.json?.error?.code === 'EXPORT_RATE_LIMITED' && Number(sexta.retryAfter) > 0,
+      `(${sexta.status} ${sexta.json?.error?.code} ${sexta.retryAfter})`);
+    const otro = await call('GET', '/me/data-export', { token: B.token });
+    check('exportar: el limite es por alumno (otro alumno sigue pudiendo)', otro.status === 200, `(${otro.status})`);
+  }
   check('respuestas: incluye la respuesta dada', ex.answers.length === 1 && ex.answers[0].questionId === q.id, JSON.stringify(ex.answers));
   check('publicaciones y comentarios propios', ex.posts.length === 1 && ex.posts[0].text === 'Mi duda de prueba' && ex.comments.length === 2, `${ex.posts?.length} ${ex.comments?.length}`);
   check('likes y reposts como ids de publicacion', ex.likes.includes(postB.id) && ex.reposts.includes(postB.id), JSON.stringify([ex.likes, ex.reposts]));
@@ -879,6 +895,70 @@ results.push('\n[27] Mis datos y privacidad: exportar y eliminar la cuenta');
 
   check('los datos de otro alumno no cambian', (await cuenta(DB7.answers, 'userId', B.id)) === respuestasB && !!(await getDoc(DB7.posts, postB.id)) && !!(await getDoc(DB7.users, B.id)));
   await expect('eliminar sin contrasena una cuenta con contrasena', 'DELETE', '/me', { token: B.token, body: {} }, 401);
+}
+
+results.push('\n[28] Limite de intentos (contador compartido en la base)');
+{
+  const { list: listDocs, COL: COL28 } = await import('../data/repo.js');
+  const ip = (n) => ({ 'X-Forwarded-For': `203.0.113.${n}` });
+  const intento = (email, password, headers) => call('POST', '/auth/login', { body: { email, password }, headers });
+  const desc = (x) => `(${x.status} ${x.json?.error?.code || ''} ${x.retryAfter || ''})`;
+
+  // Por correo: 5 fallos en 15 minutos bloquean ese correo, desde cualquier IP.
+  const fallos = [];
+  for (let i = 0; i < 5; i++) fallos.push((await intento('Sin.Cuenta@correo.cl', 'mala-clave', ip(10))).status);
+  check('login: los primeros 5 fallos responden 401', fallos.every((st) => st === 401), fallos.join(','));
+  let r = await intento('sin.cuenta@correo.cl', 'mala-clave', ip(10));
+  check('login: el sexto intento del mismo correo -> 429 TOO_MANY_ATTEMPTS con Retry-After',
+    r.status === 429 && r.json?.error?.code === 'TOO_MANY_ATTEMPTS' && Number(r.retryAfter) > 0 && Number(r.retryAfter) <= 900, desc(r));
+  r = await intento('sin.cuenta@correo.cl', 'mala-clave', ip(20));
+  check('login: el bloqueo por correo aplica desde otra IP', r.status === 429, desc(r));
+  r = await intento('otro.correo@correo.cl', 'mala-clave', ip(10));
+  check('login: otro correo desde la misma IP sigue respondiendo 401', r.status === 401, desc(r));
+
+  // Un login correcto reinicia el contador del correo.
+  for (let i = 0; i < 4; i++) await intento('demo@aprueba.cl', 'mala-clave', ip(20));
+  r = await intento('demo@aprueba.cl', 'demo1234', ip(20));
+  check('login: con 4 fallos, la contrasena correcta entra', r.status === 200, desc(r));
+  const tras = [];
+  for (let i = 0; i < 4; i++) tras.push((await intento('demo@aprueba.cl', 'mala-clave', ip(20))).status);
+  check('login: el acceso correcto reinicia el contador del correo', tras.every((st) => st === 401), tras.join(','));
+  r = await intento('demo@aprueba.cl', 'demo1234', ip(20));
+  check('login: ... y la cuenta sigue entrando', r.status === 200, desc(r));
+
+  // Con el correo bloqueado, ni la contrasena correcta entra.
+  for (let i = 0; i < 5; i++) await intento('juan@correo.cl', 'mala-clave', ip(30));
+  r = await intento('juan@correo.cl', 'demo1234', ip(30));
+  check('login: con el correo bloqueado se rechaza incluso la contrasena correcta', r.status === 429, desc(r));
+
+  // Por IP: 20 fallos en 15 minutos, aunque sean correos distintos.
+  const porIp = [];
+  for (let i = 0; i < 20; i++) porIp.push((await intento(`ip${i}@correo.cl`, 'mala-clave', ip(40))).status);
+  check('login: 20 fallos desde una IP con correos distintos responden 401', porIp.every((st) => st === 401), porIp.join(','));
+  r = await intento('camila@correo.cl', 'demo1234', ip(40));
+  check('login: el intento 21 desde esa IP -> 429, aunque sea otra cuenta', r.status === 429 && r.json?.error?.code === 'TOO_MANY_ATTEMPTS', desc(r));
+  r = await intento('camila@correo.cl', 'demo1234', ip(10));
+  check('login: la misma cuenta entra desde otra IP', r.status === 200, desc(r));
+
+  // El contador vive en la base (rateLimits), no en la memoria de la instancia,
+  // y su id es un hash: no guarda el correo ni la IP en claro.
+  const docs = await listDocs(COL28.rateLimits);
+  check('rateLimits: los contadores se guardan en la base', docs.some((d) => d.scope === 'login-email' && d.count >= 5), JSON.stringify(docs.slice(0, 2)));
+  check('rateLimits: no guarda correos ni IP en claro', !JSON.stringify(docs).includes('correo.cl') && !JSON.stringify(docs).includes('203.0.113'));
+
+  // Recuperar contrasena: 5 solicitudes por correo en 15 minutos, exista o no la cuenta.
+  const pedidos = [];
+  for (let i = 0; i < 5; i++) pedidos.push((await call('POST', '/auth/password/forgot', { body: { email: 'nadie@correo.cl' }, headers: ip(10) })).status);
+  check('forgot: las primeras 5 solicitudes responden 200', pedidos.every((st) => st === 200), pedidos.join(','));
+  r = await call('POST', '/auth/password/forgot', { body: { email: 'NADIE@correo.cl' }, headers: ip(20) });
+  check('forgot: la sexta del mismo correo -> 429 RATE_LIMITED con Retry-After',
+    r.status === 429 && r.json?.error?.code === 'RATE_LIMITED' && Number(r.retryAfter) > 0, desc(r));
+  r = await call('POST', '/auth/password/forgot', { body: { email: 'alguien@correo.cl' }, headers: ip(20) });
+  check('forgot: otro correo sigue respondiendo 200', r.status === 200, desc(r));
+
+  // Lo que corre despues (openapi:generar) no debe heredar los bloqueos.
+  const { del: delDoc } = await import('../data/repo.js');
+  for (const d of await listDocs(COL28.rateLimits)) await delDoc(COL28.rateLimits, d.id);
 }
 
 console.log(results.join('\n'));
