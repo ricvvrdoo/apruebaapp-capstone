@@ -5,6 +5,7 @@ académico (semestre del 10 de agosto al 12 de diciembre de 2026).
 
 | Artefacto | Contenido |
 |---|---|
+| [Acta de inicio](../acta-de-inicio.md) | Nombre, problema, objetivos general y específicos, alcance, metodología, cronograma, roles y partes interesadas |
 | [Visión del producto](product-vision.md) | Para quién es Aprueba, qué problema resuelve y cómo se mide el éxito del proyecto |
 | [Product Backlog](product-backlog.md) | Historias de usuario y técnicas priorizadas, con criterios de aceptación y estado |
 | [Sprint Backlog](sprint-backlog.md) | Objetivo, elementos y resultado de cada sprint |

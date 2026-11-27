@@ -1,6 +1,6 @@
 # Product Backlog
 
-**Product Owner:** Elías Millahuala · **Versión:** 1 · **Actualizado:** 23-10-2026 (Sprint 3)
+**Product Owner:** Elías Millahuala · **Versión:** 1 · **Actualizado:** 27-11-2026 (cierre)
 
 Elementos ordenados por épica. La prioridad usa MoSCoW (**M**ust, **S**hould,
 **C**ould) y la estimación, puntos de historia en escala de Fibonacci. Los elementos
@@ -37,7 +37,7 @@ los implementaron; sus puntos se estimaron al crear este backlog.
 | **Contrato y documentación** |||||||
 | PB-17 | Especificación OpenAPI 3.1 verificada y protegida | M | 5 | 1 | Ricardo | Terminado (PR #9, #10) |
 | PB-18 | Artefactos Scrum | M | 3 | 3 | Ricardo | En revisión |
-| PB-19 | Documentación técnica: manual técnico, modelo de datos, requisitos no funcionales, diagramas UML e innovación | S | 5 | 3 | Ricardo | En revisión |
+| PB-19 | Documentación técnica: manual técnico, modelo de datos, requisitos no funcionales, diagramas UML e innovación | S | 5 | 3 | Ricardo | Terminado (PR #14; correcciones de la revisión de la sede en la rama `docs/correcciones-excel`) |
 | **Despliegue** |||||||
 | PB-20 | API y sitio web en Vercel como proyectos independientes | M | 5 | 1 | Ricardo | Terminado (PR #5, #7, #11, #12) |
 | PB-21 | Entorno completo con Docker Compose | M | 8 | 5 | Elías | Pendiente |
@@ -50,7 +50,7 @@ los implementaron; sus puntos se estimaron al crear este backlog.
 | **Cierre** |||||||
 | PB-27 | Presentación final y demostración | M | 3 | Cierre | Elías | Pendiente |
 
-**Avance:** 12 de 27 elementos terminados (53 de 125 puntos).
+**Avance:** 13 de 27 elementos terminados (58 de 125 puntos).
 
 ## Historias y criterios de aceptación
 
@@ -152,6 +152,8 @@ los sprints y las retrospectivas.
 y mantener el sistema.
 - `docs/` incluye manual técnico, modelo de datos, requisitos no funcionales,
   diagramas UML y la propuesta de innovación.
+- El modelo de datos incluye un diagrama entidad-relación, y el acta de inicio
+  (`docs/acta-de-inicio.md`) declara los objetivos, el alcance y el cronograma.
 
 ### Despliegue
 
